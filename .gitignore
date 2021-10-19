@@ -2,7 +2,7 @@
 *
 
 # Keep python files
-!*.py
+!**/*.py
 
 # Keep gitignore
 !.gitignore
