@@ -20,13 +20,16 @@ def main():
         conn, addr = s.accept()
         with conn:
             print('Connected by', addr)
+            print('AKA: ', socket.gethostbyaddr(addr[0]))
             while True:
                 # Blocking calls
                 data = conn.recv(1024)
 
                 # If no bytes are received, connection is closed
-                if not data:
-                    break
+                #if not data:
+                #    break
+
+                # Send the data back to the client
                 conn.sendall(data)
 
     return
