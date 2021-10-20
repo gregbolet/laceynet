@@ -44,8 +44,6 @@ def main():
         # Check if we need to send a heartbeat
         shouldSendBeat = (lastHeartbeat == None) or (getTSDiff(getCTS(), lastHeartbeat) > HEARTBEAT_INTERVAL)
 
-        print(shouldSendBeat)
-
         if shouldSendBeat:
             sendHeartbeat(s)
             
