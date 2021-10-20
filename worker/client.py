@@ -12,7 +12,7 @@ def main():
     s.connect((HOST, PORT))
 
     # Create an object instance
-    mydata = WorkerData()
+    mydata = WorkerMsg()
     mydata.numbersToGuess = [3,4,5,6]
     mydata.status = 44
 

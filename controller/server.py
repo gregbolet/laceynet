@@ -6,10 +6,15 @@ import pickle
 from lacey import *
 from _thread import *
 
+from threading import Lock
+
+# Array to hold state of all connected machines
+# Maps device name to status
+globalState = {}
+
 # thread function
 def handle_request(conn):
     while True:
-
 
         # Blocking calls, max MSG_BUFF_SIZE bytes
         data = conn.recv(MSG_BUFF_SIZE)
@@ -19,9 +24,8 @@ def handle_request(conn):
             break
         else:
             # Expecting a worker data packet
-            workerData = pickle.loads(data)
-            print(workerData.numbersToGuess)
-            print(workerData.status)
+            workermsg = pickle.loads(data)
+            print(workermsg.request)
 
             # Send the data back to the client, sends all bytes
             conn.sendall(data)
@@ -40,7 +44,7 @@ def main():
     s.bind((HOST, PORT))
 
     # Make this a listening server
-    s.listen()
+    s.listen(MAX_CONNS)
 
     while True:
         # Block and wait for an incoming connection
