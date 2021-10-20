@@ -5,6 +5,28 @@ import pickle
 
 from lacey import *
 
+lastHeartbeat = None
+
+def sendMsg(s, obj):
+    # Pickle the object to send over the network
+    tosend = pickle.dumps(obj)
+
+    s.send(tosend) 
+    return
+
+def sendHeartbeat(s):
+    lastHeartbeat = getCTS()
+    beat = WorkerMsg(WorkerMsg.HEARTBEAT)
+    sendMsg(s, beat)
+    print('Sent heartbeat!', lastHeartbeat)
+    return
+
+def registerWorker(s):
+    regReq = WorkerMsg(WorkerMsg.REGISTER)
+    sendMsg(s, regReq)
+    return
+
+
 def main():
     print("Hello from Worker!")
     
@@ -13,28 +35,18 @@ def main():
 
     # Create an object instance
     mydata = WorkerMsg()
-    mydata.numbersToGuess = [3,4,5,6]
-    mydata.status = 44
+    mydata.request = 1
 
     while True:
-        # Pickle the object to send over the network
-        tosend = pickle.dumps(mydata)
 
-        # Send object to the server
-        s.send(tosend)
+        # Get the current timestamp
+        shouldSendBeat = (getTSDiff(getCTS(), lastHeartbeat) > HEARTBEAT_INTERVAL)
 
-        # Expect a message in return
-        data = s.recv(4096)
-        print('Received', repr(data))
+        if lastHeartbeat == None or shouldSendBeat:
+            sendHeartbeat()
+            
 
-        # ask the client whether he wants to continue
-        ans = input('\nDo you want to continue(y/n) :')
-        if ans == 'y':
-            continue
-        else:
-            break
-
-    # Close the socket
+    # Close the socket connection
     s.close()
 
     return

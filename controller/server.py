@@ -13,22 +13,24 @@ from threading import Lock
 globalState = {}
 
 # thread function
-def handle_request(conn):
+def handle_worker_request(conn):
     while True:
 
         # Blocking calls, max MSG_BUFF_SIZE bytes
         data = conn.recv(MSG_BUFF_SIZE)
 
         if not data:
-            print('No more data from client...', conn)
+            print('Client comm closed...', conn)
             break
         else:
             # Expecting a worker data packet
             workermsg = pickle.loads(data)
-            print(workermsg.request)
+
+            if workermsg.request == WorkerMsg.HEARTBEAT:
+                print('Got a heartbeat from:', conn)
 
             # Send the data back to the client, sends all bytes
-            conn.sendall(data)
+            #conn.sendall(data)
 
     # close connection if no more data
     conn.close()
@@ -52,7 +54,7 @@ def main():
 
         print('Connected by', addr, socket.gethostbyaddr(addr[0])[0])
 
-        start_new_thread(handle_request, (conn,))
+        start_new_thread(handle_worker_request, (conn,))
 
     # Close the socket
     s.close()
