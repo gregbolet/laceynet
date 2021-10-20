@@ -24,6 +24,8 @@ def sendHeartbeat(s):
 def registerWorker(s):
     regReq = WorkerMsg(WorkerMsg.REGISTER)
     sendMsg(s, regReq)
+
+    # Expecting a confirmation back
     return
 
 
@@ -33,13 +35,15 @@ def main():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((HOST, PORT))
 
+    #registerWorker(s)
+
     while True:
 
-        # Get the current timestamp
-        shouldSendBeat = (getTSDiff(getCTS(), lastHeartbeat) > HEARTBEAT_INTERVAL)
+        # Check if we need to send a heartbeat
+        shouldSendBeat = (lastHeartbeat == None) or (getTSDiff(getCTS(), lastHeartbeat) > HEARTBEAT_INTERVAL)
 
-        if lastHeartbeat == None or shouldSendBeat:
-            sendHeartbeat()
+        if shouldSendBeat:
+            sendHeartbeat(s)
             
 
     # Close the socket connection
