@@ -30,7 +30,7 @@ def getTSDiff(ts1, ts2):
         diff = ts1 - ts2
     else:
         diff = ts2 - ts1
-    return diff.total_seconds()
+    return diff
 
 
 # This object will allow the server to keep track of 
