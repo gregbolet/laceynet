@@ -19,6 +19,14 @@ MAX_CONNS = 40
 # before sending a heartbeat, we expect to wait 10 seconds
 HEARTBEAT_INTERVAL = 10
 
+# Sends an object over the socket s
+def sendMsg(s, obj):
+    # Pickle the object to send over the network
+    tosend = pickle.dumps(obj)
+
+    s.send(tosend) 
+    return
+
 # Get the current timestamp
 def getCTS():
     return datetime.datetime.now().timestamp()
@@ -63,15 +71,22 @@ class WorkerMsg:
 # These are the messages the server sends to the clients
 class ControllerMsg:
 
-    # The list of numbers this worker will be "guessing"
-    numbersToGuess = []
-
     # Let the device know what the game state is
+    # these are response codes
     # 0 = wait for start signal
     # 1 = game started
     # 2 = game paused
     # 3 = game ended
     # 4 = succesfully registered worker
-    gameState = 0
+    # 5 = failed registration
+    REGIST_SUCC = 4
+    REGIST_FAIL = 5
+
+    def __init__(self, responseCode):
+        self.response = responseCode
+        self.timestamp = getCTS() 
+
+        # The list of numbers this worker will be "guessing"
+        self.numbersToGuess = []
 
 

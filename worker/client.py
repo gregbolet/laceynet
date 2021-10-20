@@ -7,12 +7,6 @@ from lacey import *
 
 lastHeartbeat = None
 
-def sendMsg(s, obj):
-    # Pickle the object to send over the network
-    tosend = pickle.dumps(obj)
-
-    s.send(tosend) 
-    return
 
 def sendHeartbeat(s):
     global lastHeartbeat
@@ -27,7 +21,10 @@ def registerWorker(s):
     sendMsg(s, regReq)
 
     # Expecting a confirmation back
-    return
+    conf = s.recv(MSG_BUFF_SIZE)
+    
+    # return a ControllerMsg object
+    return pickle.loads(conf)
 
 
 def main():
@@ -37,7 +34,15 @@ def main():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((HOST, PORT))
 
-    #registerWorker(s)
+    
+    # register ourselves with the server
+    cntrlMsg = registerWorker(s)
+    if cntrlMsg.response is not ControllerMsg.REGIST_SUCC:
+        print('Could not get registered to controller!')
+        return
+    else:
+        print('Succesfully Registered!')
+        
 
     while True:
 
@@ -53,4 +58,6 @@ def main():
 
     return
 
-main()
+# Always keep trying to connect and register worker to controller
+while True:
+    main()

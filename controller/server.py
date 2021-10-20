@@ -28,6 +28,9 @@ def handle_worker_request(conn):
 
             if workermsg.request == WorkerMsg.HEARTBEAT:
                 print('Got a heartbeat from:', conn)
+            elif workermsg.request == WorkerMsg.REGISTER:
+                print('Got a registration request from:', conn)
+                sendMsg(conn, ControllerMsg(ControllerMsg.REGIST_SUCC)) 
 
             # Send the data back to the client, sends all bytes
             #conn.sendall(data)
