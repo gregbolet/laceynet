@@ -15,6 +15,7 @@ def sendMsg(s, obj):
     return
 
 def sendHeartbeat(s):
+    global lastHeartbeat
     lastHeartbeat = getCTS()
     beat = WorkerMsg(WorkerMsg.HEARTBEAT)
     sendMsg(s, beat)
@@ -30,6 +31,7 @@ def registerWorker(s):
 
 
 def main():
+    global lastHeartbeat
     print("Hello from Worker!")
     
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -41,6 +43,8 @@ def main():
 
         # Check if we need to send a heartbeat
         shouldSendBeat = (lastHeartbeat == None) or (getTSDiff(getCTS(), lastHeartbeat) > HEARTBEAT_INTERVAL)
+
+        print(shouldSendBeat)
 
         if shouldSendBeat:
             sendHeartbeat(s)
