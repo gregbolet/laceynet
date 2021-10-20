@@ -5,20 +5,18 @@ import pickle
 
 from lacey import *
 
-HOST = 'controller.laceynet'
-PORT = 65432
-
 def main():
     print("Hello from Worker!")
     
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect((HOST, PORT))
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((HOST, PORT))
 
-        # Create an object instance
-        mydata = WorkerData()
-        mydata.numbersToGuess = [3,4,5,6]
-        mydata.status = 44
+    # Create an object instance
+    mydata = WorkerData()
+    mydata.numbersToGuess = [3,4,5,6]
+    mydata.status = 44
 
+    while True:
         # Pickle the object to send over the network
         tosend = pickle.dumps(mydata)
 
@@ -28,6 +26,16 @@ def main():
         # Expect a message in return
         data = s.recv(4096)
         print('Received', repr(data))
+
+        # ask the client whether he wants to continue
+        ans = input('\nDo you want to continue(y/n) :')
+        if ans == 'y':
+            continue
+        else:
+            break
+
+    # Close the socket
+    s.close()
 
     return
 

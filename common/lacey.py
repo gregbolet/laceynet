@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+MSG_BUFF_SIZE = 4096
+
+HOST = 'controller.laceynet'
+PORT = 65432
+
 class WorkerData:
 
     # 0 = waiting to start
