@@ -33,8 +33,6 @@ def getTSDiff(ts1, ts2):
     return diff.total_seconds()
 
 
-
-
 # This object will allow the server to keep track of 
 # the state of an individual worker
 class WorkerState:
@@ -57,7 +55,6 @@ class WorkerMsg:
     # 1 = is heartbeat msg
     # 2 = register to join game
     # 3 = been touched by stylus
-    self.request = 0
 
     # Keep track of when this message was sent
     self.timestamp = None
