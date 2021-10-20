@@ -56,12 +56,9 @@ class WorkerMsg:
     # 2 = register to join game
     # 3 = been touched by stylus
 
-    # Keep track of when this message was sent
-    self.timestamp = None
-
     def __init__(self, requestCode):
         self.request = requestCode
-        self.timestamp = datetime.datetime.now().timestamp()
+        self.timestamp = getCTS() 
 
 # These are the messages the server sends to the clients
 class ControllerMsg:
