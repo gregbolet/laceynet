@@ -5,9 +5,6 @@ import pickle
 
 from lacey import *
 from _thread import *
-import Threading
-
-print_lock = threading.lock()
 
 # thread function
 def handle_request(conn):
@@ -30,7 +27,7 @@ def handle_request(conn):
             conn.sendall(data)
 
     # close connection if no more data
-    c.close()
+    conn.close()
     return
 
 def main():
@@ -49,9 +46,7 @@ def main():
         # Block and wait for an incoming connection
         conn, addr = s.accept()
 
-        # Block until we have started the new thread
-        print('Connected by', addr)
-        print('AKA: ', socket.gethostbyaddr(addr[0]))
+        print('Connected by', addr, socket.gethostbyaddr(addr[0])[0])
 
         start_new_thread(handle_request, (conn,))
 
