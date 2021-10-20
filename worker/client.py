@@ -1,8 +1,5 @@
 #!/usr/bin/env -S PYTHONPATH=../common python3
 
-import socket
-import pickle
-
 from lacey import *
 
 lastHeartbeat = None
