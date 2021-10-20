@@ -1,6 +1,9 @@
-#!/usr/bin/python3
+#!/usr/bin/env -S PYTHONPATH=../common python3
 
 import socket
+import pickle
+
+from lacey import *
 
 HOST = 'controller.laceynet'
 PORT = 65432
@@ -22,14 +25,18 @@ def main():
             print('Connected by', addr)
             print('AKA: ', socket.gethostbyaddr(addr[0]))
             while True:
-                # Blocking calls
-                data = conn.recv(1024)
+                # Blocking calls, max 4096 bytes
+                data = conn.recv(4096)
 
                 # If no bytes are received, connection is closed
-                #if not data:
-                #    break
+                if not data:
+                    break
 
-                # Send the data back to the client
+                workerData = pickle.loads(data)
+                print(workerData.numbersToGuess)
+                print(workerData.status)
+
+                # Send the data back to the client, sends all bytes
                 conn.sendall(data)
 
     return
