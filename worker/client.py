@@ -33,10 +33,6 @@ def main():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((HOST, PORT))
 
-    # Create an object instance
-    mydata = WorkerMsg()
-    mydata.request = 1
-
     while True:
 
         # Get the current timestamp
