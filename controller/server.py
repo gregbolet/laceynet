@@ -15,9 +15,10 @@ def handle_worker_request(conn):
 
         # Blocking calls, max MSG_BUFF_SIZE bytes
         data = conn.recv(MSG_BUFF_SIZE)
+        alias = getAliasFromConn(conn)
 
         if not data:
-            print('Client comm closed...', conn)
+            print('Connection to [', alias, '] closed...', sep='')
             break
         else:
             # Expecting a worker data packet
@@ -26,7 +27,9 @@ def handle_worker_request(conn):
             if workermsg.request == WorkerMsg.HEARTBEAT:
                 print('Got a heartbeat from:', getAliasFromConn(conn))
             elif workermsg.request == WorkerMsg.REGISTER:
+                
                 print('Got a registration request from:', getAliasFromConn(conn))
+                globalState[
                 sendMsg(conn, ControllerMsg(ControllerMsg.REGIST_SUCC)) 
 
             # Send the data back to the client, sends all bytes
