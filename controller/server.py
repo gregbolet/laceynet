@@ -24,9 +24,9 @@ def handle_worker_request(conn):
             workermsg = pickle.loads(data)
 
             if workermsg.request == WorkerMsg.HEARTBEAT:
-                print('Got a heartbeat from:', conn)
+                print('Got a heartbeat from:', getAliasFromConn(conn))
             elif workermsg.request == WorkerMsg.REGISTER:
-                print('Got a registration request from:', conn)
+                print('Got a registration request from:', getAliasFromConn(conn))
                 sendMsg(conn, ControllerMsg(ControllerMsg.REGIST_SUCC)) 
 
             # Send the data back to the client, sends all bytes
@@ -37,11 +37,12 @@ def handle_worker_request(conn):
     return
 
 def main():
-    print("Hello from Controller!")
+    print("Controller Starting...")
 
     # AF_INET is IPV4, SOCK_STREAM is for TCP protocol
     # Will automatically close connections
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
     # Associate the given HOST with the given PORT
     s.bind((HOST, PORT))
 
@@ -52,7 +53,7 @@ def main():
         # Block and wait for an incoming connection
         conn, addr = s.accept()
 
-        print('Connected by', addr, socket.gethostbyaddr(addr[0])[0])
+        print('Connected by:', getAliasFromConn(conn))
 
         start_new_thread(handle_worker_request, (conn,))
 

@@ -26,7 +26,7 @@ def registerWorker(s):
 
 def main():
     global lastHeartbeat
-    print("Hello from Worker!")
+    print("Worker Starting!")
     
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((HOST, PORT))
@@ -55,6 +55,4 @@ def main():
 
     return
 
-# Always keep trying to connect and register worker to controller
-while True:
-    main()
+main()

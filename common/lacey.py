@@ -21,6 +21,9 @@ MAX_CONNS = 40
 # before sending a heartbeat, we expect to wait 10 seconds
 HEARTBEAT_INTERVAL = 10
 
+def getAliasFromConn(conn):
+    return socket.gethostbyaddr(conn.getpeername()[0])[0]
+
 # Sends an object over the socket s
 def sendMsg(s, obj):
     # Pickle the object to send over the network
