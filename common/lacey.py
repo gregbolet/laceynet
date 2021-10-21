@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import sys
 import datetime
 import socket
 import pickle
@@ -20,6 +21,10 @@ MAX_CONNS = 40
 # This is how many seconds the client should wait
 # before sending a heartbeat, we expect to wait 10 seconds
 HEARTBEAT_INTERVAL = 10
+
+# If after 20 seconds we don't get a heartbeat, consider
+# the node disconnected
+HEARTBEAT_TIMEOUT = 20
 
 def getAliasFromConn(conn):
     return socket.gethostbyaddr(conn.getpeername()[0])[0]
@@ -49,13 +54,21 @@ def getTSDiff(ts1, ts2):
 # This object will allow the server to keep track of 
 # the state of an individual worker
 class WorkerState:
-    
-    # 0 = joined game 
-    # 1 = no heartbeat for last 30 seconds
-    workerStatus = 0
 
-    # Timestamp of last time this worker sent a heartbeat
-    lastHeartbeat = None
+    NOT_REGISTERED = 0
+    REGISTERED = 1
+    PLAYING = 2
+    
+    def __init__(self):
+        self.status = self.NOT_REGISTERED
+        self.lastHeartbeat = None
+
+    def tickHeartbeat(self):
+        self.lastHeartbeat = getCTS()
+        
+    def isAlive(self):
+        timeSinceLastBeat = getTSDiff(getCTS(), self.lastHeartbeat)
+        return (timeSinceLastBeat < HEARTBEAT_TIMEOUT)
 
 # These are the requests the workers/client can send
 class WorkerMsg:
@@ -93,5 +106,14 @@ class ControllerMsg:
 
         # The list of numbers this worker will be "guessing"
         self.numbersToGuess = []
+        return
+
+# Override the print function to show timestamps
+import builtins as __builtin__
+def print(*args, **kwargs):
+    __builtin__.print("[%s] " % str((datetime.datetime.now())), end='')
+    return __builtin__.print(*args, **kwargs)
+
+
 
 
