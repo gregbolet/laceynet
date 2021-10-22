@@ -1,8 +1,8 @@
 #!/usr/bin/env -S PYTHONPATH=../common python3
 
+from sys import platform
 from lacey import *
 from _thread import *
-
 from threading import Lock
 
 # Array to hold state of all connected machines
