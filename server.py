@@ -25,9 +25,9 @@ def handle_worker_request(conn):
             workermsg = pickle.loads(data)
 
             if workermsg.request == WorkerMsg.HEARTBEAT:
-                print('Got a heartbeat from:', alias)
+                print('Heartbeat from:', alias)
             elif workermsg.request == WorkerMsg.REGISTER:
-                print('Got a registration request from:', alias)
+                print('Registration request from:', alias)
                 sendMsg(conn, ControllerMsg(ControllerMsg.REGIST_SUCC)) 
 
             # Send the data back to the client, sends all bytes
