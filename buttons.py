@@ -27,6 +27,7 @@ class Button:
         self.text_surf = gui_font.render(text,True,'#FFFFFF')
         self.text_rect = self.text_surf.get_rect(center = self.top_rect.center)
 
+    #updating button location
     def updateLoc(self, newW,newH, size):
         self.pos = ((newW // 2) - (size / 2),( newH//2)-(size /2))
         self.original_y_pos = self.pos[1]
@@ -48,6 +49,7 @@ class Button:
         else:
             self.check_click()
 
+    #function for exit button
     def check_click_Exit(self):
         mouse_pos = pygame.mouse.get_pos()
         if self.top_rect.collidepoint(mouse_pos):
@@ -68,6 +70,7 @@ class Button:
             self.dynamic_elecation = self.elevation
             self.top_color = '#475F77'
 
+    #function for normal button
     def check_click(self):
         mouse_pos = pygame.mouse.get_pos()
         if self.top_rect.collidepoint(mouse_pos):
@@ -82,13 +85,12 @@ class Button:
                     foundString = False
                     printString = ""
                     global game_over #signals if the game is over
-                    global message
+                    global message #message to print to screen
                     while foundString == False and not(game_over):
                         currString = numfile.readline().strip().split(",") #list
                         if len(currString) <= 1:
                             #nothing in file, we reached the end
                             printString = "Game Over, thanks for playing!"
-
                             self.currNum = "Game Over"
                             message = printString
                             foundString = True
@@ -98,11 +100,8 @@ class Button:
                             foundString = True
                             printString = "You guessed: " + self.currNum
                             if int(self.currNum) == int(winning):
-                                printString = "Congrats, you guess the correct answer: " + self.currNum + ". You win!"
-                                message = printString
-                                #print("You won!")
-                                #figure out what to do at end of game
-                                #global game_over 
+                                printString = "Congrats, you guessed the correct answer: " + self.currNum + ". You win!"
+                                message = printString 
                                 game_over = True                  
                     
                     self.text_surf = gui_font.render(self.currNum,True,'#FFFFFF')
@@ -120,17 +119,16 @@ size = 400
 screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN | pygame.RESIZABLE)
 width, height = screen.get_size()
 print(width,height)
-pygame.display.set_caption('Gui Menu')
+pygame.display.set_caption('Guessing Game')
 clock = pygame.time.Clock()
 gui_font = pygame.font.Font(None,65)
 font = pygame.font.SysFont(None, 30)
 
 red = (255,0,0)
-
-
 currTime = time.time()
 
-name = "n1"
+name = "n1" #name of node/machine  for reading file
+
 game_over = False
 message = ""
 
@@ -141,8 +139,9 @@ numfile = open("testfile.txt","r+")
 
 #winning number is going to be the first line of the file
 firstline = numfile.readline().split(",")
-winning = firstline[1]
+winning = firstline[1] #winning value 
 
+#function to print message to screen
 def message_to_screen(msg):
     screen_text = font.render(msg, True, red)
     screen.blit(screen_text,(200, height - 100))
@@ -167,7 +166,8 @@ while True:
             button1.draw()
             exitButton.draw()
     
-    #mouse has to be on the window
+    #self clicking functonality
+    #time = how long it waits until another click
     currTime = time.time()
     if currTime - button1.lastTimePressed > 3 and not(game_over):
         #print("self click")
