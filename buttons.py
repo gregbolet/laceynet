@@ -146,6 +146,12 @@ numfile = open("testfile.txt","r+")
 firstline = numfile.readline().split(",")
 winning = firstline[1] #winning value 
 
+
+#create start button to create window/buttons
+
+
+
+
 #function to print message to screen
 def message_to_screen(msg):
     if len(msg) >= 34:
@@ -169,7 +175,7 @@ while True:
 
         elif event.type == pygame.VIDEORESIZE:
             #for flipping orientation ignore
-           # print("currsize: " + (str(width)+ " "+str(height)))
+            # print("currsize: " + (str(width)+ " "+str(height)))
             width, height =  event.size
             #print("newsize: " + (str(width)+ " "+str(height)))
             screen = pygame.display.set_mode((width, height), pygame.FULLSCREEN | pygame.RESIZABLE)
@@ -195,3 +201,116 @@ while True:
     message_to_screen(message)
     pygame.display.update()
     clock.tick(60)
+
+    from lacey import * 
+
+    class GameGui:
+        
+
+        def startConnection(self):
+            def __init__(self): #move this
+                self.lastHeartbeat = None
+                print("Starting Worker!")
+
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                s.connect((HOST, PORT))
+
+                # register ourselves with the server
+                cntrlMsg = self.__registerWorker(s)
+                if cntrlMsg.response is not ControllerMsg.REGIST_SUCC:
+                    print('Could not get registered to controller!')
+                    return
+                else:
+                    print('Succesfully Registered!')
+
+
+        def setupBoard(): #should this be init?
+            pygame.init()
+            size = 700
+            global screen
+            screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN | pygame.RESIZABLE)
+            width, height = screen.get_size()
+            print(width,height)
+            pygame.display.set_caption('Guessing Game')
+            clock = pygame.time.Clock()
+            gui_font = pygame.font.Font(None,250)
+            font = pygame.font.SysFont(None, 65)
+            red = (255,0,0)
+            currTime = time.time()
+
+            name = "n1" #name of node/machine for reading file
+
+            game_over = False
+            message = ""
+            global button1
+            global exitButton
+            button1 = Button("Start",size,size,((width // 2) - (size / 2),(height //2)-(size /2)),15, False)
+            exitButton = Button("Exit", 150,150,(10, 10),5, True)
+
+        def getMyNums():
+            #response code??
+            contrl = ControllerMsg(4)
+            global myNums 
+            myNums = contrl.numbersToGuess
+            global winner 
+             #winner = winning number
+
+        def isGameStarted():
+
+        def checkForClicks():
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    numfile.close()
+                    pygame.quit()
+                    sys.exit()
+
+                elif event.type == pygame.VIDEORESIZE:
+                    #for flipping orientation ignore
+                    # print("currsize: " + (str(width)+ " "+str(height)))
+                    width, height =  event.size
+                    #print("newsize: " + (str(width)+ " "+str(height)))
+                    screen = pygame.display.set_mode((width, height), pygame.FULLSCREEN | pygame.RESIZABLE)
+                    button1.updateLoc(width,height, size)
+                    #print(button1.bottom_rect.width)
+                    #print(button1.bottom_rect.height)
+                    button1.draw()
+                    exitButton.draw()
+            
+            #self clicking functonality
+            #time = how long it waits until another click
+            currTime = time.time()
+            if currTime - button1.lastTimePressed > 30 and not(game_over):
+                #print("self click")
+                pygame.mouse.set_pos([(width/2) - (size/2),(height/2) - (size/2)])
+                button1.pressed = True            
+                button1.check_click() 
+                
+                
+            screen.fill('#DCDDD8')
+            button1.draw()
+            exitButton.draw()
+            message_to_screen(message)
+            pygame.display.update()
+            clock.tick(60)
+
+        def isWinner(self, value):
+            if value == winning:
+                return True
+            else:
+                return False
+
+
+        startConnection()
+        setupBoard()
+        getMyNums()
+
+        while True:
+            isGameStarted()
+            checkForClicks()
+            heartbeat()
+            isWinner()
+
+
+        
+    
+
