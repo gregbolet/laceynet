@@ -44,7 +44,7 @@ class guessingGame:
             nextNum = randIntList.pop()
             player = playersList[currPlayer]
             self.players[player].append(nextNum)
-            currPlayer = (currPlayer+1) % getNumPlayers()
+            currPlayer = (currPlayer+1) % self.getNumPlayers()
 
         for player in self.players:
             print(player, ': ', self.players[player], sep='')
