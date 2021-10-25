@@ -38,12 +38,12 @@ class guessingGame:
 
         # While there are still integers to hand out,
         # give the next integer to the next player
+        # RoundRobin style makes sure no other players have too many guesses
         while randIntList:
             nextNum = randIntList.pop()
             player = self.players.keys()[currPlayer]
             self.players[player].append(nextNum)
             currPlayer = (currPlayer+1) % getNumPlayers()
-
 
         for player in self.players:
             print(player, ': ', self.players[player], sep='')
@@ -52,7 +52,7 @@ class guessingGame:
 
     # Add new player
     def addNewPlayer(self, alias):
-        # Gen the guesses for the player
+        # ReGen the guesses for all the players
         self.players[alias] = []
         self.__genPlayerGuesses()
         return
@@ -63,23 +63,21 @@ class guessingGame:
         return
 
     # Get the guesses associated with an alias 
-    def getGuesses(self, alias):
-        return self.players
+    def getGuessesForAlias(self, alias):
+        return self.players[alias]
 
     # Start game
     def startGame(self):
+        self.winGuess = np.random.randint(1, self.maxGuess+1)
+        self.__genPlayerGuesses()
         return
 
-    # Pause game
-    def pauseGame(self):
-        return
-
-    # Stop game
-    def stopGame(self):
-        return
+    def getWinGuess(self):
+        return self.winGuess
 
     # Restart the game
     def restartGame(self):
+        self.startGame()
         return
 
 

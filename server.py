@@ -3,14 +3,12 @@
 from sys import platform
 from lacey import *
 from _thread import *
+from guessingGame import guessingGame
 from threading import Lock
-
-# Array to hold state of all connected machines
-# Maps device name to status
-globalState = {}
 
 # thread function
 def handle_worker_request(conn):
+    global game
     while True:
 
         # Blocking calls, max MSG_BUFF_SIZE bytes
@@ -28,9 +26,10 @@ def handle_worker_request(conn):
                 print('Heartbeat from:', alias)
             elif workermsg.request == WorkerMsg.REGISTER:
                 print('Registration request from:', alias)
+                game.addNewPlayer(alias)
                 cntrlMsg = ControllerMsg(ControllerMsg.REGIST_SUCC)
-                cntrlMsg.numbersToGuess = [20, 33, 12, 4, 103, 48]
-                cntrlMsg.winningNum = 103
+                cntrlMsg.numbersToGuess = game.getGuessesForAlias(alias)
+                cntrlMsg.winningNum = game.getWinGuess()
                 sendMsg(conn, cntrlMsg) 
 
             # Send the data back to the client, sends all bytes
@@ -41,6 +40,7 @@ def handle_worker_request(conn):
     return
 
 def main():
+    global game
     print("Controller Starting...")
 
     # AF_INET is IPV4, SOCK_STREAM is for TCP protocol
@@ -53,6 +53,11 @@ def main():
     # Make this a listening server
     s.listen(MAX_CONNS)
 
+    # Create a new guessing game
+    game = guessingGame(10)
+
+    print("Socket server ready!")
+
     while True:
         # Block and wait for an incoming connection
         conn, addr = s.accept()
@@ -63,7 +68,6 @@ def main():
 
     # Close the socket
     s.close()
-        
 
     return
 
