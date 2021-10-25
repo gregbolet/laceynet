@@ -3,14 +3,16 @@
 from sys import platform
 from lacey import *
 from _thread import *
+from guessingGame import guessingGame
 from threading import Lock
 
-# Array to hold state of all connected machines
-# Maps device name to status
-globalState = {}
+def updateAllWorkers():
+    global connList
+    
 
 # thread function
 def handle_worker_request(conn):
+    global game
     while True:
 
         # Blocking calls, max MSG_BUFF_SIZE bytes
@@ -28,9 +30,10 @@ def handle_worker_request(conn):
                 print('Heartbeat from:', alias)
             elif workermsg.request == WorkerMsg.REGISTER:
                 print('Registration request from:', alias)
+                game.addNewPlayer(alias)
                 cntrlMsg = ControllerMsg(ControllerMsg.REGIST_SUCC)
-                cntrlMsg.numbersToGuess = [20, 33, 12, 4, 103, 48]
-                cntrlMsg.winningNum = 103
+                cntrlMsg.numbersToGuess = game.getGuessesForAlias(alias)
+                cntrlMsg.winningNum = game.getWinGuess()
                 sendMsg(conn, cntrlMsg) 
 
             # Send the data back to the client, sends all bytes
@@ -41,29 +44,45 @@ def handle_worker_request(conn):
     return
 
 def main():
-    print("Controller Starting...")
+    global game
+    global connList
 
-    # AF_INET is IPV4, SOCK_STREAM is for TCP protocol
-    # Will automatically close connections
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        print("Controller Starting...")
 
-    # Associate the given HOST with the given PORT
-    s.bind((HOST, PORT))
+        # AF_INET is IPV4, SOCK_STREAM is for TCP protocol
+        # Will automatically close connections
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    # Make this a listening server
-    s.listen(MAX_CONNS)
+        # Associate the given HOST with the given PORT
+        s.bind((HOST, PORT))
 
-    while True:
-        # Block and wait for an incoming connection
-        conn, addr = s.accept()
+        # Make this a listening server
+        s.listen(MAX_CONNS)
 
-        print('Connected by:', getAliasFromConn(conn))
+        # Create a new guessing game
+        game = guessingGame(10)
 
-        start_new_thread(handle_worker_request, (conn,))
+        # Keep track of the connections
+        connList = {}
 
-    # Close the socket
-    s.close()
-        
+        print("Socket server ready!")
+
+        while True:
+            # Block and wait for an incoming connection
+            conn, addr = s.accept()
+
+            alias = getAliasFromConn(conn)
+            print('Connected by:', alias)
+
+            # Keep track of the new connection
+            connList[alias] = conn
+
+            start_new_thread(handle_worker_request, (conn,))
+
+    finally:
+        # Close the socket
+        s.close()
 
     return
 
