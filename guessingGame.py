@@ -36,12 +36,13 @@ class guessingGame:
 
         currPlayer = 0
 
+        playersList = list(self.players.keys())
         # While there are still integers to hand out,
         # give the next integer to the next player
         # RoundRobin style makes sure no other players have too many guesses
         while randIntList:
             nextNum = randIntList.pop()
-            player = self.players.keys()[currPlayer]
+            player = playersList[currPlayer]
             self.players[player].append(nextNum)
             currPlayer = (currPlayer+1) % getNumPlayers()
 
