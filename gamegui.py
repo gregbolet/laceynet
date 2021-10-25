@@ -182,7 +182,7 @@ class GameGui:
 
     def getMyNums(self):
             myNums = self.contrlMsg.numbersToGuess
-            winningNum = self.contrlMsg.winningNumber
+            winningNum = self.contrlMsg.winningNum
             self.button1.getMyNums(myNums)
              #winner = winning number
 
