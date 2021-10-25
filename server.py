@@ -28,7 +28,9 @@ def handle_worker_request(conn):
                 print('Heartbeat from:', alias)
             elif workermsg.request == WorkerMsg.REGISTER:
                 print('Registration request from:', alias)
-                sendMsg(conn, ControllerMsg(ControllerMsg.REGIST_SUCC)) 
+                cntrlMsg = ControllerMsg(ControllerMsg.REGIST_SUCC)
+                cntrlMsg.numbersToGuess = [20, 33, 12, 4, 103, 48]
+                sendMsg(conn, cntrlMsg) 
 
             # Send the data back to the client, sends all bytes
             #conn.sendall(data)
