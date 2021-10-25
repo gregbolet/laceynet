@@ -24,7 +24,11 @@ class Button:
         self.bottom_rect = pygame.Rect(pos,(width,height))
         self.bottom_color = '#354B5E'
         #text
-        self.text_surf = gui_font.render(text,True,'#FFFFFF')
+        if exit:
+            global font
+            self.text_surf = font.render(text, True, '#FFFFFF')
+        else:
+            self.text_surf = gui_font.render(text,True,'#FFFFFF')
         self.text_rect = self.text_surf.get_rect(center = self.top_rect.center)
 
     #updating button location
@@ -91,9 +95,10 @@ class Button:
                         if len(currString) <= 1:
                             #nothing in file, we reached the end
                             printString = "Game Over, thanks for playing!"
-                            self.currNum = "Game Over"
+                            self.currNum = "Sorry!"
                             message = printString
                             foundString = True
+                            game_over = True
                             
                         if currString[0] == name:
                             self.currNum = currString[1]
@@ -113,21 +118,21 @@ class Button:
             self.dynamic_elecation = self.elevation
             self.top_color = '#475F77'
 
-os.environ['SDL_VIDEO_CENTERED'] = '1'
+os.environ['SDL_VIDEO_CENTERED'] = '1' #idk if this is needed
 pygame.init()
-size = 400
+size = 700
 screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN | pygame.RESIZABLE)
 width, height = screen.get_size()
 print(width,height)
 pygame.display.set_caption('Guessing Game')
 clock = pygame.time.Clock()
-gui_font = pygame.font.Font(None,65)
-font = pygame.font.SysFont(None, 30)
+gui_font = pygame.font.Font(None,250)
+font = pygame.font.SysFont(None, 65)
 
 red = (255,0,0)
 currTime = time.time()
 
-name = "n1" #name of node/machine  for reading file
+name = "n1" #name of node/machine for reading file
 
 game_over = False
 message = ""
@@ -143,8 +148,16 @@ winning = firstline[1] #winning value
 
 #function to print message to screen
 def message_to_screen(msg):
-    screen_text = font.render(msg, True, red)
-    screen.blit(screen_text,(200, height - 100))
+    if len(msg) >= 34:
+        #do something
+        length = len(msg)
+        screen_text = font.render(msg[0:33],True,red)
+        screen.blit(screen_text, (100, height - 200))
+        screen_text2 = font.render(msg[34:length],True,red)
+        screen.blit(screen_text2,(100, height - 100))
+    else:
+        screen_text = font.render(msg, True, red)
+        screen.blit(screen_text,(150, height - 100))
    
 
 while True:
@@ -169,7 +182,7 @@ while True:
     #self clicking functonality
     #time = how long it waits until another click
     currTime = time.time()
-    if currTime - button1.lastTimePressed > 3 and not(game_over):
+    if currTime - button1.lastTimePressed > 30 and not(game_over):
         #print("self click")
         pygame.mouse.set_pos([(width/2) - (size/2),(height/2) - (size/2)])
         button1.pressed = True            
