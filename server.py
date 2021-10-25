@@ -41,6 +41,7 @@ def handle_worker_request(conn):
 
 def main():
     global game
+    global connList
     print("Controller Starting...")
 
     # AF_INET is IPV4, SOCK_STREAM is for TCP protocol
@@ -55,6 +56,7 @@ def main():
 
     # Create a new guessing game
     game = guessingGame(10)
+    #connList
 
     print("Socket server ready!")
 
