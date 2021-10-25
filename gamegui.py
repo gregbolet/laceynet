@@ -19,7 +19,7 @@ class Button:
         self.dynamic_elecation = elevation
         self.original_y_pos = pos[1]
         self.lastTimePressed = time.time()
-        self.currNum = str(0)
+        self.nextGuess = str(0)
         #true if exit button, false else
         self.exitButton = exit
         self.pos = pos
@@ -54,7 +54,7 @@ class Button:
         if curr < len(self.myNums):
             return self.myNums[curr]
 
-    def draw(self, numToWrite):
+    def draw(self, buttonText):
         # elevation logic
         #self.update_button()
         self.top_rect.y = self.original_y_pos - self.dynamic_elecation
@@ -71,7 +71,7 @@ class Button:
         if(self.exitButton):
             self.check_click_Exit()
         else:
-            self.check_click(numToWrite)
+            self.check_click(buttonText)
 
     #function for exit button
     def check_click_Exit(self):
@@ -84,7 +84,6 @@ class Button:
             else:
                 self.dynamic_elecation = self.elevation
                 if self.pressed == True:
-                    #numfile.close()
                     print('We are exiting the program, thanks for playing!')
                     self.pressed = False
                     pygame.quit()
@@ -107,10 +106,10 @@ class Button:
                 if self.pressed == True:
                     self.lastTimePressed = time.time()
 
-                    #self.currNum = numToWrite
+                    #self.prevGuess = numToWrite
                     self.onClickEvent()
                     self.text_surf = self.font.render(
-                        str(self.currNum), True, '#FFFFFF')
+                        str(self.nextGuess), True, '#FFFFFF')
                     self.text_rect = self.text_surf.get_rect(
                         center=self.top_rect.center)
                     self.screen.blit(self.text_surf, self.text_rect)
@@ -161,8 +160,7 @@ class GameGui:
         pygame.init()
         self.size = 700
         #global screen
-        self.screen = pygame.display.set_mode(
-            (0, 0), pygame.FULLSCREEN | pygame.RESIZABLE)
+        self.screen = pygame.display.set_mode( (0, 0), pygame.FULLSCREEN | pygame.RESIZABLE)
         self.width, self.height = self.screen.get_size()
         print(self.width, self.height)
         pygame.display.set_caption('Guessing Game')
@@ -170,97 +168,74 @@ class GameGui:
         self.gui_font = pygame.font.Font(None, 250)
         self.font = pygame.font.SysFont(None, 65)
         self.currIndex = 0
-        self.currNum = -1
+        self.prevGuess = -1
         self.message = "winner"
-        red = (255, 0, 0)
-        currTime = time.time()
 
-        name = "n1"  # name of node/machine for reading file
-
-        #game_over = False
-        message = ""
         self.button1 = Button("Start", self.size, self.size, ((self.width // 2) - (
             self.size / 2), (self.height // 2)-(self.size / 2)), 15, False, self.screen, self.gui_font, self.clickEvent)
         self.exitButton = Button(
             "Exit", 150, 150, (10, 10), 5, True, self.screen, self.font,self.clickEvent)
 
-    def getMyNums(self):
-        self.myNums = self.contrlMsg.numbersToGuess
-        self.winningNum = self.contrlMsg.winningNum
-        print("winner")
-        print(self.winningNum)
-        #self.button1.getMyNums(myNums)
-        #winner = winning number
-
-    def getNextNum(self):
+    def getNextGuess(self):
         curr = self.currIndex
         if curr == 0:
             return -1
-        if curr < len(self.myNums):
+        elif curr < len(self.myNums):
             return self.myNums[curr]
         else:
             return "Game Over"
 
     def clickEvent(self):
-       
-        if self.currIndex < len(self.myNums):
-            self.currNum = self.myNums[self.currIndex]
-            self.button1.currNum = self.myNums[self.currIndex]
+        if self.currIndex == 0:
+            self.prevGuess = -1
+            self.button1.nextGuess = self.myNums[self.currIndex]
+            self.currIndex = self.currIndex+1
+
+        elif self.currIndex < len(self.myNums):
+            self.prevGuess = self.myNums[self.currIndex-1]
+            self.button1.nextGuess = self.myNums[self.currIndex]
             self.currIndex = self.currIndex+1
         else:
-            self.button1.currNum = "Game Over"
+            self.button1.nextGuess = "Game Over"
 
-    def checkForClicks(self):
+    def checkForAnyInput(self):
+
+        # If they requested to close the game, close it
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 #numfile.close()
                 pygame.quit()
-                sys.exit()
+                #sys.exit()
 
-                # elif event.type == pygame.VIDEORESIZE:
-                #     #for flipping orientation ignore
-                #     # print("currsize: " + (str(width)+ " "+str(height)))
-                #     width, height =  event.size
-                #     #print("newsize: " + (str(width)+ " "+str(height)))
-                #     screen = pygame.display.set_mode((width, height), pygame.FULLSCREEN | pygame.RESIZABLE)
-                #     self.button1.updateLoc(width,height, self.size)
-                #     #print(button1.bottom_rect.width)
-                #     #print(button1.bottom_rect.height)
-                #     self.button1.draw()
-                #     self.exitButton.draw()
-
-            #self clicking functonality
-            #time = how long it waits until another click
+        #self clicking functonality
+        #time = how long it waits until another click
         currTime = time.time()
-        if currTime - self.button1.lastTimePressed > 30 and not(self.button1.game_over):
+        if (currTime - self.button1.lastTimePressed > 30) and not(self.button1.game_over):
                 #print("self click")
-            pygame.mouse.set_pos(
-                [(self.width/2) - (self.size/2), (self.height/2) - (self.size/2)])
+            pygame.mouse.set_pos( [(self.width/2) - (self.size/2), (self.height/2) - (self.size/2)])
             self.button1.pressed = True
             self.button1.check_click()
 
         self.screen.fill('#DCDDD8')
-        self.currNum = self.getNextNum()
-        #print(self.currNum)
-        self.button1.draw(self.currNum)
-        self.exitButton.draw(self.currNum)
-        #message_to_screen(message)
+        self.prevGuess = self.getNextGuess()
+        #print(self.prevGuess)
+        self.button1.draw(self.prevGuess)
+        self.exitButton.draw(self.prevGuess)
         pygame.display.update()
         
         self.clock.tick(60)
 
-    def isWinner(self):
-        if self.currNum == self.winningNum:
+    def checkIfWinner(self):
+        if self.prevGuess == self.winningNum:
             print("WINNER")
-            self.message = "Congrats, you guessed the correct answer: " + str(self.currNum) + ". You win!"
+            self.message = "Congrats, you guessed the correct answer: " + str(self.prevGuess) + ". You win!"
             return True
-        elif self.currNum == "Game Over":
+        elif self.prevGuess == "Game Over":
             self.message = "Game over, sorry!"
             print("LOSER")
             return False
-        else:
-            print("still going")
-            return False
+
+        return False
 
     def doHeartbeat(self, s):
         # Check if we need to send a heartbeat
@@ -270,32 +245,46 @@ class GameGui:
         if shouldSendBeat:
             self.__sendHeartbeat(s)
 
-    def message_to_screen(self, msg):
-        if len(msg) >= 34:
-            #do something
-            length = len(msg)
-            screen_text = self.font.render(msg[0:33], True,(255,0,0))
-            self.screen.blit(screen_text, (100, self.height - 200))
-            screen_text2 = self.font.render(msg[34:length], True,(255,0,0))
-            self.screen.blit(screen_text2, (100, self.height - 100))
-        else:
-            screen_text = self.font.render(msg, True, (255, 0,0))
-            self.screen.blit(screen_text, (150, self.height - 100))
+    #def message_to_screen(self, msg):
+    #    if len(msg) >= 34:
+    #        #do something
+    #        length = len(msg)
+    #        screen_text = self.font.render(msg[0:33], True,(255,0,0))
+    #        self.screen.blit(screen_text, (100, self.height - 200))
+    #        screen_text2 = self.font.render(msg[34:length], True,(255,0,0))
+    #        self.screen.blit(screen_text2, (100, self.height - 100))
+    #    else:
+    #        screen_text = self.font.render(msg, True, (255, 0,0))
+    #        self.screen.blit(screen_text, (150, self.height - 100))
 
     def __init__(self):
-        s = self.startConnection()
-        self.setupBoard()
-        self.getMyNums()
+        s = None
+        try:
+            s = self.startConnection()
+        except:
+            s.close()
+            return
+        
+        try:
+            self.myNums = self.contrlMsg.numbersToGuess
+            self.winningNum = self.contrlMsg.winningNum
+            print("Winning number:", self.winningNum)
+            print("My numbers:", self.myNums)
 
-        while True:
-            #self.isGameStarted()
-            self.checkForClicks()
-            self.doHeartbeat(s)
-            if self.isWinner():
-                break
-                self.message_to_screen(self.message)
-            elif not(self.isWinner()) and len(self.message) > 0:
-                self.message_to_screen(self.message)
+            self.setupBoard()
+
+            while True:
+                #self.isGameStarted()
+                self.checkForAnyInput()
+                self.doHeartbeat(s)
+                if self.checkIfWinner():
+                    #self.message_to_screen(self.message)
+                    break
+                elif not(self.checkIfWinner()) and len(self.message) > 0:
+                    continue
+                    #self.message_to_screen(self.message)
+        finally:
+            s.close()
 
 
 game = GameGui()
