@@ -30,7 +30,7 @@ class guessingGame:
 
         # generate a list of maxGuess integers in random order
         #randIntList = np.random.choice(self.maxGuess, self.maxGuess)
-        randIntList = random.sample(range(self.maxGuess), self.maxGuess)
+        randIntList = np.array(random.sample(range(self.maxGuess), self.maxGuess))
 
         # Bump up all the values so min(randIntList) == 1
         randIntList = randIntList + 1

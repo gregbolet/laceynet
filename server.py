@@ -6,6 +6,10 @@ from _thread import *
 from guessingGame import guessingGame
 from threading import Lock
 
+def updateAllWorkers():
+    global connList
+    
+
 # thread function
 def handle_worker_request(conn):
     global game
