@@ -106,7 +106,7 @@ class ControllerMsg:
 
         # The list of numbers this worker will be "guessing"
         self.numbersToGuess = []
-        self.winningNumber = -1
+        self.winningNum = -1
         return
 
 # Override the print function to show timestamps
