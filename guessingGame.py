@@ -1,6 +1,7 @@
 #!/usr/bin/env -S PYTHONPATH=../common python3
 
 import numpy as np
+import random
 
 class guessingGame:
 
@@ -13,6 +14,7 @@ class guessingGame:
         # (i.e: if maxGuess = 100, guesses are in [1,100])
         self.maxGuess = maxGuess
         self.winGuess = np.random.randint(1, self.maxGuess+1)
+        print('Winning number is: ', self.winGuess)
         return
 
     def getNumPlayers(self):
@@ -27,7 +29,8 @@ class guessingGame:
             self.players[player] = []
 
         # generate a list of maxGuess integers in random order
-        randIntList = np.random.choice(self.maxGuess, self.maxGuess)
+        #randIntList = np.random.choice(self.maxGuess, self.maxGuess)
+        randIntList = random.sample(range(self.maxGuess), self.maxGuess)
 
         # Bump up all the values so min(randIntList) == 1
         randIntList = randIntList + 1

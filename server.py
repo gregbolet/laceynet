@@ -45,31 +45,37 @@ def main():
 
     try:
         print("Controller Starting...")
-    
+
         # AF_INET is IPV4, SOCK_STREAM is for TCP protocol
         # Will automatically close connections
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    
+
         # Associate the given HOST with the given PORT
         s.bind((HOST, PORT))
-    
+
         # Make this a listening server
         s.listen(MAX_CONNS)
-    
+
         # Create a new guessing game
         game = guessingGame(10)
-        #connList
-    
+
+        # Keep track of the connections
+        connList = {}
+
         print("Socket server ready!")
-    
+
         while True:
             # Block and wait for an incoming connection
             conn, addr = s.accept()
-    
-            print('Connected by:', getAliasFromConn(conn))
-    
+
+            alias = getAliasFromConn(conn)
+            print('Connected by:', alias)
+
+            # Keep track of the new connection
+            connList[alias] = conn
+
             start_new_thread(handle_worker_request, (conn,))
-    
+
     finally:
         # Close the socket
         s.close()
