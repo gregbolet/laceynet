@@ -30,6 +30,7 @@ def handle_worker_request(conn):
                 print('Registration request from:', alias)
                 cntrlMsg = ControllerMsg(ControllerMsg.REGIST_SUCC)
                 cntrlMsg.numbersToGuess = [20, 33, 12, 4, 103, 48]
+                cntrlMsg.winningNum = 103
                 sendMsg(conn, cntrlMsg) 
 
             # Send the data back to the client, sends all bytes
