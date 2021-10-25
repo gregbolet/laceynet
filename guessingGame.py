@@ -12,6 +12,7 @@ class guessingGame:
         # This is an INCLUSIVE maxGuess value
         # (i.e: if maxGuess = 100, guesses are in [1,100])
         self.maxGuess = maxGuess
+        self.winGuess = np.random.randint(1, self.maxGuess+1)
         return
 
     def getNumPlayers(self):
@@ -67,17 +68,12 @@ class guessingGame:
     def getGuessesForAlias(self, alias):
         return self.players[alias]
 
-    # Start game
-    def startGame(self):
-        self.winGuess = np.random.randint(1, self.maxGuess+1)
-        self.__genPlayerGuesses()
-        return
-
     def getWinGuess(self):
         return self.winGuess
 
     # Restart the game
     def restartGame(self):
+        self.winGuess = np.random.randint(1, self.maxGuess+1)
         self.startGame()
         return
 
