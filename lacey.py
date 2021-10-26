@@ -97,6 +97,7 @@ class ControllerMsg:
     # 3 = game ended
     # 4 = succesfully registered worker
     # 5 = failed registration
+    GAME_RESTART = 3
     REGIST_SUCC = 4
     REGIST_FAIL = 5
 
