@@ -14,8 +14,6 @@ class Button:
         self.pos = pos
         self.screen = screen
         self.font = myFont
-        self.currIndex = 0
-        self.myNums = [] # can probably get rid of
         self.game_over = False
         self.onClickEvent = onClickEvent
         # top rectangle
