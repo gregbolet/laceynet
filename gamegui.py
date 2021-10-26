@@ -109,7 +109,7 @@ class Button:
                     self.onClickEvent() #dont really understand this
                     
                     self.text_surf = self.font.render(
-                        str(self.nextGuess), True, '#FFFFFF')
+                        str(self.currNum), True, '#FFFFFF')
                     self.text_rect = self.text_surf.get_rect(
                         center=self.top_rect.center)
                     self.screen.blit(self.text_surf, self.text_rect)
@@ -213,13 +213,12 @@ class GameGui:
             self.currNum = self.myNums[self.currIndex]
             self.button1.currNum = self.myNums[self.currIndex]
         elif self.currIndex + 1 < len(self.myNums): 
+            self.guessedNum = self.currNum
             if self.guessedNum != self.winningNum:
-                self.guessedNum = self.currNum
                 self.currIndex = self.currIndex+1
                 self.currNum = self.myNums[self.currIndex]
                 self.button1.currNum = self.myNums[self.currIndex]
             else:
-                self.guessedNum = self.currNum
                 self.button1.currNum = "Congrats!"
                 self.button1.game_over = True
         else: #essentially at the last number
