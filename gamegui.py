@@ -71,11 +71,17 @@ class GameGui:
             "Exit", 150, 150, (10, 10), 5, True, self.screen, self.font,self.clickEvent)
 
     #Sets the list of numbers
-    def getMyNums(self):
-        self.myNums = self.contrlMsg.numbersToGuess
-        self.winningNum = self.contrlMsg.winningNum
-        print("winner")
-        print(self.winningNum)
+    def getMyNums(self, conn):
+        # Expecting a game start signal, blocking call
+        resp = conn.recv(MSG_BUFF_SIZE)
+
+        # return a ControllerMsg object
+        cntrlMsg = pickle.loads(resp)
+        if resp.response == ControllerMsg.GAME_RESTART:
+            self.myNums = cntrlMsg.numbersToGuess
+            self.winningNum = cntrlMsg.winningNum
+        
+        return
 
     #determines if we're in portrait or landscape mode
     def checkOrientation(self):
@@ -175,7 +181,9 @@ class GameGui:
     def __init__(self):
         s = self.startConnection()
         self.setupBoard()
-        self.getMyNums()
+
+        # Block and wait to get numbers
+        self.getMyNums(s)
 
         while True:
             #self.isGameStarted()
