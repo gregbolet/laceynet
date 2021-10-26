@@ -60,6 +60,7 @@ class guessingGame:
         # ReGen the guesses for all the players
         self.players[alias] = []
         self.__genPlayerGuesses()
+        print('Added player:', alias)
         return
 
     # Drop player

@@ -4,6 +4,7 @@ import sys
 import datetime
 import socket
 import pickle
+import time
 
 # Maximum message buffer size
 MSG_BUFF_SIZE = 4096
