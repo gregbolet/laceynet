@@ -18,11 +18,12 @@ class GameGui:
         regReq = WorkerMsg(WorkerMsg.REGISTER)
         sendMsg(s, regReq)
 
+        return
         # Expecting a confirmation back
-        conf = s.recv(MSG_BUFF_SIZE)
+        #conf = s.recv(MSG_BUFF_SIZE)
 
         # return a ControllerMsg object
-        return pickle.loads(conf)
+        #return pickle.loads(conf)
 
     def __sendHeartbeat(self, s):
         self.lastHeartbeat = getCTS()
@@ -39,13 +40,13 @@ class GameGui:
         s.connect((HOST, PORT))
 
         # register ourselves with the server
-        self.contrlMsg = self.__registerWorker(s)
-        if self.contrlMsg.response is not ControllerMsg.REGIST_SUCC:
-            print('Could not get registered to controller!')
-            return None
-        else:
-            print('Succesfully Registered!')
-            return s
+        self.__registerWorker(s)
+        #if self.contrlMsg.response is not ControllerMsg.REGIST_SUCC:
+            #print('Could not get registered to controller!')
+            #return None
+       # else:
+            #print('Succesfully Registered!')
+        return s
 
     def setupBoard(self): 
         pygame.init()
@@ -77,7 +78,7 @@ class GameGui:
 
         # return a ControllerMsg object
         cntrlMsg = pickle.loads(resp)
-        if resp.response == ControllerMsg.GAME_RESTART:
+        if cntrlMsg.response == ControllerMsg.GAME_RESTART:
             self.myNums = cntrlMsg.numbersToGuess
             self.winningNum = cntrlMsg.winningNum
         
