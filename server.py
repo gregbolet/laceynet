@@ -42,8 +42,8 @@ def handle_worker_request(conn):
                 print('Registration request from:', alias)
                 game.addNewPlayer(alias)
                 cntrlMsg = ControllerMsg(ControllerMsg.REGIST_SUCC)
-                cntrlMsg.numbersToGuess = [5,2,3,4,6,7,8,9,10,5]#game.getGuessesForAlias(alias)
-                cntrlMsg.winningNum = 5#game.getWinGuess()
+                cntrlMsg.numbersToGuess = game.getGuessesForAlias(alias)
+                cntrlMsg.winningNum = game.getWinGuess()
                 sendMsg(conn, cntrlMsg) 
 
             # Send the data back to the client, sends all bytes
