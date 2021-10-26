@@ -256,7 +256,7 @@ while True:
              #winner = winning number
 
         def isGameStarted():
-
+            return
         def checkForClicks():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
