@@ -15,6 +15,7 @@ def restartAllWorkers():
         msg.numbersToGuess = game.getGuessesForAlias(alias)
         msg.winningNum = game.getWinGuess()
         sendMsg(conn, msg)
+        print('Restarted:', alias)
     return
 
 # thread function
