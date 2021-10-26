@@ -42,11 +42,7 @@ def handle_worker_request(conn):
                 print('Registration request from:', alias)
                 game.addNewPlayer(alias)
                 cntrlMsg = ControllerMsg(ControllerMsg.REGIST_SUCC)
-<<<<<<< HEAD
-                cntrlMsg.numbersToGuess =game.getGuessesForAlias(alias)
-=======
                 cntrlMsg.numbersToGuess = game.getGuessesForAlias(alias)
->>>>>>> c15bc4882938523942e637d2f934505305d45540
                 cntrlMsg.winningNum = game.getWinGuess()
                 sendMsg(conn, cntrlMsg) 
 
