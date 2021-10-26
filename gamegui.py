@@ -1,4 +1,5 @@
 from lacey import *
+import button
 
  #!/bin/bash
 #source https://github.com/clear-code-projects/elevatedButton/blob/main/button.py
@@ -9,114 +10,6 @@ import os
 import numpy
 
 from pygame.constants import NUMEVENTS
-
-
-class Button:
-    def __init__(self, text, width, height, pos, elevation, exit, screen, myFont, onClickEvent):
-        #Core attributes
-        self.pressed = False
-        self.elevation = elevation
-        self.dynamic_elecation = elevation
-        self.original_y_pos = pos[1]
-        self.lastTimePressed = time.time()
-        self.currNum = 0
-        #true if exit button, false else
-        self.exitButton = exit
-        self.pos = pos
-        self.screen = screen
-        self.font = myFont
-        self.currIndex = 0
-        self.myNums = [] # can probably get rid of
-        self.game_over = False
-        self.onClickEvent = onClickEvent
-        # top rectangle
-        self.top_rect = pygame.Rect(pos, (width, height))
-        self.top_color = '#475F77'
-
-        # bottom rectangle
-        self.bottom_rect = pygame.Rect(pos, (width, height))
-        self.bottom_color = '#354B5E'
-        #text
-        self.text_surf = self.font.render(text, True, '#FFFFFF')
-        self.text_rect = self.text_surf.get_rect(center=self.top_rect.center)
-
-    #updating button location
-    #need this if we implement rotation
-    def updateLoc(self, newW, newH, size):
-        self.pos = ((newW // 2) - (size / 2), (newH//2)-(size / 2))
-        self.original_y_pos = self.pos[1]
-
-    #can probably get rid of
-    def getMyNums(self, list):
-        self.myNums = list
-
-    #can probably get rid of
-    def getNextNum(self):
-        curr = self.currIndex
-        if curr < len(self.myNums):
-            return self.myNums[curr]
-
-    def draw(self):
-        # elevation logic
-        self.top_rect.y = self.original_y_pos - self.dynamic_elecation
-        self.text_rect.center = self.top_rect.center
-
-        self.bottom_rect.midtop = self.top_rect.midtop
-        self.bottom_rect.height = self.top_rect.height + self.dynamic_elecation
-
-        pygame.draw.rect(self.screen, self.bottom_color,
-                         self.bottom_rect, border_radius=12)
-        pygame.draw.rect(self.screen, self.top_color,
-                         self.top_rect, border_radius=12)
-        self.screen.blit(self.text_surf, self.text_rect)
-        if(self.exitButton):
-            self.check_click_Exit()
-        else:
-            self.check_click()
-
-    #function for exit button
-    def check_click_Exit(self):
-        mouse_pos = pygame.mouse.get_pos()
-        if self.top_rect.collidepoint(mouse_pos):
-            self.top_color = '#D74B4B'
-            if pygame.mouse.get_pressed()[0]:
-                self.dynamic_elecation = 0
-                self.pressed = True
-            else:
-                self.dynamic_elecation = self.elevation
-                if self.pressed == True:
-                    print('We are exiting the program, thanks for playing!')
-                    self.pressed = False
-                    pygame.quit()
-                    sys.exit()
-        else:
-            self.dynamic_elecation = self.elevation
-            self.top_color = '#475F77'
-
-    #function for normal button when clicked
-    def check_click(self):
-        mouse_pos = pygame.mouse.get_pos()
-        if self.top_rect.collidepoint(mouse_pos):
-            self.top_color = '#D74B4B'
-            if pygame.mouse.get_pressed()[0]:
-                self.dynamic_elecation = 0
-                self.pressed = True
-            else:
-                self.dynamic_elecation = self.elevation
-                if self.pressed == True and not(self.game_over):
-                    self.lastTimePressed = time.time()
-
-                    self.onClickEvent() #dont really understand this
-                    
-                    self.text_surf = self.font.render(
-                        str(self.currNum), True, '#FFFFFF')
-                    self.text_rect = self.text_surf.get_rect(
-                        center=self.top_rect.center)
-                    self.screen.blit(self.text_surf, self.text_rect)
-                    self.pressed = False
-        else:
-            self.dynamic_elecation = self.elevation
-            self.top_color = '#475F77'
 
 
 class GameGui:
@@ -161,7 +54,7 @@ class GameGui:
             (0,0), pygame.FULLSCREEN | pygame.RESIZABLE)
         self.width, self.height = self.screen.get_size()
         #print(self.width, self.height)
-        self.orientation = self.checkOrientation()
+        #self.orientation = self.checkOrientation()
         pygame.display.set_caption('Guessing Game')
         self.clock = pygame.time.Clock()
         self.gui_font = pygame.font.Font(None, 250)
@@ -170,13 +63,11 @@ class GameGui:
         self.currNum =  -1#-1 # current numbers
         self.guessedNum = -1 #-1 #previous number
         self.message = ""
-        
-        self.won = False #True if we've won the game
-        self.lost = False #True if we've lost the game 
+    
 
-        self.button1 = Button("Start", self.size, self.size, ((self.width // 2) - (
+        self.button1 = button.Button("Start", self.size, self.size, ((self.width // 2) - (
             self.size / 2), (self.height // 2)-(self.size / 2)), 15, False, self.screen, self.gui_font, self.clickEvent)
-        self.exitButton = Button(
+        self.exitButton = button.Button(
             "Exit", 150, 150, (10, 10), 5, True, self.screen, self.font,self.clickEvent)
 
     #Sets the list of numbers
@@ -194,17 +85,6 @@ class GameGui:
         else:
             #portrait
             return 1
-
-    #Returns the next number
-    #can probably get rid of this
-    def getNextNum(self):
-        curr = self.currIndex
-        if curr == 0:
-            return -1
-        elif curr < len(self.myNums):
-            return self.myNums[curr]
-        else:
-            return "Game Over"
 
     #gets the next number and updates the guessednumber
     def clickEvent(self):
@@ -257,21 +137,14 @@ class GameGui:
     #Determines if we've won or lost the game
     def isWinner(self):
         if self.guessedNum == self.winningNum:
-            #print("WINNER at " + str(self.currIndex))
             self.message = "Congrats, you guessed the correct answer: " + str(self.guessedNum) + ". You win!"
-            self.won = True #dont need
-            return True
         elif self.currNum == "Game Over":
             self.message = "Game over, better luck next time!"
-            self.lost = True    #dont need        
-           
-            return False
         else:
             if self.guessedNum == -1:
                 self.message = "Let's start guessing!"
             else:
                 self.message = "You guessed " + str(self.guessedNum)+ ", keep trying!"
-            return False
 
     #does heartbear
     def doHeartbeat(self, s):
@@ -285,12 +158,11 @@ class GameGui:
     #Prints a given message to screen based on size 
     def message_to_screen(self, msg):
         orien = self.checkOrientation()
-        if orien == 0:
+        if orien == 0: #landscape
                 screen_text = self.font.render(msg, True, (255, 0,0))
                 self.screen.blit(screen_text, (100, self.height - 100))
-        else:
-            if len(msg) >= 34:
-                #do something
+        else: #portrait
+            if len(msg) >= 34: # if it doesnt fit the screen
                 length = len(msg)
                 screen_text = self.font.render(msg[0:33], True,(255,0,0))
                 self.screen.blit(screen_text, (100, self.height - 200))
