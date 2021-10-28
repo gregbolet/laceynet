@@ -69,7 +69,10 @@ class laceyPlayer:
                 #print('doing the heartbeat as i should')
                 self.doHeartbeat(s)
 
+        except Exception as e:
+            print('Exception!!!', e)
         finally:
+            print('Closing connection!')
             s.close()
             return
 
