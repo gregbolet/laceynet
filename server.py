@@ -46,6 +46,7 @@ def handle_worker_conn(conn):
                 cntrlMsg.numbersToGuess = game.getGuessesForAlias(alias)
                 cntrlMsg.winningNum = game.getWinGuess()
                 sendMsg(conn, cntrlMsg) 
+                restartAllWorkers()
 
     # close connection if no more data
     conn.close()
