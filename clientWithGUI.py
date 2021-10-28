@@ -76,6 +76,9 @@ class laceyPlayer:
             s.close()
             return
 
+    def buttonCallback(self):
+        return
+
     def __init__(self):
         self.lastHeartbeat = None
         self.haveNumbers = False
