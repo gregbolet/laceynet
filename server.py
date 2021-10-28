@@ -87,8 +87,8 @@ def main():
             connList[alias] = conn
 
             start_new_thread(handle_worker_conn, (conn,))
-            time.sleep(3)
-            restartAllWorkers()
+            #time.sleep(3)
+            #restartAllWorkers()
 
     finally:
         # Close the socket

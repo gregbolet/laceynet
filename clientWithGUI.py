@@ -3,15 +3,18 @@ from _thread import *
 
 class laceyPlayer:
     def __sendHeartbeat(self, s):
-        self.lastHeartbeat = getCTS()
         beat = WorkerMsg(WorkerMsg.HEARTBEAT)
         sendMsg(s, beat)
+        self.lastHeartbeat = getCTS()
         print('Sent heartbeat!')
+        self.__waitForServerResponse(s)
+        print('Got heartbeat response')
         return
 
     def __registerWorker(self, s):
         regReq = WorkerMsg(WorkerMsg.REGISTER)
         sendMsg(s, regReq)
+        print('Sent registration request!')
 
         self.__waitForServerResponse(s)
 
@@ -31,6 +34,7 @@ class laceyPlayer:
             self.iAmRegistered = True
             self.myNumbers = resp.numbersToGuess
             self.winningNum = resp.winningNum
+            print('Starting game')
 
         elif resp.response is ControllerMsg.GAME_RESTART:
             print('Restarting game!')
@@ -51,7 +55,6 @@ class laceyPlayer:
         if shouldSendBeat:
             self.__sendHeartbeat(s)
 
-        self.__waitForServerResponse(s)
         return
 
     def connThread(self):
@@ -63,7 +66,9 @@ class laceyPlayer:
             self.__registerWorker(s)
 
             while True:
+                #print('doing the heartbeat as i should')
                 self.doHeartbeat(s)
+
         finally:
             s.close()
             return
@@ -78,6 +83,10 @@ class laceyPlayer:
         print("Starting Worker!")
 
         start_new_thread(self.connThread, ())
+
+        # Do nothing for now
+        while True:
+            continue
 
         return
 
