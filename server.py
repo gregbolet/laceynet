@@ -15,10 +15,11 @@ def restartAllWorkers():
         msg.numbersToGuess = game.getGuessesForAlias(alias)
         msg.winningNum = game.getWinGuess()
         sendMsg(conn, msg)
+        print('Restarted:', alias)
     return
 
 # thread function
-def handle_worker_request(conn):
+def handle_worker_conn(conn):
     global game
     while True:
 
@@ -35,6 +36,9 @@ def handle_worker_request(conn):
 
             if workermsg.request == WorkerMsg.HEARTBEAT:
                 print('Heartbeat from:', alias)
+                cntrlMsg = ControllerMsg(ControllerMsg.CONTINUE)
+                sendMsg(conn, cntrlMsg) 
+
             elif workermsg.request == WorkerMsg.REGISTER:
                 print('Registration request from:', alias)
                 game.addNewPlayer(alias)
@@ -42,9 +46,7 @@ def handle_worker_request(conn):
                 #cntrlMsg.numbersToGuess = game.getGuessesForAlias(alias)
                 #cntrlMsg.winningNum = game.getWinGuess()
                 #sendMsg(conn, cntrlMsg) 
-
-            # Send the data back to the client, sends all bytes
-            #conn.sendall(data)
+                restartAllWorkers()
 
     # close connection if no more data
     conn.close()
@@ -85,9 +87,9 @@ def main():
             # Keep track of the new connection
             connList[alias] = conn
 
-            start_new_thread(handle_worker_request, (conn,))
-            time.sleep(3)
-            restartAllWorkers()
+            start_new_thread(handle_worker_conn, (conn,))
+            #time.sleep(3)
+            #restartAllWorkers()
 
     finally:
         # Close the socket
