@@ -42,10 +42,10 @@ def handle_worker_conn(conn):
             elif workermsg.request == WorkerMsg.REGISTER:
                 print('Registration request from:', alias)
                 game.addNewPlayer(alias)
-                cntrlMsg = ControllerMsg(ControllerMsg.REGIST_SUCC)
-                cntrlMsg.numbersToGuess = game.getGuessesForAlias(alias)
-                cntrlMsg.winningNum = game.getWinGuess()
-                sendMsg(conn, cntrlMsg) 
+                #cntrlMsg = ControllerMsg(ControllerMsg.REGIST_SUCC)
+                #cntrlMsg.numbersToGuess = game.getGuessesForAlias(alias)
+                #cntrlMsg.winningNum = game.getWinGuess()
+                #sendMsg(conn, cntrlMsg) 
                 restartAllWorkers()
 
     # close connection if no more data
