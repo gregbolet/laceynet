@@ -8,15 +8,15 @@ class laceyPlayer:
         self.lastHeartbeat = getCTS()
         print('Sent heartbeat!')
         self.__waitForServerResponse(s)
-        print('Got heartbeat response')
+        #print('Got heartbeat response')
         return
 
     def __registerWorker(self, s):
         regReq = WorkerMsg(WorkerMsg.REGISTER)
         sendMsg(s, regReq)
         print('Sent registration request!')
-
         self.__waitForServerResponse(s)
+        print('Got registration response')
 
     # Update client state based on server responses
     def __waitForServerResponse(self,s):
@@ -29,18 +29,20 @@ class laceyPlayer:
         if resp.response is ControllerMsg.CONTINUE:
             print('Continuing game...')
 
-        elif resp.response is ControllerMsg.REGIST_SUCC:
-            print('Registered with server!')
-            self.iAmRegistered = True
-            self.myNumbers = resp.numbersToGuess
-            self.winningNum = resp.winningNum
-            print('Starting game')
+        #elif resp.response is ControllerMsg.REGIST_SUCC:
+        #    print('Registered with server!')
+        #    self.iAmRegistered = True
+        #    self.myNumbers = resp.numbersToGuess
+        #    self.winningNum = resp.winningNum
+        #    print('Starting game')
 
         elif resp.response is ControllerMsg.GAME_RESTART:
             print('Restarting game!')
             self.restartGame = True
             self.myNumbers = resp.numbersToGuess
             self.winningNum = resp.winningNum
+            print(self.myNumbers)
+            print(self.winningNum)
 
         else:
             self.iAmRegistered = False
