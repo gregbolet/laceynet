@@ -78,6 +78,7 @@ class WorkerMsg:
     HEARTBEAT = 1
     REGISTER = 2
 
+
     # 0 = get game status
     # 1 = is heartbeat msg
     # 2 = register to join game
@@ -98,6 +99,7 @@ class ControllerMsg:
     # 3 = game ended
     # 4 = succesfully registered worker
     # 5 = failed registration
+    CONTINUE = 2
     GAME_RESTART = 3
     REGIST_SUCC = 4
     REGIST_FAIL = 5
