@@ -3,23 +3,20 @@ from PyQt5 import QtGui
 from PyQt5.QtCore import *
 import sys, random
 
-class Window(QMainWindow):
+class Window(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Blockchain Guessing Game")
-        self.UIComponents()
-        self.showFullScreen()
-        self.setUIGeometries()
+        grid_layout = QGridLayout()
+        self.setLayout(grid_layout)
 
-    def setUIGeometries(self):
-        self.button.setGeometry(0, 0,self.width()/2,self.height()/2)
-
-
-    def UIComponents(self):
         self.button = QPushButton("Click ME!", self)
         self.button.clicked.connect(self.clickme)
         self.button.setText("Start")
+
         self.index = 0
+
+        grid_layout.addWidget(self.button, 0, 0)
 
     def clickme(self):
         list = [1,2,3,4,5,6,7,8,9]
@@ -30,6 +27,9 @@ class Window(QMainWindow):
             self.button.setText("Game over")
         print("pressed")
     
-App = QApplication(sys.argv)
-window = Window()
-sys.exit(App.exec())
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    window = Window()
+    window.showFullScreen()
+    sys.exit(app.exec_())

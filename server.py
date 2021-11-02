@@ -18,7 +18,7 @@ def restartAllWorkers():
         print('Restarted:', alias)
     return
 
-# thread function
+# thread function to handle worker connection
 def handle_worker_conn(conn):
     global game
     while True:

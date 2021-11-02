@@ -2,6 +2,15 @@ from lacey import *
 from _thread import *
 
 class laceyPlayer:
+    def doHeartbeat(self,s):
+        # Check if we need to send a heartbeat
+        shouldSendBeat = (self.lastHeartbeat == None) or (getTSDiff(getCTS(), self.lastHeartbeat) > HEARTBEAT_INTERVAL)
+
+        if shouldSendBeat:
+            self.__sendHeartbeat(s)
+
+        return
+
     def __sendHeartbeat(self, s):
         beat = WorkerMsg(WorkerMsg.HEARTBEAT)
         sendMsg(s, beat)
@@ -22,19 +31,14 @@ class laceyPlayer:
     def __waitForServerResponse(self,s):
         # Expecting a confirmation back
         conf = s.recv(MSG_BUFF_SIZE)
+        print('Got a server response!')
 
         # return a ControllerMsg object
         resp = pickle.loads(conf)
+        print('Unpickled response object!')
 
         if resp.response is ControllerMsg.CONTINUE:
             print('Continuing game...')
-
-        elif resp.response is ControllerMsg.REGIST_SUCC:
-            print('Registered with server!')
-            self.iAmRegistered = True
-            self.myNumbers = resp.numbersToGuess
-            self.winningNum = resp.winningNum
-            print('Starting game')
 
         elif resp.response is ControllerMsg.GAME_RESTART:
             print('Restarting game!')
@@ -48,14 +52,6 @@ class laceyPlayer:
 
         return
 
-    def doHeartbeat(self,s):
-        # Check if we need to send a heartbeat
-        shouldSendBeat = (self.lastHeartbeat == None) or (getTSDiff(getCTS(), self.lastHeartbeat) > HEARTBEAT_INTERVAL)
-
-        if shouldSendBeat:
-            self.__sendHeartbeat(s)
-
-        return
 
     def connThread(self):
         try:
