@@ -164,7 +164,7 @@ class GameWindow(QMainWindow):
         self.button = QPushButton("Connecting...", self)
         self.exitButton = QPushButton("EXIT",self)
         self.button.setFont(QFont('Times', 45))
-        self.button.clicked.connect(lambda: self.player.buttonClickCallback(self.button))
+        self.button.clicked.connect(lambda: self.player.buttonClickCallback())
         self.exitButton.clicked.connect(self.exit)
         #self.button.setText("Start")
 
