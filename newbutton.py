@@ -17,8 +17,6 @@ class Window(QMainWindow):
         buttonHeight = 1000
         self.button.setGeometry(self.width()/2-buttonWidth/2,self.height()/2-buttonHeight/2,buttonWidth,buttonHeight)
         self.exitButton.setGeometry(100,100, 250,250)
-        
-
 
     def UIComponents(self):
         self.button = QPushButton("Click ME!", self)
