@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import *
-from PyQt5 import QtGui
+from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import sys, random
 
@@ -7,11 +7,23 @@ class Window(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Blockchain Guessing Game")
-        grid_layout = QGridLayout()
-        self.setLayout(grid_layout)
+        self.UIComponents()
+        self.showFullScreen()
+        self.setUIGeometries()
+        print(self.width(),self.height())
 
+    def setUIGeometries(self):
+        buttonWidth = 1000
+        buttonHeight = 1000
+        self.button.setGeometry(self.width()/2-buttonWidth/2,self.height()/2-buttonHeight/2,buttonWidth,buttonHeight)
+        self.exitButton.setGeometry(100,100, 250,250)
+
+    def UIComponents(self):
         self.button = QPushButton("Click ME!", self)
+        self.exitButton = QPushButton("EXIT",self)
+        self.button.setFont(QFont('Times', 45))
         self.button.clicked.connect(self.clickme)
+        self.exitButton.clicked.connect(self.exit)
         self.button.setText("Start")
 
         self.index = 0
@@ -26,6 +38,9 @@ class Window(QWidget):
         else:
             self.button.setText("Game over")
         print("pressed")
+
+    def exit(self):
+        sys.exit(App.exec())
     
 
 if __name__ == '__main__':
