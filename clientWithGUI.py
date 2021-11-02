@@ -104,14 +104,14 @@ class laceyPlayer:
                     self.restartGame = True
                 elif self.currGuessIndex -1 > -1 and self.myNumbers[self.currGuessIndex -1] == self.winningNum:
                     button.setText("Winner!")
+                    button.setStyleSheet("background-color : yellow")
+                    button.setEnabled(False)
 
                     winnermsg = WorkerMsg(WorkerMsg.IWON)
                     sendMsg(self.socket, winnermsg)
                     self.lastHeartbeat = getCTS()
                     self.__waitForServerResponse(self.socket)
 
-                    button.setStyleSheet("background-color : yellow")
-                    button.setEnabled(False)
                 else:
                     if self.currGuessIndex >= len(self.myNumbers):
                         button.setStyleSheet("background-color : red")
