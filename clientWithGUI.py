@@ -21,15 +21,15 @@ class laceyPlayer:
         self.lastHeartbeat = getCTS()
         print('Sent heartbeat!')
         self.__waitForServerResponse(s)
-        print('Got heartbeat response')
+        #print('Got heartbeat response')
         return
 
     def __registerWorker(self, s):
         regReq = WorkerMsg(WorkerMsg.REGISTER)
         sendMsg(s, regReq)
         print('Sent registration request!')
-
         self.__waitForServerResponse(s)
+        print('Got registration response')
 
     # Update client state based on server responses
     def __waitForServerResponse(self,s):
@@ -49,6 +49,8 @@ class laceyPlayer:
             self.restartGame = True
             self.myNumbers = resp.numbersToGuess
             self.winningNum = resp.winningNum
+            print(self.myNumbers)
+            print(self.winningNum)
 
         else:
             self.iAmRegistered = False
