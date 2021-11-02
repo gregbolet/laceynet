@@ -48,6 +48,10 @@ def handle_worker_conn(conn):
                 #sendMsg(conn, cntrlMsg) 
                 restartAllWorkers()
 
+            elif workermsg.request == WorkerMsg.IWON:
+                print('We have a winner! -- Restarting game')
+                restartAllWorkers()
+
     # close connection if no more data
     conn.close()
     return

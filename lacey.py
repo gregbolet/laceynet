@@ -77,7 +77,7 @@ class WorkerMsg:
     # Static vars to describe messages
     HEARTBEAT = 1
     REGISTER = 2
-
+    IWON = 3
 
     # 0 = get game status
     # 1 = is heartbeat msg

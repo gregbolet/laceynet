@@ -62,6 +62,8 @@ class laceyPlayer:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((HOST, PORT))
 
+            self.socket = s
+
             # register ourselves with the server -- assume it completes
             self.__registerWorker(s)
 
@@ -95,6 +97,12 @@ class laceyPlayer:
                     self.restartGame = True
                 elif self.currGuessIndex -1 > -1 and self.myNumbers[self.currGuessIndex -1] == self.winningNum:
                     button.setText("Winner!")
+
+                    winnermsg = WorkerMsg(WorkerMsg.IWON)
+                    sendMsg(self.socket, winnermsg)
+                    self.lastHeartbeat = getCTS()
+                    self.__waitForServerResponse(s)
+
                     button.setStyleSheet("background-color : yellow")
                     button.setEnabled(False)
                 else:
