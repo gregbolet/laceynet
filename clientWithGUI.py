@@ -76,12 +76,20 @@ class laceyPlayer:
             s.close()
             return
 
-    def buttonCallback(self):
+    # This updates the client's state based on
+    def buttonClickCallback(self):
+        # We will only change the button text if the game has started
+        if self.iAmRegistered:
+            if self.restartGame:
+                print('Updating GUI for game RESTART!')
+                self.restartGame = False
+            
+
+
         return
 
     def __init__(self):
         self.lastHeartbeat = None
-        self.haveNumbers = False
         self.iAmRegistered = False
         self.restartGame = False
         self.myNumbers = []

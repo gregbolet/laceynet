@@ -6,26 +6,29 @@ import sys, random
 class Window(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("blah")
-        self.setGeometry(100,100,600,400)
+        self.setWindowTitle("Blockchain Guessing Game")
         self.UIComponents()
-        self.show()
+        self.showFullScreen()
+        self.setUIGeometries()
+
+    def setUIGeometries(self):
+        self.button.setGeometry(0, 0,self.width()/2,self.height()/2)
+
 
     def UIComponents(self):
-        self.button = QPushButton("Click", self)
-        self.button.setGeometry(200,150,100,300)
+        self.button = QPushButton("Click ME!", self)
         self.button.clicked.connect(self.clickme)
         self.button.setText("Start")
         self.index = 0
 
     def clickme(self):
-        list = [1,2,3,4,5 ,6,7 ,8,9]
+        list = [1,2,3,4,5,6,7,8,9]
         if self.index < len(list):
             self.button.setText(str(list[self.index]))
             self.index = self.index +1
         else:
             self.button.setText("Game over")
-        print("rpessed")
+        print("pressed")
     
 App = QApplication(sys.argv)
 window = Window()
