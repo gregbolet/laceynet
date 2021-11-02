@@ -49,6 +49,9 @@ class laceyPlayer:
             self.restartGame = True
             self.myNumbers = resp.numbersToGuess
             self.winningNum = resp.winningNum
+            self.button.setStyleSheet("")
+            self.button.setEnabled(True)
+            self.button.setText("RESTARTED!")
             print(self.myNumbers)
             print(self.winningNum)
 
@@ -81,7 +84,9 @@ class laceyPlayer:
             return
 
     # This updates the client's state based on
-    def buttonClickCallback(self,button):
+    def buttonClickCallback(self):
+        button = self.button
+
         # We will only change the button text if the game has started
         if len(self.myNumbers) > 0:
             if self.restartGame:
@@ -116,6 +121,10 @@ class laceyPlayer:
                         button.setText(str(self.myNumbers[self.currGuessIndex]))
         return
 
+    def setButton(self, button):
+        self.button = button
+        return
+
     def __init__(self):
         self.lastHeartbeat = None
         self.iAmRegistered = False
@@ -139,6 +148,7 @@ class GameWindow(QMainWindow):
         self.player = myplayer
         self.setWindowTitle("Blockchain Guessing Game")
         self.UIComponents()
+        self.player.setButton(self.button)
         self.showFullScreen()
         self.setUIGeometries()
         
