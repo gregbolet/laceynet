@@ -49,9 +49,9 @@ class laceyPlayer:
             self.restartGame = True
             self.myNumbers = resp.numbersToGuess
             self.winningNum = resp.winningNum
-            self.button.setStyleSheet("")
             self.button.setEnabled(True)
             self.button.setText("RESTARTED!")
+            self.button.setStyleSheet("")
             print(self.myNumbers)
             print(self.winningNum)
 
