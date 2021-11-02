@@ -103,7 +103,7 @@ class laceyPlayer:
                     winnermsg = WorkerMsg(WorkerMsg.IWON)
                     sendMsg(self.socket, winnermsg)
                     self.lastHeartbeat = getCTS()
-                    self.__waitForServerResponse(s)
+                    self.__waitForServerResponse(self.socket)
 
                     button.setStyleSheet("background-color : yellow")
                     button.setEnabled(False)
