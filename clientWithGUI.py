@@ -79,31 +79,31 @@ class laceyPlayer:
     # This updates the client's state based on
     def buttonClickCallback(self,button):
         # We will only change the button text if the game has started
-        #if self.iAmRegistered:
-        if self.restartGame:
-            print('Updating GUI for game RESTART!')
-            self.restartGame = False     
-            self.currGuessIndex = 0
-            button.setEnabled(True)
-            button.setText(str(self.myNumbers[self.currGuessIndex]))
-            button.setStyleSheet("")
-        else:
-            self.currGuessIndex = self.currGuessIndex +1
-            if self.currGuessIndex > len(self.myNumbers):
-                button.setText("Game Over")
-                button.setStyleSheet("background-color : red")
-                self.restartGame = True
-            elif self.currGuessIndex -1 > -1 and self.myNumbers[self.currGuessIndex -1] == self.winningNum:
-                button.setText("Winner!")
-                button.setStyleSheet("background-color : yellow")
-                button.setEnabled(False)
+        if len(self.myNumbers) > 0:
+            if self.restartGame:
+                print('Updating GUI for game RESTART!')
+                self.restartGame = False     
+                self.currGuessIndex = 0
+                button.setEnabled(True)
+                button.setText(str(self.myNumbers[self.currGuessIndex]))
+                button.setStyleSheet("")
             else:
-                if self.currGuessIndex >= len(self.myNumbers):
-                    button.setStyleSheet("background-color : red")
+                self.currGuessIndex = self.currGuessIndex +1
+                if self.currGuessIndex > len(self.myNumbers):
                     button.setText("Game Over")
+                    button.setStyleSheet("background-color : red")
                     self.restartGame = True
-                else:   
-                    button.setText(str(self.myNumbers[self.currGuessIndex]))
+                elif self.currGuessIndex -1 > -1 and self.myNumbers[self.currGuessIndex -1] == self.winningNum:
+                    button.setText("Winner!")
+                    button.setStyleSheet("background-color : yellow")
+                    button.setEnabled(False)
+                else:
+                    if self.currGuessIndex >= len(self.myNumbers):
+                        button.setStyleSheet("background-color : red")
+                        button.setText("Game Over")
+                        self.restartGame = True
+                    else:   
+                        button.setText(str(self.myNumbers[self.currGuessIndex]))
         return
 
     def __init__(self):
