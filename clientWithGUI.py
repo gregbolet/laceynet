@@ -86,16 +86,22 @@ class laceyPlayer:
             self.currGuessIndex = 0
             button.setEnabled(True)
             button.setText(str(self.myNumbers[self.currGuessIndex]))
+            button.setStyleSheet("")
         else:
             self.currGuessIndex = self.currGuessIndex +1
             if self.currGuessIndex > len(self.myNumbers):
                 button.setText("Game Over")
+                button.setStyleSheet("background-color : red")
+                self.restartGame = True
             elif self.currGuessIndex -1 > -1 and self.myNumbers[self.currGuessIndex -1] == self.winningNum:
                 button.setText("Winner!")
+                button.setStyleSheet("background-color : yellow")
                 button.setEnabled(False)
             else:
                 if self.currGuessIndex >= len(self.myNumbers):
+                    button.setStyleSheet("background-color : red")
                     button.setText("Game Over")
+                    self.restartGame = True
                 else:   
                     button.setText(str(self.myNumbers[self.currGuessIndex]))
         return
@@ -131,7 +137,7 @@ class GameWindow(QMainWindow):
     def setUIGeometries(self):
         buttonWidth = 1000
         buttonHeight = 1000
-        self.button.setGeometry(self.width()/2-buttonWidth/2,self.height()/2-buttonHeight/2,buttonWidth,buttonHeight)
+        self.button.setGeometry(self.width()//2-buttonWidth//2,self.height()//2-buttonHeight//2,buttonWidth,buttonHeight)
         self.exitButton.setGeometry(100,100, 250,250)
 
     def UIComponents(self):
