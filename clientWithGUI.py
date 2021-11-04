@@ -96,6 +96,7 @@ class laceyPlayer:
                 button.setEnabled(True)
                 button.setText(str(self.myNumbers[self.currGuessIndex]))
                 button.setStyleSheet("")
+                button.repaint()
             else:
                 self.currGuessIndex = self.currGuessIndex +1
                 if self.currGuessIndex > len(self.myNumbers):
