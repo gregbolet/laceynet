@@ -106,6 +106,7 @@ class laceyPlayer:
                     button.setText("Winner!")
                     button.setStyleSheet("background-color : yellow")
                     button.setEnabled(False)
+                    button.repaint()
                     print("Won, we're sleeping!")
                     time.sleep(5)
                     print("Waking up!")
