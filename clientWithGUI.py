@@ -52,6 +52,7 @@ class laceyPlayer:
             self.button.setEnabled(True)
             self.button.setText("RESTARTED!")
             self.button.setStyleSheet("")
+            self.button.repaint()
             print(self.myNumbers)
             print(self.winningNum)
 
