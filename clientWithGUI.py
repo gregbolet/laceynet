@@ -106,7 +106,9 @@ class laceyPlayer:
                     button.setText("Winner!")
                     button.setStyleSheet("background-color : yellow")
                     button.setEnabled(False)
-
+                    print("Won, we're sleeping!")
+                    time.sleep(5)
+                    print("Waking up!")
                     winnermsg = WorkerMsg(WorkerMsg.IWON)
                     sendMsg(self.socket, winnermsg)
                     self.lastHeartbeat = getCTS()
