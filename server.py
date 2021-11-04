@@ -9,10 +9,10 @@ from threading import Lock
 def restartAllWorkers():
     global connList
     global game
+    game.restartGame()
     for alias in connList:
         conn = connList[alias]
         msg = ControllerMsg(ControllerMsg.GAME_RESTART)
-        game.restartGame()
         msg.numbersToGuess = game.getGuessesForAlias(alias)
         msg.winningNum = game.getWinGuess()
         sendMsg(conn, msg)
