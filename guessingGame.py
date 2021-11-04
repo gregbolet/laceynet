@@ -79,6 +79,7 @@ class guessingGame:
     def restartGame(self):
         self.winGuess = np.random.randint(1, self.maxGuess+1)
         self.__genPlayerGuesses()
+        print("The winning number is now: " + str(self.winGuess))
        # self.startGame()
         return
 
