@@ -84,11 +84,6 @@ class WorkerMsg:
     REGISTER = 2
     IWON = 3
 
-    # 0 = get game status
-    # 1 = is heartbeat msg
-    # 2 = register to join game
-    # 3 = been touched by stylus
-
     def __init__(self, requestCode):
         self.request = requestCode
         self.timestamp = getCTS() 
@@ -99,12 +94,6 @@ class ControllerMsg:
 
     # Let the device know what the game state is
     # these are response codes
-    # 0 = wait for start signal
-    # 1 = game started
-    # 2 = game paused
-    # 3 = game ended
-    # 4 = succesfully registered worker
-    # 5 = failed registration
     CONTINUE = 2
     GAME_RESTART = 3
     REGIST_SUCC = 4
