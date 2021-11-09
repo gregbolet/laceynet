@@ -23,55 +23,69 @@ def restart_all_workers():
         send_msg(conn, msg)
         print('Restarted:', alias)
 
+class ConnectionThread:
+    def __init__(self):
+        print('Init connection thread!')
 
-# thread function to handle worker connection
-def handle_worker_conn(conn):
-    global game
-    global conn_list
-    global conn_lock
+    # thread function to handle worker connection
+    def __handle_worker_conn(self):
+        global game
+        global conn_list
+        global conn_lock
+        global conn
 
-    print("I'm here")
+        last_time_heartbeat = get_cts()
 
-    while True:
-        # Blocking calls, max MSG_BUFF_SIZE bytes
-        data = conn.recv(MSG_BUFF_SIZE)
-        alias = get_alias_from_conn(conn)
+        while True:
+            # Blocking calls, max MSG_BUFF_SIZE bytes
+            data = conn.recv(MSG_BUFF_SIZE)
+            alias = get_alias_from_conn(conn)
 
-        if not data: # if there's no data being sent to server from client
-            print('Connection to [', alias, '] closed...', sep='')
-            break
-        else:
-            # Expecting a worker data packet
-            workermsg = pickle.loads(data)
-
-            # if received a hearbeat message
-            if workermsg.request == WorkerMsg.HEARTBEAT:
-                print('Heartbeat from:', alias)
-                cntrl_msg = ControllerMsg(ControllerMsg.CONTINUE)
-                last_time_heartbeat = get_cts()
-                send_msg(conn, cntrl_msg) 
-
-            # handles when a worker registers (joined the game)
-            elif workermsg.request == WorkerMsg.REGISTER:
-                print('Registration request from:', alias)
-                game.add_new_player(alias)
-                restart_all_workers()
-
-            # handles if a worker won the game
-            elif workermsg.request == WorkerMsg.IWON:
-                print('We have a winner! -- Restarting game')
-                restart_all_workers()
-
-            if get_ts_diff(get_cts(), last_time_heartbeat) > HEARTBEAT_TIMEOUT:
+            if not data: # if there's no data being sent to server from client
+                print('Connection to [', alias, '] closed...', sep='')
                 break
-    # close connection if no more data
-    conn.close()
+            else:
+                # Expecting a worker data packet
+                workermsg = pickle.loads(data)
+
+                # if received a hearbeat message
+                if workermsg.request == WorkerMsg.HEARTBEAT:
+                    print('Heartbeat from:', alias)
+                    cntrl_msg = ControllerMsg(ControllerMsg.CONTINUE)
+                    last_time_heartbeat = get_cts()
+                    send_msg(conn, cntrl_msg) 
+
+                # handles when a worker registers (joined the game)
+                elif workermsg.request == WorkerMsg.REGISTER:
+                    print('Registration request from:', alias)
+                    game.add_new_player(alias)
+                    print("jere")
+                    restart_all_workers()
+
+                # handles if a worker won the game
+                elif workermsg.request == WorkerMsg.IWON:
+                    print('We have a winner! -- Restarting game')
+                    restart_all_workers()
+
+                if get_ts_diff(get_cts(), last_time_heartbeat) > HEARTBEAT_TIMEOUT:
+                    break
+        # close connection if no more data
+        conn.close()
+
+    # This is what the threading.Thread.start will call 
+    def __call__(self, *args, **kwargs):
+        global conn
+        print("Forked connection thread")
+        self.__handle_worker_conn()
+        while True:
+            1 == 1
 
 
 def main():
     global game
     global conn_list
     global conn_lock
+    global conn
 
     try:
         print("Controller Starting...")
@@ -109,9 +123,9 @@ def main():
             conn_list[alias] = conn
             conn_lock.release()
 
-            print("HIII!!!")
             # start a new connection thread
-            Thread(target=handle_worker_conn, args=(conn,))
+            connection_thread = Thread(target=ConnectionThread())
+            connection_thread.start()
 
     finally:
         # Close the socket

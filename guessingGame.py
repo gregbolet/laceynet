@@ -50,12 +50,15 @@ class GuessingGame:
         # RoundRobin style makes sure no other players have too many guesses
         while rand_int_list:
             next_num = rand_int_list.pop()
+
             self.lock.acquire()
             player = players_list[curr_player]
             self.players[player].append(next_num)
-            self.lock.acquire()
+            self.lock.release()
+
             curr_player = (curr_player+1) % self.get_num_players()
 
+        print("maybe here?")
         for player in self.players:
             self.lock.acquire()
             print(player, ': ', self.players[player], sep='')
