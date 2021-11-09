@@ -1,35 +1,29 @@
 #!/usr/bin/env -S PYTHONPATH=../common python3
 
 from sys import platform
-from config import *
+from lacey import *
 from _thread import *
 from guessingGame import guessingGame
 from threading import Lock
 
-
-def restart_all_workers():
+def restartAllWorkers():
+    global connList
     global game
-    global conn_list
-    global conn_lock
-
     game.restartGame()
-    for alias in conn_list:
-        conn = conn_list[alias]
+    for alias in connList:
+        conn = connList[alias]
         msg = ControllerMsg(ControllerMsg.GAME_RESTART)
         msg.numbersToGuess = game.getGuessesForAlias(alias)
         msg.winningNum = game.getWinGuess()
         sendMsg(conn, msg)
         print('Restarted:', alias)
-
+    return
 
 # thread function to handle worker connection
 def handle_worker_conn(conn):
     global game
-    global conn_list
-    global conn_lock
-    global restart
-
     while True:
+
         # Blocking calls, max MSG_BUFF_SIZE bytes
         data = conn.recv(MSG_BUFF_SIZE)
         alias = getAliasFromConn(conn)
@@ -41,7 +35,6 @@ def handle_worker_conn(conn):
             # Expecting a worker data packet
             workermsg = pickle.loads(data)
 
-            # if received a hearbeat message
             if workermsg.request == WorkerMsg.HEARTBEAT:
                 print('Heartbeat from:', alias)
                 cntrlMsg = ControllerMsg(ControllerMsg.CONTINUE)
@@ -50,20 +43,24 @@ def handle_worker_conn(conn):
             elif workermsg.request == WorkerMsg.REGISTER:
                 print('Registration request from:', alias)
                 game.addNewPlayer(alias)
-                restart_all_workers()
+                #cntrlMsg = ControllerMsg(ControllerMsg.REGIST_SUCC)
+                #cntrlMsg.numbersToGuess = game.getGuessesForAlias(alias)
+                #cntrlMsg.winningNum = game.getWinGuess()
+                #sendMsg(conn, cntrlMsg) 
+                restartAllWorkers()
 
             elif workermsg.request == WorkerMsg.IWON:
                 print('We have a winner! -- Restarting game')
-                restart_all_workers()
+                restartAllWorkers()
 
     # close connection if no more data
     conn.close()
+    return
 
 
 def main():
     global game
-    global conn_list
-    global conn_lock
+    global connList
 
     try:
         print("Controller Starting...")
@@ -81,31 +78,30 @@ def main():
         # Create a new guessing game
         game = guessingGame(10)
 
-        # Set up empty connection list
-        conn_list = {}
+        # Keep track of the connections
+        connList = {}
 
-        # initialize the lock
-        conn_lock = Lock()
         print("Socket server ready!")
 
         while True:
             # Block and wait for an incoming connection
             conn, addr = s.accept()
 
-            # receives a new connection
             alias = getAliasFromConn(conn)
             print('Connected by:', alias)
 
-            # start a new connection thread
-            start_new_thread(handle_worker_conn, (conn,))
             # Keep track of the new connection
-            conn_lock.acquire()
-            conn_list[alias] = conn
-            conn_lock.release()
+            connList[alias] = conn
+            
+
+            start_new_thread(handle_worker_conn, (conn,))
+            #time.sleep(3)
+            #restartAllWorkers()
 
     finally:
         # Close the socket
         s.close()
 
+    return
 
 main()
