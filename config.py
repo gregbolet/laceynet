@@ -10,10 +10,12 @@ import time
 MSG_BUFF_SIZE = 4096
 
 # The server's hostname -- resovled later via DNS
-HOST = 'controller.laceynet'
+# HOST = 'controller.laceynet'
+HOST = '127.0.0.1'
 
 # Port to communicate on
-PORT = 65432
+# PORT = 65432
+PORT = 5000
 
 # The maximum number of connections allowed until
 # the server starts rejecting requests
@@ -21,7 +23,7 @@ MAX_CONNS = 40
 
 # This is how many seconds the client should wait
 # before sending a heartbeat, we expect to wait 10 seconds
-HEARTBEAT_INTERVAL = 10
+HEARTBEAT_INTERVAL = 2
 
 # If after 20 seconds we don't get a heartbeat, consider
 # the node disconnected

@@ -30,6 +30,8 @@ def handle_worker_conn(conn):
     global conn_list
     global conn_lock
 
+    print("I'm here")
+
     while True:
         # Blocking calls, max MSG_BUFF_SIZE bytes
         data = conn.recv(MSG_BUFF_SIZE)
@@ -102,12 +104,14 @@ def main():
             alias = get_alias_from_conn(conn)
             print('Connected by:', alias)
 
-            # start a new connection thread
-            Thread(target=handle_worker_conn, args=(conn,))
-            # Keep track of the new connection
+            # keep track of the new connection
             conn_lock.acquire()
             conn_list[alias] = conn
             conn_lock.release()
+
+            print("HIII!!!")
+            # start a new connection thread
+            Thread(target=handle_worker_conn, args=(conn,))
 
     finally:
         # Close the socket

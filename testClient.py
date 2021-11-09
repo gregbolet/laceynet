@@ -1,36 +1,36 @@
 #!/usr/bin/env -S PYTHONPATH=../common python3
 
-from lacey import *
+from config import *
 
-class laceyPlayer:
-    def __sendHeartbeat(self, s):
-        self.lastHeartbeat = getCTS()
+class LaceyPlayer:
+    def __send_heartbeat(self, s):
+        self.last_heartbeat = get_cts()
         beat = WorkerMsg(WorkerMsg.HEARTBEAT)
-        sendMsg(s, beat)
+        send_msg(s, beat)
         print('Sent heartbeat!')
-        return
 
-    def __registerWorker(self, s):
-        regReq = WorkerMsg(WorkerMsg.REGISTER)
-        sendMsg(s, regReq)
+
+    def __register_worker(self, s):
+        reg_req = WorkerMsg(WorkerMsg.REGISTER)
+        send_msg(s, reg_req)
 
         # Expecting a confirmation back
         conf = s.recv(MSG_BUFF_SIZE)
-
+        print('Im registered!')
         # return a ControllerMsg object
         return pickle.loads(conf)
 
 
     def __init__(self):
-        self.lastHeartbeat = None
+        self.last_heartbeat = None
         print("Starting Worker!")
 
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((HOST, PORT))
 
         # register ourselves with the server
-        cntrlMsg = self.__registerWorker(s)
-        if cntrlMsg.response is not ControllerMsg.GAME_RESTART:
+        cntrl_msg = self.__register_worker(s)
+        if cntrl_msg.response is not ControllerMsg.GAME_RESTART:
             print('Could not get registered to controller!')
             return
         else:
@@ -40,17 +40,16 @@ class laceyPlayer:
         while True:
 
             # Check if we need to send a heartbeat
-            shouldSendBeat = (self.lastHeartbeat == None) or (getTSDiff(getCTS(), self.lastHeartbeat) > HEARTBEAT_INTERVAL)
+            should_send_beat = (self.last_heartbeat == None) or (get_ts_diff(get_cts(), self.last_heartbeat) > HEARTBEAT_INTERVAL)
 
-            if shouldSendBeat:
-                self.__sendHeartbeat(s)
+            if should_send_beat:
+                self.__send_heartbeat(s)
 
         # Close the socket connection
         s.close()
 
-
 def main():
-    laceyPlayer()
+    LaceyPlayer()
 
 if __name__=="__main__":
     main()
