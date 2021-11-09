@@ -28,27 +28,26 @@ HEARTBEAT_INTERVAL = 10
 HEARTBEAT_TIMEOUT = 20
 
 
-def getAliasFromConn(conn):
+def get_alias_from_conn(conn):
     return socket.gethostbyaddr(conn.getpeername()[0])[0]
 
 
 # Sends an object over the socket s
-def sendMsg(s, obj):
+def send_msg(s, obj):
     # Pickle the object to send over the network
     tosend = pickle.dumps(obj)
 
     s.send(tosend) 
-    return
 
 
 # Get the current timestamp
-def getCTS():
+def get_cts():
     return datetime.datetime.now().timestamp()
 
 
 # Check the difference of two timestamps
 # returns the diff in seconds
-def getTSDiff(ts1, ts2):
+def get_ts_diff(ts1, ts2):
     if ts1 > ts2:
         diff = ts1 - ts2
     else:
@@ -66,14 +65,14 @@ class WorkerState:
     
     def __init__(self):
         self.status = self.NOT_REGISTERED
-        self.lastHeartbeat = None
+        self.last_heartbeat = None
 
-    def tickHeartbeat(self):
-        self.lastHeartbeat = getCTS()
+    def tick_heartbeat(self):
+        self.last_heartbeat = get_cts()
         
-    def isAlive(self):
-        timeSinceLastBeat = getTSDiff(getCTS(), self.lastHeartbeat)
-        return (timeSinceLastBeat < HEARTBEAT_TIMEOUT)
+    def is_alive(self):
+        time_since_last_beat = get_ts_diff(get_cts(), self.lastHeartbeat)
+        return (time_since_last_beat < HEARTBEAT_TIMEOUT)
 
 
 # These are the requests the workers/client can send
@@ -83,15 +82,10 @@ class WorkerMsg:
     HEARTBEAT = 1
     REGISTER = 2
     IWON = 3
-
-    # 0 = get game status
-    # 1 = is heartbeat msg
-    # 2 = register to join game
-    # 3 = been touched by stylus
-
-    def __init__(self, requestCode):
-        self.request = requestCode
-        self.timestamp = getCTS() 
+    
+    def __init__(self, request_code):
+        self.request = request_code
+        self.timestamp = get_cts() 
 
 
 # These are the messages the server sends to the clients
@@ -99,25 +93,18 @@ class ControllerMsg:
 
     # Let the device know what the game state is
     # these are response codes
-    # 0 = wait for start signal
-    # 1 = game started
-    # 2 = game paused
-    # 3 = game ended
-    # 4 = succesfully registered worker
-    # 5 = failed registration
     CONTINUE = 2
     GAME_RESTART = 3
     REGIST_SUCC = 4
     REGIST_FAIL = 5
 
-    def __init__(self, responseCode):
-        self.response = responseCode
-        self.timestamp = getCTS() 
+    def __init__(self, response_code):
+        self.response = response_code
+        self.timestamp = get_cts() 
 
         # The list of numbers this worker will be "guessing"
-        self.numbersToGuess = []
-        self.winningNum = -1
-        return
+        self.numbers_to_guess = []
+        self.winning_num = -1
 
 
 # Override the print function to show timestamps
