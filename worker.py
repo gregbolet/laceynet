@@ -5,9 +5,9 @@ from threading import Lock, Thread
 conn = None
 nums = []
 winNum = -1
-restartGameFlag = 0
+restartFlag = AtomicInt(0)
+isRegFlag = AtomicInt(0)
 globalDataLock = Lock()
-restartGameLock = Lock()
 
 class SenderThread:
     def __init__(self):
@@ -46,14 +46,13 @@ class RecvThread:
         global nums
         global winNum
         global globalDataLock
+        global isRegFlag
         print("Forked recv thread")
 
         # Handle restart/continue requests
         while True:
             # Expecting a confirmation back
-            globalDataLock.acquire()
             conf = conn.recv(MSG_BUFF_SIZE)
-            globalDataLock.release()
             print('Got a server response!')
 
             # return a ControllerMsg object
@@ -62,6 +61,25 @@ class RecvThread:
 
             if resp.response is ControllerMsg.CONTINUE:
                 print('Continuing game...')
+
+            elif resp.response is ControllerMsg.REGIST_SUCC:
+                print('Registration succesfull...')
+                isRegFlag.lock()
+                isRegFlag.set_int(1)
+                isRegFlag.unlock()
+
+            elif resp.response is ControllerMsg.GAME_RESTART:
+                globalDataLock.acquire()
+                restartFlag.lock()
+                restartFlag.set_int(1)
+
+                nums = resp.numbers_to_guess
+                winNum = resp.winning_num
+                print('Got new restart data: ', nums)
+
+                globalDataLock.release()
+                restartFlag.unlock()
+
         return
 
 def setupGUI():
