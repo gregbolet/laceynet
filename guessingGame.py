@@ -2,6 +2,7 @@
 
 import numpy as np
 import random
+from threading import Lock
 
 class GuessingGame:
 
@@ -9,6 +10,7 @@ class GuessingGame:
     def __init__(self, max_guess = 100):
         # Keep a list/mapping of all the players
         self.players = {}
+        self.lock = Lock()
 
         # This is an INCLUSIVE maxGuess value
         # (i.e: if maxGuess = 100, guesses are in [1,100])
@@ -26,7 +28,9 @@ class GuessingGame:
 
         # empty each player's list
         for player in self.players:
+            self.lock.acquire()
             self.players[player] = []
+            self.lock.release()
 
         # generate a list of maxGuess integers in random order
         #randIntList = np.random.choice(self.maxGuess, self.maxGuess)
@@ -46,30 +50,42 @@ class GuessingGame:
         # RoundRobin style makes sure no other players have too many guesses
         while rand_int_list:
             next_num = rand_int_list.pop()
+            self.lock.acquire()
             player = players_list[curr_player]
             self.players[player].append(next_num)
+            self.lock.acquire()
             curr_player = (curr_player+1) % self.get_num_players()
 
         for player in self.players:
+            self.lock.acquire()
             print(player, ': ', self.players[player], sep='')
+            self.lock.release()
         
 
     # Add new player
     def add_new_player(self, alias):
         # ReGen the guesses for all the players
+        self.lock.acquire()
         self.players[alias] = []
+        self.lock.release()
+
         self.__gen_player_guesses()
         print('Added player:', alias)
 
 
     # Drop player
     def drop_player(self, alias):
+        self.lock.acquire()
         del self.players[alias]
+        self.lock.release()
 
 
     # Get the guesses associated with an alias 
     def get_guesses_for_alias(self, alias):
-        return self.players[alias]
+        self.lock.acquire()
+        res = self.players[alias]
+        self.lock.release()
+        return res
 
 
     def get_win_guess(self):
