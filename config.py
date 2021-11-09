@@ -5,6 +5,7 @@ import datetime
 import socket
 import pickle
 import time
+from threading import Lock
 
 # Maximum message buffer size
 MSG_BUFF_SIZE = 4096
@@ -114,3 +115,27 @@ import builtins as __builtin__
 def print(*args, **kwargs):
     __builtin__.print("[%s] " % str((datetime.datetime.now())), end='')
     return __builtin__.print(*args, **kwargs)
+
+
+class AtomicInt:
+    def __init__(self, val):
+        self.__datalock = Lock()
+        self.__val = val
+        return
+
+    def lock(self):
+        self.__datalock.acquire()
+        return
+
+    def unlock(self):
+        self.__datalock.release()
+        return
+
+    def get_int(self):
+        toret = self.__val
+        return toret 
+
+    def set_int(self, val):
+        self.__val = val
+        return
+        
