@@ -46,6 +46,7 @@ def handle_worker_conn(conn):
             if workermsg.request == WorkerMsg.HEARTBEAT:
                 print('Heartbeat from:', alias)
                 cntrl_msg = ControllerMsg(ControllerMsg.CONTINUE)
+                last_time_heartbeat = get_cts()
                 send_msg(conn, cntrl_msg) 
 
             # handles when a worker registers (joined the game)
@@ -59,6 +60,8 @@ def handle_worker_conn(conn):
                 print('We have a winner! -- Restarting game')
                 restart_all_workers()
 
+            if get_ts_diff(get_cts(), last_time_heartbeat) > HEARTBEAT_TIMEOUT:
+                break
     # close connection if no more data
     conn.close()
 
