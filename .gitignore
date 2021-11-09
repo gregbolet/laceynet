@@ -1,0 +1,18 @@
+# Ignore everything
+*
+
+# Keep the og directory
+!og/
+
+# Ignore the pycache
+__pycache__/
+
+# Keep python files
+#!**/*.py
+
+#keep txt
+!*.txt
+
+# Keep gitignore
+!.gitignore
+
