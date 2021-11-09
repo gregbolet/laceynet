@@ -1,3 +1,4 @@
+from threading import Lock
 from lacey import *
 from _thread import *
 from PyQt5.QtWidgets import *
@@ -75,7 +76,9 @@ class laceyPlayer:
 
             while True:
                 #print('doing the heartbeat as i should')
+                Lock.acquire()
                 self.doHeartbeat(s)
+                Lock.release()
 
         except Exception as e:
             print('Exception!!!', e)
@@ -83,6 +86,31 @@ class laceyPlayer:
             print('Closing connection!')
             s.close()
             return
+
+
+    def restart_thread(self):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.connect((HOST, PORT))
+
+            self.socket = s
+
+            # register ourselves with the server -- assume it completes
+            self.__registerWorker(s)
+
+            while True:
+                #print('doing the heartbeat as i should')
+                Lock.acquire()
+                self.__waitForServerResponse(s)
+                Lock.release()
+
+        except Exception as e:
+            print('Exception!!!', e)
+        finally:
+            print('Closing connection!')
+            s.close()
+            return
+
 
     # This updates the client's state based on
     def buttonClickCallback(self):
@@ -126,6 +154,7 @@ class laceyPlayer:
                         button.setText(str(self.myNumbers[self.currGuessIndex]))
         return
 
+
     def setButton(self, button):
         self.button = button
         return
@@ -140,6 +169,7 @@ class laceyPlayer:
         print("Starting Worker!")
 
         start_new_thread(self.connThread, ())
+        start_new_thread(self.restart_thread, ())
 
         # Do nothing for now
         # while True:
