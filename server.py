@@ -11,28 +11,30 @@ def restart_all_workers():
     global conn_lock
 
     game.restart_game()
+    conn_lock.acquire()
     for alias in conn_list:
 
-        conn_lock.acquire()
         conn = conn_list[alias]
-        conn_lock.release()
-
         msg = ControllerMsg(ControllerMsg.GAME_RESTART)
         msg.numbers_to_guess = game.get_guesses_for_alias(alias)
         msg.winning_num = game.get_win_guess()
         send_msg(conn, msg)
         print('Restarted:', alias)
 
+    conn_lock.release()
+
 class ConnectionThread:
     def __init__(self):
         print('Init connection thread!')
 
-    # thread function to handle worker connection
-    def __handle_worker_conn(self):
+    # This is what the threading.Thread.start will call 
+    def __call__(self, *args, **kwargs):
+        conn = args[0]
+        print(conn)
+        print("Forked connection thread")
         global game
         global conn_list
         global conn_lock
-        global conn
 
         last_time_heartbeat = get_cts()
 
@@ -68,23 +70,15 @@ class ConnectionThread:
 
                 if get_ts_diff(get_cts(), last_time_heartbeat) > HEARTBEAT_TIMEOUT:
                     break
+
         # close connection if no more data
         conn.close()
-
-    # This is what the threading.Thread.start will call 
-    def __call__(self, *args, **kwargs):
-        global conn
-        print("Forked connection thread")
-        self.__handle_worker_conn()
-        while True:
-            continue
 
 
 def main():
     global game
     global conn_list
     global conn_lock
-    global conn
 
     try:
         print("Controller Starting...")
@@ -123,7 +117,7 @@ def main():
             conn_lock.release()
 
             # start a new connection thread
-            connection_thread = Thread(target=ConnectionThread())
+            connection_thread = Thread(target=ConnectionThread(), args=(conn,))
             connection_thread.start()
 
     finally:

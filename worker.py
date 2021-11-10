@@ -5,19 +5,37 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import sys, random
 
-
 conn = None
 nums = []
 winNum = -1
 currIdx = -1
 restartFlag = AtomicInt(0)
-isRegFlag = AtomicInt(0)
+#isRegFlag = AtomicInt(0)
 globalDataLock = Lock()
 guiobj = None
+
+def checkIfWon():
+    global nums
+    global winNum
+    global currIdx
+    global globalDataLock
+    globalDataLock.acquire()
+
+    if currIdx == -1:
+        globalDataLock.release()
+        return False
+
+    elif nums[currIdx] == winNum:
+        globalDataLock.release()
+        return True
+
+    globalDataLock.release()
+    return False
 
 class SenderThread:
     def __init__(self):
         print('Init sender thread!')
+        self.lastHeartbeat = None
         return
 
     def __register_worker(self):
@@ -35,18 +53,30 @@ class SenderThread:
         print('Sent heartbeat!')
         return
 
+    def doHeartbeat(self):
+        # Check if we need to send a heartbeat
+        shouldSendBeat = (self.lastHeartbeat == None) or (get_ts_diff(get_cts(), self.lastHeartbeat) > HEARTBEAT_INTERVAL)
+
+        if shouldSendBeat:
+            self.__sendHeartbeat()
+
+        return
+
     # This is what the threading.Thread.start will call 
     def __call__(self, *args, **kwargs):
         global conn
-        global nums
-        global winNum
-        global globalDataLock
         print("Forked sender thread")
 
         # Get ourselves registered
         self.__register_worker()
+
         while True:
-            winNum = winNum
+            self.doHeartbeat()
+
+            if checkIfWon():
+                winnermsg = WorkerMsg(WorkerMsg.IWON)
+                send_msg(conn, winnermsg)
+
         return
 
 class RecvThread:
@@ -60,7 +90,8 @@ class RecvThread:
         global nums
         global winNum
         global globalDataLock
-        global isRegFlag
+        #global isRegFlag
+        global currIdx
         print("Forked recv thread")
 
         # Handle restart/continue requests
@@ -76,20 +107,24 @@ class RecvThread:
             if resp.response is ControllerMsg.CONTINUE:
                 print('Continuing game...')
 
-            elif resp.response is ControllerMsg.REGIST_SUCC:
-                print('Registration succesfull...')
-                isRegFlag.lock()
-                isRegFlag.set_int(1)
-                isRegFlag.unlock()
+            #elif resp.response is ControllerMsg.REGIST_SUCC:
+                #print('Registration succesfull...')
+                #isRegFlag.lock()
+                #isRegFlag.set_int(1)
+                #isRegFlag.unlock()
 
             elif resp.response is ControllerMsg.GAME_RESTART:
+                print('Restarting game...')
                 globalDataLock.acquire()
                 restartFlag.lock()
                 restartFlag.set_int(1)
 
                 nums = resp.numbers_to_guess
                 winNum = resp.winning_num
-                print('Got new restart data: ', nums)
+                # Start at one index behind
+                currIdx = -1
+                print('Got new restart data: numbers', nums)
+                print('Got new restart data: winNum ', winNum)
 
                 globalDataLock.release()
                 restartFlag.unlock()
@@ -97,35 +132,39 @@ class RecvThread:
         return
 
 class GameWindow(QMainWindow):
-    def __init__(self,callback,setFun):
+    def __init__(self,callback):
         super().__init_()
-        self.player = callback
+        self.buttonCallback = callback
         self.setWindowTitle("Blockchain")
-        self.UIComponents(self.player)
-        setFun(self.button)
+        self.UIComponents()
         self.showFullScreen()
         self.setUIGeometries()
+        return
 
     def setUIGeometries(self):
         buttonWidth = 1000
         buttonHeight = 1000
         self.button.setGeometry(self.width()//2-buttonWidth//2, self.height()//2-buttonHeight//2,buttonWidth,buttonHeight)
+        return
 
     def UIComponents(self):
         self.button = QPushButton("Connecting...",self)
         self.exitButton = QPushButton("EXIT", self)
         self.button.setFont(QFont('Times', 45))
-        self.button.clicked.connect(self.player)
+        self.button.clicked.connect(self.buttonCallback)
         self.exitButton.clicked.connect(self.exit)
+        return
 
     def exit(self):
         sys.exit(App.exec())
+        return
 
     def setWinnerStyle(self):
         self.button.setText("Winner!")
         self.button.setStyleSheet("background-color: yellow")
         self.button.setEnabled(False)
         self.button.repaint()
+        return
 
     def setButtonText(self, text):
         if text == "Game Over":
@@ -134,62 +173,47 @@ class GameWindow(QMainWindow):
             self.button.setText(text)
             self.button.setStyleSheet("")
             self.button.repaint()
+        return
 
-    def getButton(self):
-        return self.button
-
-def buttonCallback(self):
+def buttonCallback():
     global currIdx
+    global guiobj
+    global nums
+    global winNum
     globalDataLock.acquire()
+
     if len(nums) > 0:
-        restartFlag.lock()
-        if restartFlag.get_int() == 1:
-            print('Updating GUI for game RESTART')
-            restartFlag.set_int(0)
-            #unlock flag here?
-            currIdx = 0
-            guiobj.setButtonText(str(nums[currIdx]))
+        # If we won
+        if (currIdx != -1) & (nums[currIdx] == winNum):
+            guiobj.setWinnerStyle()
+            print("Won, we're sleeping!")
+            time.sleep(5)
+            print("Waking up!")
+
         else:
             currIdx = currIdx + 1
-            if currIdx > len(nums):
+            guiobj.setButtonText(str(nums[currIdx]))
+
+            if currIdx >= len(nums):
                 guiobj.setButttonText("Game Over")
-                restartFlag.set_int(1)
-                #unlock flag here?
-            elif currIdx -1 > -1 and nums[currIdx -1]== winNum:
-                guiobj.setWinnerStyle()
-                print("Won, we're sleeping!")
-                time.sleep(5)
-                print("Waking up!")
-                #worker message??
-            else:
-                if currIdx >= len(nums):
-                    guiobj.setButtonText("Game Over")
-                    restartFlag.set_int(1)
-                else:
-                    guiobj.setButtonText(str(nums[currIdx]))
-        restartFlag.unlock()
+
     globalDataLock.release()
     return
-
-
-
-def setButton(self,button):
-    self.button = button
 
 def setupGUI():
     # Setup the GUI object and return it
     App = QApplication(sys.argv)
-    window = GameWindow(buttonCallback,setButton)
-    guiobj = window #returns the window
-    return guiobj
-
-
+    window = GameWindow(buttonCallback)
+    guiobjToRet = window #returns the window
+    return guiobjToRet
 
 def main():
     global conn
     global nums
     global winNum
     global globalDataLock
+    global restartFlag
+    global guiobj
     
     print('Starting worker!')
     print('Establishing Connection...')
@@ -209,16 +233,17 @@ def main():
     print('Sender + Receiver Threads Started')
     print('Setting up GUI...')
 
-
     guiobj = setupGUI()
 
     print('GUI set up')
 
     # Now we loop waiting for a restart game signal
     while True:
-        restartGameLock.acquire()
-
-        restartGameLock.release()
+        restartFlag.lock()
+        if restartFlag.get_int() == 1:
+            guiobj.setButtonText('RESTARTINGGGGG!')
+            restartFlag.set_int(0)
+        restartFlag.unlock()
 
     print('Worker done')
     return
