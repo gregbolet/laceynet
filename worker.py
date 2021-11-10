@@ -168,7 +168,7 @@ class GameWindow(QMainWindow):
         self.button.setText("Winner!")
         self.button.setStyleSheet("background-color: yellow")
         self.button.setEnabled(False)
-        self.button.repaint()
+        #self.button.repaint()
         return
 
     def setButtonText(self, text):
@@ -177,7 +177,7 @@ class GameWindow(QMainWindow):
         else:
             self.button.setText(text)
             self.button.setStyleSheet("")
-            self.button.repaint()
+            #self.button.repaint()
         return
 
 def buttonCallback():
@@ -197,10 +197,12 @@ def buttonCallback():
 
         else:
             currIdx = currIdx + 1
-            guiobj.setButtonText(str(nums[currIdx]))
 
             if currIdx >= len(nums):
                 guiobj.setButttonText("Game Over")
+            else:
+                guiobj.setButtonText(str(nums[currIdx]))
+
 
     globalDataLock.release()
     return
