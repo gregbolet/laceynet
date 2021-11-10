@@ -201,7 +201,8 @@ def setup_gui():
 
     App = QApplication(sys.argv)
     guiobj = GameWindow(button_callback)
-    App.exec()
+    # App.exec()
+    sys.exit(App.exec())
 
 
 def main():
