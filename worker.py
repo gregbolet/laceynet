@@ -21,6 +21,14 @@ class SenderThread:
         print('Sent registration request!')
         return
 
+    def __sendHeartbeat(self):
+        global conn
+        beat = WorkerMsg(WorkerMsg.HEARTBEAT)
+        send_msg(conn, beat)
+        self.lastHeartbeat = get_cts()
+        print('Sent heartbeat!')
+        return
+
     # This is what the threading.Thread.start will call 
     def __call__(self, *args, **kwargs):
         global conn
