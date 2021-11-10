@@ -95,16 +95,19 @@ class laceyPlayer:
                 self.restartGame = False     
                 self.currGuessIndex = 0
                 button.setEnabled(True)
+                button.setFont(QFont('Times', 150))
                 button.setText(str(self.myNumbers[self.currGuessIndex]))
                 button.setStyleSheet("")
                 button.repaint()
             else:
                 self.currGuessIndex = self.currGuessIndex +1
                 if self.currGuessIndex > len(self.myNumbers):
+                    self.button.setFont(QFont('Times', 45))
                     button.setText("Game Over")
                     button.setStyleSheet("background-color : red")
                     self.restartGame = True
                 elif self.currGuessIndex -1 > -1 and self.myNumbers[self.currGuessIndex -1] == self.winningNum:
+                    button.setFont(QFont('Times', 45))
                     button.setText("Winner!")
                     button.setStyleSheet("background-color : yellow")
                     button.setEnabled(False)
@@ -120,9 +123,11 @@ class laceyPlayer:
                 else:
                     if self.currGuessIndex >= len(self.myNumbers):
                         button.setStyleSheet("background-color : red")
+                        button.setFont(QFont('Times', 45))
                         button.setText("Game Over")
                         self.restartGame = True
                     else:   
+                        button.setFont(QFont('Times', 150))
                         button.setText(str(self.myNumbers[self.currGuessIndex]))
         return
 
@@ -160,8 +165,8 @@ class GameWindow(QMainWindow):
         #print(self.width(),self.height())
 
     def setUIGeometries(self):
-        buttonWidth = 1000
-        buttonHeight = 1000
+        buttonWidth = 1250
+        buttonHeight = 1750
         self.button.setGeometry(self.width()//2-buttonWidth//2,self.height()//2-buttonHeight//2,buttonWidth,buttonHeight)
         self.exitButton.setGeometry(100,100, 250,250)
 
