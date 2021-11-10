@@ -7,7 +7,7 @@ import time
 from threading import Lock
 
 # Maximum message buffer size
-MSG_BUFF_SIZE = 4096
+MSG_BUFF_SIZE = 1024
 
 # The server's hostname -- resovled later via DNS
 HOST = 'controller.laceynet'

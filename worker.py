@@ -104,9 +104,9 @@ class RecvThread:
 
             elif resp.response is ControllerMsg.GAME_RESTART:
                 print('Restarting game...')
-                #globalDataLock.acquire()
-                #restartFlag.lock()
-                #iWonFlag.lock()
+                globalDataLock.acquire()
+                restartFlag.lock()
+                iWonFlag.lock()
                 restartFlag.set_int(1)
                 iWonFlag.set_int(0)
 
@@ -117,9 +117,9 @@ class RecvThread:
                 print('Got new restart data: numbers', nums)
                 print('Got new restart data: winNum ', winNum)
 
-                #globalDataLock.release()
-                #restartFlag.unlock()
-                #iWonFlag.unlock()
+                globalDataLock.release()
+                restartFlag.unlock()
+                iWonFlag.unlock()
 
         return
 
