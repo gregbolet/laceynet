@@ -133,14 +133,12 @@ class GameWindow(QMainWindow):
         print('set geometries!')
 
     def setUIGeometries(self):
-        print('1!!!!')
         button_width = 1000
         button_height = 1000
         self.button.setGeometry(self.width()//2-button_width//2, self.height()//2-button_height//2, button_width, button_height)
         self.exitButton.setGeometry(100,100,250,250)
 
     def UIComponents(self):
-        print('2!!!!')
         self.button = QPushButton("Connecting...",self)
         self.exitButton = QPushButton("EXIT", self)
         self.button.setFont(QFont('Times', 45))
@@ -165,7 +163,7 @@ class GameWindow(QMainWindow):
         else:
             self.button.setText(text)
             self.button.setStyleSheet("")
-            #self.button.repaint()
+            self.button.repaint()
 
 
 def button_callback():
