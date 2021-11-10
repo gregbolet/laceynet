@@ -10,7 +10,8 @@ import time
 MSG_BUFF_SIZE = 4096
 
 # The server's hostname -- resovled later via DNS
-HOST = 'controller.laceynet'
+# HOST = 'controller.laceynet'
+HOST = '127.0.0.1'
 
 # Port to communicate on
 PORT = 65432
