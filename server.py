@@ -59,7 +59,6 @@ class ConnectionThread:
                 elif workermsg.request == WorkerMsg.REGISTER:
                     print('Registration request from:', alias)
                     game.add_new_player(alias)
-                    print("jere")
                     restart_all_workers()
 
                 # handles if a worker won the game
@@ -78,7 +77,7 @@ class ConnectionThread:
         print("Forked connection thread")
         self.__handle_worker_conn()
         while True:
-            1 == 1
+            continue
 
 
 def main():
