@@ -1,5 +1,9 @@
 from config import *
 from threading import Lock, Thread
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
+import sys, random
 
 
 conn = None
@@ -82,12 +86,64 @@ class RecvThread:
 
         return
 
-def setupGUI():
+class GameWindow(QMainWindow):
+    def __init__(self,callback,setFun):
+        super().__init_()
+        self.player = callback
+        self.setWindowTitle("Blockchain")
+        self.UIComponents(self.player)
+        setFun(self.button)
+        self.showFullScreen()
+        self.setUIGeometries()
+
+    def setUIGeometries(self):
+        buttonWidth = 1000
+        buttonHeight = 1000
+        self.button.setGeometry(self.width()//2-buttonWidth//2, self.height()//2-buttonHeight//2,buttonWidth,buttonHeight)
+
+    def UIComponents(self):
+        self.button = QPushButton("Connecting...",self)
+        self.exitButton = QPushButton("EXIT", self)
+        self.button.setFont(QFont('Times', 45))
+        self.button.clicked.connect(self.player)
+        self.exitButton.clicked.connect(self.exit)
+
+    def exit(self):
+        sys.exit(App.exec())
+
+    def setWinnerStyle(self):
+        self.button.setText("Winner!")
+        self.button.setStyleSheet("background-color: yellow")
+        self.button.setEnabled(False)
+        self.button.repaint()
+
+    def setButtonText(self, text):
+        self.button.setText(text)
+
+    def getButton(self):
+        return self.button
+
+def buttonCallback(self):
+    print('callback')
+    globalDataLock.acquire()
+    if len(nums) > 0:
+        if self.restart
+
+
+
+def setButton(self,button):
+    self.button = button
+
+def setupGUI(self):
     # Setup the GUI object and return it
-    guiobj = None
+    App = QApplication(sys.argv)
+    window = GameWindow(buttonCallback,setButton)
+    guiobj = window #returns the window
     return guiobj
 
-def main():
+
+
+def main(self):
     global conn
     global nums
     global winNum
@@ -111,7 +167,8 @@ def main():
     print('Sender + Receiver Threads Started')
     print('Setting up GUI...')
 
-    setupGUI()
+
+    self.guiobj = setupGUI()
 
     print('GUI set up')
 
