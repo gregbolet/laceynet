@@ -161,8 +161,7 @@ class GameWindow(QMainWindow):
         return
 
     def exit(self):
-        global App
-        sys.exit(App.exec())
+        sys.exit(0)
         return
 
     def setWinnerStyle(self):
@@ -208,9 +207,10 @@ def buttonCallback():
 
 def setupGUI():
     global App
+    global guiobj
     App = QApplication(sys.argv)
     guiobj = GameWindow(buttonCallback)
-    sys.exit(App.exec())
+    App.exec()
 
 def main():
     global conn
