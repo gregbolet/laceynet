@@ -134,18 +134,22 @@ class RecvThread:
 
 class GameWindow(QMainWindow):
     def __init__(self,callback):
-        super().__init__(None)
+        super().__init__()
         self.buttonCallback = callback
         self.setWindowTitle("Blockchain")
         self.UIComponents()
+        print('Setup UI components!')
         self.showFullScreen()
+        print('made fullscreen!')
         self.setUIGeometries()
+        print('set geometries!')
         return
 
     def setUIGeometries(self):
         buttonWidth = 1000
         buttonHeight = 1000
         self.button.setGeometry(self.width()//2-buttonWidth//2, self.height()//2-buttonHeight//2,buttonWidth,buttonHeight)
+        self.exitButton.setGeometry(100,100,250,250)
         return
 
     def UIComponents(self):
@@ -204,11 +208,9 @@ def buttonCallback():
 
 def setupGUI():
     global App
-    # Setup the GUI object and return it
     App = QApplication(sys.argv)
-    window = GameWindow(buttonCallback)
-    guiobjToRet = window #returns the window
-    return guiobjToRet
+    guiobj = GameWindow(buttonCallback)
+    sys.exit(App.exec())
 
 def main():
     global conn
@@ -236,7 +238,9 @@ def main():
     print('Sender + Receiver Threads Started')
     print('Setting up GUI...')
 
-    guiobj = setupGUI()
+    # Setup the GUI object and return it
+    guithread = Thread(target=setupGUI)
+    guithread.start()
 
     print('GUI set up')
 
@@ -247,6 +251,8 @@ def main():
             guiobj.setButtonText('RESTARTINGGGGG!')
             restartFlag.set_int(0)
         restartFlag.unlock()
+
+    time.sleep(5)
 
     print('Worker done')
     return
