@@ -86,6 +86,7 @@ class RecvThread:
         #global isRegFlag
         global iWonFlag
         global currIdx
+        global restartFlag
         print("Forked recv thread")
 
         # Handle restart/continue requests
@@ -100,12 +101,6 @@ class RecvThread:
 
             if resp.response is ControllerMsg.CONTINUE:
                 print('Continuing game...')
-
-            #elif resp.response is ControllerMsg.REGIST_SUCC:
-                #print('Registration succesfull...')
-                #isRegFlag.lock()
-                #isRegFlag.set_int(1)
-                #isRegFlag.unlock()
 
             elif resp.response is ControllerMsg.GAME_RESTART:
                 print('Restarting game...')
@@ -217,9 +212,6 @@ def setupGUI():
 
 def main():
     global conn
-    global nums
-    global winNum
-    global globalDataLock
     global restartFlag
     global guiobj
     
