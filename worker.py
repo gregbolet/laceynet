@@ -10,27 +10,19 @@ nums = []
 winNum = -1
 currIdx = -1
 restartFlag = AtomicInt(0)
+iWonFlag = AtomicInt(0)
 #isRegFlag = AtomicInt(0)
 globalDataLock = Lock()
 guiobj = None
 App = None
 
 def checkIfWon():
-    global nums
-    global winNum
-    global currIdx
-    global globalDataLock
-    globalDataLock.acquire()
-
-    if currIdx == -1:
-        globalDataLock.release()
-        return False
-
-    elif nums[currIdx] == winNum:
-        globalDataLock.release()
+    global iWonFlag
+    iWonFlag.lock()
+    if iWonFlag.get_int() == 1:
+        iWonFlag.unlock()
         return True
-
-    globalDataLock.release()
+    iWonFlag.unlock()
     return False
 
 class SenderThread:
@@ -92,6 +84,7 @@ class RecvThread:
         global winNum
         global globalDataLock
         #global isRegFlag
+        global iWonFlag
         global currIdx
         print("Forked recv thread")
 
@@ -118,7 +111,9 @@ class RecvThread:
                 print('Restarting game...')
                 globalDataLock.acquire()
                 restartFlag.lock()
+                iWonFlag.lock()
                 restartFlag.set_int(1)
+                iWonFlag.set_int(0)
 
                 nums = resp.numbers_to_guess
                 winNum = resp.winning_num
@@ -129,6 +124,7 @@ class RecvThread:
 
                 globalDataLock.release()
                 restartFlag.unlock()
+                iWonFlag.unlock()
 
         return
 
@@ -185,15 +181,16 @@ def buttonCallback():
     global guiobj
     global nums
     global winNum
+    global iWonFlag
     globalDataLock.acquire()
 
     if len(nums) > 0:
         # If we won
         if (currIdx != -1) & (nums[currIdx] == winNum):
             guiobj.setWinnerStyle()
-            print("Won, we're sleeping!")
-            time.sleep(5)
-            print("Waking up!")
+            iWonFlag.lock()
+            iWonFlag.set_int(1)
+            iWonFlag.unlock()
 
         else:
             currIdx = currIdx + 1
