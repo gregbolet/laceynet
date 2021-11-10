@@ -11,17 +11,18 @@ def restart_all_workers():
     global conn_lock
 
     game.restart_game()
-    conn_lock.acquire()
     for alias in conn_list:
 
+        conn_lock.acquire()
         conn = conn_list[alias]
+        conn_lock.release()
+
         msg = ControllerMsg(ControllerMsg.GAME_RESTART)
         msg.numbers_to_guess = game.get_guesses_for_alias(alias)
         msg.winning_num = game.get_win_guess()
         send_msg(conn, msg)
         print('Restarted:', alias)
 
-    conn_lock.release()
 
 class ConnectionThread:
     def __init__(self):
