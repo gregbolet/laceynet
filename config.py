@@ -14,8 +14,8 @@ HOST = 'controller.laceynet'
 # HOST = '127.0.0.1'
 
 # Port to communicate on
-# PORT = 65432
-PORT = 5000
+PORT = 65432
+# PORT = 5000
 
 # The maximum number of connections allowed until
 # the server starts rejecting requests

@@ -16,44 +16,42 @@ globalDataLock = Lock()
 guiobj = None
 App = None
 
-def checkIfWon():
-    global iWonFlag
-    iWonFlag.lock()
-    if iWonFlag.get_int() == 1:
-        iWonFlag.unlock()
-        return True
-    iWonFlag.unlock()
-    return False
-
 class SenderThread:
     def __init__(self):
         print('Init sender thread!')
-        self.lastHeartbeat = None
-        return
+        self.last_heartbeat = None
 
     def __register_worker(self):
         global conn
-        regReq = WorkerMsg(WorkerMsg.REGISTER)
-        send_msg(conn, regReq)
-        print('Sent registration request!')
-        return
 
-    def __sendHeartbeat(self):
+        reg_req = WorkerMsg(WorkerMsg.REGISTER)
+        send_msg(conn, reg_req)
+        print('Sent registration request!')
+
+    def __send_heartbeat(self):
         global conn
+
         beat = WorkerMsg(WorkerMsg.HEARTBEAT)
         send_msg(conn, beat)
-        self.lastHeartbeat = get_cts()
+        self.last_heartbeat = get_cts()
         print('Sent heartbeat!')
-        return
 
-    def doHeartbeat(self):
+    def __check_if_won(self):
+        global iWonFlag
+        
+        iWonFlag.lock()
+        if iWonFlag.get_int() == 1:
+            iWonFlag.unlock()
+            return True
+        iWonFlag.unlock()
+        return False
+
+    def do_heartbeat(self):
         # Check if we need to send a heartbeat
-        shouldSendBeat = (self.lastHeartbeat == None) or (get_ts_diff(get_cts(), self.lastHeartbeat) > HEARTBEAT_INTERVAL)
+        should_send_beat = (self.last_heartbeat == None) or (get_ts_diff(get_cts(), self.last_heartbeat) > HEARTBEAT_INTERVAL)
 
-        if shouldSendBeat:
-            self.__sendHeartbeat()
-
-        return
+        if should_send_beat:
+            self.__send_heartbeat()
 
     # This is what the threading.Thread.start will call 
     def __call__(self, *args, **kwargs):
@@ -64,18 +62,16 @@ class SenderThread:
         self.__register_worker()
 
         while True:
-            self.doHeartbeat()
+            self.do_heartbeat()
 
-            if checkIfWon():
+            if self.__check_if_won():
                 winnermsg = WorkerMsg(WorkerMsg.IWON)
                 send_msg(conn, winnermsg)
 
-        return
 
 class RecvThread:
     def __init__(self):
         print('Init receiving thread!')
-        return
 
     # This is what the threading.Thread.start will call 
     def __call__(self, *args, **kwargs):
@@ -99,11 +95,13 @@ class RecvThread:
             resp = pickle.loads(conf)
             print('Unpickled response object!')
 
+            # if received a continue message from server
             if resp.response is ControllerMsg.CONTINUE:
                 print('Continuing game...')
 
             elif resp.response is ControllerMsg.GAME_RESTART:
                 print('Restarting game...')
+
                 globalDataLock.acquire()
                 restartFlag.lock()
                 iWonFlag.lock()
@@ -117,16 +115,15 @@ class RecvThread:
                 print('Got new restart data: numbers', nums)
                 print('Got new restart data: winNum ', winNum)
 
-                globalDataLock.release()
-                restartFlag.unlock()
                 iWonFlag.unlock()
+                restartFlag.unlock()
+                globalDataLock.release()
 
-        return
 
 class GameWindow(QMainWindow):
-    def __init__(self,callback):
+    def __init__(self, callback):
         super().__init__()
-        self.buttonCallback = callback
+        self.button_callback = callback
         self.setWindowTitle("Blockchain")
         self.UIComponents()
         print('Setup UI components!')
@@ -134,37 +131,31 @@ class GameWindow(QMainWindow):
         print('made fullscreen!')
         self.setUIGeometries()
         print('set geometries!')
-        return
 
     def setUIGeometries(self):
-        buttonWidth = 1000
-        buttonHeight = 1000
-        self.button.setGeometry(self.width()//2-buttonWidth//2, self.height()//2-buttonHeight//2,buttonWidth,buttonHeight)
+        button_width = 1000
+        button_height = 1000
+        self.button.setGeometry(self.width()//2-button_width//2, self.height()//2-button_height//2, button_width, button_height)
         self.exitButton.setGeometry(100,100,250,250)
-        return
 
     def UIComponents(self):
         self.button = QPushButton("Connecting...",self)
         self.exitButton = QPushButton("EXIT", self)
         self.button.setFont(QFont('Times', 45))
-        self.button.clicked.connect(self.buttonCallback)
+        self.button.clicked.connect(self.button_callback)
         self.exitButton.clicked.connect(self.exit)
-        return
 
     def exit(self):
         sys.exit(0)
-        return
 
     def setWinnerStyle(self):
         self.button.setText("Winner!")
         self.button.setStyleSheet("background-color: yellow")
         self.button.setEnabled(False)
         #self.button.repaint()
-        return
 
     def enableButton(self):
         self.button.setEnabled(True)
-        return
 
     def setButtonText(self, text):
         if text == "Game Over":
@@ -173,20 +164,22 @@ class GameWindow(QMainWindow):
             self.button.setText(text)
             self.button.setStyleSheet("")
             #self.button.repaint()
-        return
 
-def buttonCallback():
+
+def button_callback():
     global currIdx
     global guiobj
     global nums
     global winNum
     global iWonFlag
+
     globalDataLock.acquire()
 
     if len(nums) > 0:
         # If we won
         if (currIdx != -1) & (nums[currIdx] == winNum):
             guiobj.setWinnerStyle()
+
             iWonFlag.lock()
             iWonFlag.set_int(1)
             iWonFlag.unlock()
@@ -199,16 +192,17 @@ def buttonCallback():
             else:
                 guiobj.setButtonText(str(nums[currIdx]))
 
-
     globalDataLock.release()
-    return
 
-def setupGUI():
+
+def setup_gui():
     global App
     global guiobj
+
     App = QApplication(sys.argv)
-    guiobj = GameWindow(buttonCallback)
+    guiobj = GameWindow(button_callback)
     App.exec()
+
 
 def main():
     global conn
@@ -223,19 +217,19 @@ def main():
 
     print('Connection READY!')
 
-    recvThread   = Thread(target = RecvThread())
-    senderThread = Thread(target = SenderThread())
+    recv_thread   = Thread(target = RecvThread())
+    sender_thread = Thread(target = SenderThread())
 
     # Tell the threads to start running
-    senderThread.start()
-    recvThread.start()
+    sender_thread.start()
+    recv_thread.start()
 
     print('Sender + Receiver Threads Started')
     print('Setting up GUI...')
 
     # Setup the GUI object and return it
-    guithread = Thread(target=setupGUI)
-    guithread.start()
+    gui_thread = Thread(target=setup_gui)
+    gui_thread.start()
 
     print('GUI set up')
 
