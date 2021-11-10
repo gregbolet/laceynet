@@ -6,17 +6,29 @@ from _thread import *
 from guessingGame import guessingGame
 from threading import Lock
 
+list1 = [10, 3, 7, 8, 2]
+list2 = [1,5,0,7,3]
+list3 = [4,6,3,1,5]
+defaultWinNum = 3
+defaultLists = [list1, list2, list3]
+
 def restartAllWorkers():
     global connList
     global game
+    global defaultLists
+    global defaultWinNum
     game.restartGame()
+    currentList = 0
     for alias in connList:
         conn = connList[alias]
         msg = ControllerMsg(ControllerMsg.GAME_RESTART)
-        msg.numbersToGuess = game.getGuessesForAlias(alias)
-        msg.winningNum = game.getWinGuess()
+        msg.winningNum = defaultWinNum
+        msg.numbersToGuess = defaultLists[currentList]
+        #msg.numbersToGuess = game.getGuessesForAlias(alias)
+        #msg.winningNum = game.getWinGuess()
         sendMsg(conn, msg)
         print('Restarted:', alias)
+        currentList = currentList + 1
     return
 
 # thread function to handle worker connection
