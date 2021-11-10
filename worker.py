@@ -13,6 +13,7 @@ restartFlag = AtomicInt(0)
 #isRegFlag = AtomicInt(0)
 globalDataLock = Lock()
 guiobj = None
+App = None
 
 def checkIfWon():
     global nums
@@ -133,7 +134,7 @@ class RecvThread:
 
 class GameWindow(QMainWindow):
     def __init__(self,callback):
-        super().__init_()
+        super().__init__(None)
         self.buttonCallback = callback
         self.setWindowTitle("Blockchain")
         self.UIComponents()
@@ -156,6 +157,7 @@ class GameWindow(QMainWindow):
         return
 
     def exit(self):
+        global App
         sys.exit(App.exec())
         return
 
@@ -201,6 +203,7 @@ def buttonCallback():
     return
 
 def setupGUI():
+    global App
     # Setup the GUI object and return it
     App = QApplication(sys.argv)
     window = GameWindow(buttonCallback)
