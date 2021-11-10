@@ -167,6 +167,10 @@ class GameWindow(QMainWindow):
         #self.button.repaint()
         return
 
+    def enableButton(self):
+        self.button.setEnabled(True)
+        return
+
     def setButtonText(self, text):
         if text == "Game Over":
             self.button.setStyleSheet("background-color : red")
@@ -248,6 +252,7 @@ def main():
         restartFlag.lock()
         if restartFlag.get_int() == 1:
             guiobj.setButtonText('RESTARTINGGGGG!')
+            guiobj.enableButton()
             restartFlag.set_int(0)
         restartFlag.unlock()
 
