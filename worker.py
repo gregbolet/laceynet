@@ -9,9 +9,11 @@ import sys, random
 conn = None
 nums = []
 winNum = -1
+currIdx = -1
 restartFlag = AtomicInt(0)
 isRegFlag = AtomicInt(0)
 globalDataLock = Lock()
+guiobj = None
 
 class SenderThread:
     def __init__(self):
@@ -118,23 +120,55 @@ class GameWindow(QMainWindow):
         self.button.repaint()
 
     def setButtonText(self, text):
-        self.button.setText(text)
+        if text == "Game Over":
+            self.button.setStyleSheet("background-color : red")
+        else:
+            self.button.setText(text)
+            self.button.setStyleSheet("")
+            self.button.repaint()
 
     def getButton(self):
         return self.button
 
 def buttonCallback(self):
-    print('callback')
+    global currIdx
     globalDataLock.acquire()
     if len(nums) > 0:
-        if self.restart
+        restartFlag.lock()
+        if restartFlag.get_int() == 1:
+            print('Updating GUI for game RESTART')
+            restartFlag.set_int(0)
+            #unlock flag here?
+            currIdx = 0
+            guiobj.setButtonText(str(nums[currIdx]))
+        else:
+            currIdx = currIdx + 1
+            if currIdx > len(nums):
+                guiobj.setButttonText("Game Over")
+                restartFlag.set_int(1)
+                #unlock flag here?
+            elif currIdx -1 > -1 and nums[currIdx -1]== winNum:
+                guiobj.setWinnerStyle()
+                print("Won, we're sleeping!")
+                time.sleep(5)
+                print("Waking up!")
+                #worker message??
+            else:
+                if currIdx >= len(nums):
+                    guiobj.setButtonText("Game Over")
+                    restartFlag.set_int(1)
+                else:
+                    guiobj.setButtonText(str(nums[currIdx]))
+        restartFlag.unlock()
+    globalDataLock.release()
+    return
 
 
 
 def setButton(self,button):
     self.button = button
 
-def setupGUI(self):
+def setupGUI():
     # Setup the GUI object and return it
     App = QApplication(sys.argv)
     window = GameWindow(buttonCallback,setButton)
@@ -143,7 +177,7 @@ def setupGUI(self):
 
 
 
-def main(self):
+def main():
     global conn
     global nums
     global winNum
@@ -168,7 +202,7 @@ def main(self):
     print('Setting up GUI...')
 
 
-    self.guiobj = setupGUI()
+    guiobj = setupGUI()
 
     print('GUI set up')
 
