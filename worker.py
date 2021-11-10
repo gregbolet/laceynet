@@ -1,13 +1,19 @@
 from config import *
 from threading import Lock, Thread
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
+import sys, random
 
 
 conn = None
 nums = []
 winNum = -1
+currIdx = -1
 restartFlag = AtomicInt(0)
 isRegFlag = AtomicInt(0)
 globalDataLock = Lock()
+guiobj = None
 
 class SenderThread:
     def __init__(self):
@@ -90,10 +96,94 @@ class RecvThread:
 
         return
 
+class GameWindow(QMainWindow):
+    def __init__(self,callback,setFun):
+        super().__init_()
+        self.player = callback
+        self.setWindowTitle("Blockchain")
+        self.UIComponents(self.player)
+        setFun(self.button)
+        self.showFullScreen()
+        self.setUIGeometries()
+
+    def setUIGeometries(self):
+        buttonWidth = 1000
+        buttonHeight = 1000
+        self.button.setGeometry(self.width()//2-buttonWidth//2, self.height()//2-buttonHeight//2,buttonWidth,buttonHeight)
+
+    def UIComponents(self):
+        self.button = QPushButton("Connecting...",self)
+        self.exitButton = QPushButton("EXIT", self)
+        self.button.setFont(QFont('Times', 45))
+        self.button.clicked.connect(self.player)
+        self.exitButton.clicked.connect(self.exit)
+
+    def exit(self):
+        sys.exit(App.exec())
+
+    def setWinnerStyle(self):
+        self.button.setText("Winner!")
+        self.button.setStyleSheet("background-color: yellow")
+        self.button.setEnabled(False)
+        self.button.repaint()
+
+    def setButtonText(self, text):
+        if text == "Game Over":
+            self.button.setStyleSheet("background-color : red")
+        else:
+            self.button.setText(text)
+            self.button.setStyleSheet("")
+            self.button.repaint()
+
+    def getButton(self):
+        return self.button
+
+def buttonCallback(self):
+    global currIdx
+    globalDataLock.acquire()
+    if len(nums) > 0:
+        restartFlag.lock()
+        if restartFlag.get_int() == 1:
+            print('Updating GUI for game RESTART')
+            restartFlag.set_int(0)
+            #unlock flag here?
+            currIdx = 0
+            guiobj.setButtonText(str(nums[currIdx]))
+        else:
+            currIdx = currIdx + 1
+            if currIdx > len(nums):
+                guiobj.setButttonText("Game Over")
+                restartFlag.set_int(1)
+                #unlock flag here?
+            elif currIdx -1 > -1 and nums[currIdx -1]== winNum:
+                guiobj.setWinnerStyle()
+                print("Won, we're sleeping!")
+                time.sleep(5)
+                print("Waking up!")
+                #worker message??
+            else:
+                if currIdx >= len(nums):
+                    guiobj.setButtonText("Game Over")
+                    restartFlag.set_int(1)
+                else:
+                    guiobj.setButtonText(str(nums[currIdx]))
+        restartFlag.unlock()
+    globalDataLock.release()
+    return
+
+
+
+def setButton(self,button):
+    self.button = button
+
 def setupGUI():
     # Setup the GUI object and return it
-    guiobj = None
+    App = QApplication(sys.argv)
+    window = GameWindow(buttonCallback,setButton)
+    guiobj = window #returns the window
     return guiobj
+
+
 
 def main():
     global conn
@@ -119,7 +209,8 @@ def main():
     print('Sender + Receiver Threads Started')
     print('Setting up GUI...')
 
-    setupGUI()
+
+    guiobj = setupGUI()
 
     print('GUI set up')
 
