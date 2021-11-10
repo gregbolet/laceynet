@@ -1,6 +1,7 @@
 #!/usr/bin/env -S PYTHONPATH=../common python3
 
 from sys import platform
+import sys
 from lacey import *
 from _thread import *
 from guessingGame import guessingGame
@@ -22,7 +23,7 @@ def restartAllWorkers():
     for alias in connList:
         conn = connList[alias]
         msg = ControllerMsg(ControllerMsg.GAME_RESTART)
-        msg.winningNum = defaultWinNum
+        msg.winningNum = int(str(sys.argv[1]))
         msg.numbersToGuess = defaultLists[currentList]
         #msg.numbersToGuess = game.getGuessesForAlias(alias)
         #msg.winningNum = game.getWinGuess()
