@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import sys, random
+import json
 
 conn = None
 nums = []
@@ -96,7 +97,8 @@ class RecvThread:
                 print("[error] timeout")
             else:
                 # return a ControllerMsg object
-                resp = pickle.loads(conf)
+                # resp = pickle.loads(conf)
+                resp = json.loads(conf.decoded())
                 print('Unpickled response object!')
 
                 # if received a continue message from server
