@@ -72,7 +72,7 @@ class GuessingGame:
         self.players[alias] = []
         self.lock.release()
 
-        self.__gen_player_guesses()
+       # self.__gen_player_guesses()
         print('Added player:', alias)
 
 
