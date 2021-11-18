@@ -3,6 +3,7 @@
 from config import *
 from guessingGame import GuessingGame
 from threading import Lock, Thread
+import json
 
 
 def restart_all_workers():
@@ -50,7 +51,8 @@ class ConnectionThread:
                 break
             else:
                 # Expecting a worker data packet
-                workermsg = pickle.loads(data)
+                # workermsg = pickle.loads(data)
+                workermsg = json.loads(data.decode())['data']
 
                 # if received a hearbeat message
                 if workermsg.request == WorkerMsg.HEARTBEAT:
