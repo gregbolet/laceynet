@@ -18,6 +18,7 @@ def restart_all_workers():
         conn_lock.release()
 
         msg = ControllerMsg(ControllerMsg.GAME_RESTART)
+        print("number Im sending: {}".format(game.get_guesses_for_alias(alias)))
         msg.numbers_to_guess = game.get_guesses_for_alias(alias)
         msg.winning_num = game.get_win_guess()
         send_msg(conn, msg)

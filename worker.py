@@ -87,37 +87,41 @@ class RecvThread:
 
         # Handle restart/continue requests
         while True:
+            # ready = select.select([])
             # Expecting a confirmation back
             conf = conn.recv(MSG_BUFF_SIZE)
             print('Got a server response!')
 
-            # return a ControllerMsg object
-            resp = pickle.loads(conf)
-            print('Unpickled response object!')
+            if not conf:
+                print("[error] timeout")
+            else:
+                # return a ControllerMsg object
+                resp = pickle.loads(conf)
+                print('Unpickled response object!')
 
-            # if received a continue message from server
-            if resp.response is ControllerMsg.CONTINUE:
-                print('Continuing game...')
+                # if received a continue message from server
+                if resp.response is ControllerMsg.CONTINUE:
+                    print('Continuing game...')
 
-            elif resp.response is ControllerMsg.GAME_RESTART:
-                print('Restarting game...')
+                elif resp.response is ControllerMsg.GAME_RESTART:
+                    print('Restarting game...')
 
-                globalDataLock.acquire()
-                restartFlag.lock()
-                iWonFlag.lock()
-                restartFlag.set_int(1)
-                iWonFlag.set_int(0)
+                    globalDataLock.acquire()
+                    restartFlag.lock()
+                    iWonFlag.lock()
+                    restartFlag.set_int(1)
+                    iWonFlag.set_int(0)
 
-                nums = resp.numbers_to_guess
-                winNum = resp.winning_num
-                # Start at one index behind
-                currIdx = -1
-                print('Got new restart data: numbers', nums)
-                print('Got new restart data: winNum ', winNum)
+                    nums = resp.numbers_to_guess
+                    winNum = resp.winning_num
+                    # Start at one index behind
+                    currIdx = -1
+                    print('Got new restart data: numbers', nums)
+                    print('Got new restart data: winNum ', winNum)
 
-                iWonFlag.unlock()
-                restartFlag.unlock()
-                globalDataLock.release()
+                    iWonFlag.unlock()
+                    restartFlag.unlock()
+                    globalDataLock.release()
 
 
 class GameWindow(QMainWindow):
@@ -214,6 +218,7 @@ def main():
     print('Establishing Connection...')
 
     conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    conn.settimeout(30)
     conn.connect((HOST, PORT))
 
     print('Connection READY!')
