@@ -39,7 +39,8 @@ def send_msg(s, obj):
     # Pickle the object to send over the network
     tosend = pickle.dumps(obj)
     # tosend = json.dumps({"data": obj})
-    s.send(tosend.encode()) 
+    # s.send(tosend.encode()) 
+    s.send(tosend)
 
 
 # Get the current timestamp
