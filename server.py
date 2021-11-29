@@ -51,8 +51,9 @@ class ConnectionThread:
                 break
             else:
                 # Expecting a worker data packet
-                # workermsg = pickle.loads(data)
-                workermsg = json.loads(data.decode())['data']
+                workermsg = pickle.loads(data)
+                print(workermsg)
+                # workermsg = json.loads(data.decode())['data']
 
                 # if received a hearbeat message
                 if workermsg.request == WorkerMsg.HEARTBEAT:

@@ -37,8 +37,8 @@ def get_alias_from_conn(conn):
 # Sends an object over the socket s
 def send_msg(s, obj):
     # Pickle the object to send over the network
-    # tosend = pickle.dumps(obj)
-    tosend = json.dumps({"data": obj})
+    tosend = pickle.dumps(obj)
+    # tosend = json.dumps({"data": obj})
     s.send(tosend.encode()) 
 
 

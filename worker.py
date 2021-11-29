@@ -97,8 +97,8 @@ class RecvThread:
                 print("[error] timeout")
             else:
                 # return a ControllerMsg object
-                # resp = pickle.loads(conf)
-                resp = json.loads(conf.decoded())
+                resp = pickle.loads(conf)
+                # resp = json.loads(conf.decoded())
                 print('Unpickled response object!')
 
                 # if received a continue message from server
