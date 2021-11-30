@@ -119,9 +119,6 @@ class RecvThread:
                     currIdx = -1
                     print('Got new restart data: numbers', nums)
                     print('Got new restart data: winNum ', winNum)
-                    # guiobj.exit()
-                    guiobj = GameWindow(button_callback)
-
 
                     iWonFlag.unlock()
                     restartFlag.unlock()
@@ -196,7 +193,7 @@ def button_callback():
             currIdx = currIdx + 1
 
             if currIdx >= len(nums):
-                guiobj.setButttonText("Game Over")
+                guiobj.setButtonText("Game Over")
             else:
                 guiobj.setButtonText(str(nums[currIdx]))
 
@@ -211,13 +208,6 @@ def setup_gui():
     guiobj = GameWindow(button_callback)
     # App.exec()
     sys.exit(App.exec())
-
-
-def restart_application():
-    global App
-    global guiobj
-
-    App.quit()
 
 
 def main():

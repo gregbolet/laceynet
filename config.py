@@ -91,7 +91,7 @@ class WorkerMsg:
         self.timestamp = get_cts() 
 
     def __str__(self):
-        message = "worker sent {}".format(self.request)
+        message = "worker sent {}".format(WorkerMsg(self.request))
         return message
 
 
@@ -114,7 +114,7 @@ class ControllerMsg:
         self.winning_num = -1
 
     def __str__(self):
-        message = "server is sending {} with numbers to guess as {}".format(self.response, self.numbers_to_guess)
+        message = "server is sending {} with numbers to guess as {}".format(ControllerMsg(self.response), self.numbers_to_guess)
         return message
 
 
