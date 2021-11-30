@@ -35,6 +35,7 @@ class GuessingGame:
         for player in self.players:
             self.lock.acquire()
             self.players[player] = []
+            print(f"player: {player}")
             self.lock.release()
         # self.lock.release()
 
