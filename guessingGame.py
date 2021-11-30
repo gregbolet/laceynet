@@ -32,7 +32,7 @@ class GuessingGame:
 
         # empty each player's list
         self.lock.acquire()
-        for player in self.players.items():
+        for player in self.players:
             # self.lock.acquire()
             self.players[player] = []
             # self.lock.release()
