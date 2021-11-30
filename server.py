@@ -15,6 +15,7 @@ def restart_all_workers():
     for alias in conn_list:
         conn_lock.acquire()
         player = conn_list[alias]
+        print("connlist: {}".format(player))
         conn_lock.release()
 
         msg = ControllerMsg(ControllerMsg.GAME_RESTART)
