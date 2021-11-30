@@ -114,7 +114,7 @@ class ControllerMsg:
         self.winning_num = -1
 
     def __str__(self):
-        message = "server is sending {} with numbers to guess as {}".format(self.response, self.numbers_to_guess)
+        message = "server is sending {} with numbers to guess as {} and winning number as {}".format(self.response, self.numbers_to_guess, self.winning_num)
         return message
 
 

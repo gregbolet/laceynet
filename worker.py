@@ -201,6 +201,7 @@ def button_callback():
             if currIdx >= len(nums):
                 guiobj.setButtonText("Game Over")
             else:
+                print("button callback! {}".format(nums))
                 guiobj.setButtonText(str(nums[currIdx]))
 
     globalDataLock.release()
