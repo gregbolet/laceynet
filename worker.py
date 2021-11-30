@@ -125,7 +125,7 @@ class RecvThread:
                     print('Got new restart data: numbers', nums)
                     print('Got new restart data: winNum ', winNum)
 
-                    guiobj = GameWindow(button_callback)
+                    restart_application()
 
                     iWonFlag.unlock()
                     restartFlag.unlock()
@@ -215,6 +215,13 @@ def setup_gui():
     guiobj = GameWindow(button_callback)
     # App.exec()
     sys.exit(App.exec())
+
+
+def restart_application():
+    global App
+    global guiobj
+
+    App.quit()
 
 
 def main():
