@@ -31,12 +31,12 @@ class GuessingGame:
     def __gen_player_guesses(self):
 
         # empty each player's list
-        self.lock.acquire()
+        # self.lock.acquire()
         for player in self.players:
-            # self.lock.acquire()
+            self.lock.acquire()
             self.players[player] = []
-            # self.lock.release()
-        self.lock.release()
+            self.lock.release()
+        # self.lock.release()
 
         # generate a list of maxGuess integers in random order
         # randIntList = np.random.choice(self.maxGuess, self.maxGuess)
