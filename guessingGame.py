@@ -105,6 +105,6 @@ class GuessingGame:
     def restart_game(self):
         self.lock.acquire()
         self.win_guess = np.random.randint(1, self.max_guess+1)
+        self.lock.release()
         self.__gen_player_guesses()
         print("The winning number is now: " + str(self.win_guess))
-        self.lock.release()
