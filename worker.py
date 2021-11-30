@@ -85,48 +85,51 @@ class RecvThread:
         global iWonFlag
         global currIdx
         global restartFlag
+        global guiobj
         print("Forked recv thread")
 
         # Handle restart/continue requests
         while True:
-            ready = select.select([conn], [], [], 0.5)
-            if ready[0]:
-                # Expecting a confirmation back
-                conf = conn.recv(MSG_BUFF_SIZE)
-                print('Got a server response!')
+            # ready = select.select([conn], [], [], 0.5)
+            # if ready[0]:
+            # Expecting a confirmation back
+            conf = conn.recv(MSG_BUFF_SIZE)
+            print('Got a server response!')
 
-                if not conf:
-                    print("[error] timeout")
-                    sys.exit(-1)
-                else:
-                    # return a ControllerMsg object
-                    resp = pickle.loads(conf)
-                    # resp = json.loads(conf.decoded())
-                    print('Unpickled response object!')
+            if not conf:
+                print("[error] timeout")
+                sys.exit(-1)
+            else:
+                # return a ControllerMsg object
+                resp = pickle.loads(conf)
+                # resp = json.loads(conf.decoded())
+                print('Unpickled response object!')
 
-                    # if received a continue message from server
-                    if resp.response is ControllerMsg.CONTINUE:
-                        print('Continuing game...')
+                # if received a continue message from server
+                if resp.response is ControllerMsg.CONTINUE:
+                    print('Continuing game...')
 
-                    elif resp.response is ControllerMsg.GAME_RESTART:
-                        print('Restarting game...')
+                elif resp.response is ControllerMsg.GAME_RESTART:
+                    print('Restarting game...')
 
-                        globalDataLock.acquire()
-                        restartFlag.lock()
-                        iWonFlag.lock()
-                        restartFlag.set_int(1)
-                        iWonFlag.set_int(0)
+                    globalDataLock.acquire()
+                    restartFlag.lock()
+                    iWonFlag.lock()
+                    restartFlag.set_int(1)
+                    iWonFlag.set_int(0)
 
-                        nums = resp.numbers_to_guess
-                        winNum = resp.winning_num
-                        # Start at one index behind
-                        currIdx = -1
-                        print('Got new restart data: numbers', nums)
-                        print('Got new restart data: winNum ', winNum)
+                    nums = resp.numbers_to_guess
+                    winNum = resp.winning_num
+                    # Start at one index behind
+                    currIdx = -1
+                    print('Got new restart data: numbers', nums)
+                    print('Got new restart data: winNum ', winNum)
 
-                        iWonFlag.unlock()
-                        restartFlag.unlock()
-                        globalDataLock.release()
+                    guiobj = GameWindow(button_callback)
+
+                    iWonFlag.unlock()
+                    restartFlag.unlock()
+                    globalDataLock.release()
 
 
 class GameWindow(QMainWindow):
