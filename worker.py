@@ -3,9 +3,7 @@ from threading import Lock, Thread
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-import sys, random
-import json
-import select
+import sys
 
 conn = None
 nums = []
@@ -20,7 +18,7 @@ App = None
 
 class SenderThread:
     def __init__(self):
-        print('Init sender thread!')
+        print('Init a sender thread!')
         self.last_heartbeat = None
 
     def __register_worker(self):
@@ -90,8 +88,6 @@ class RecvThread:
 
         # Handle restart/continue requests
         while True:
-            # ready = select.select([conn], [], [], 0.5)
-            # if ready[0]:
             # Expecting a confirmation back
             conf = conn.recv(MSG_BUFF_SIZE)
             print('Got a server response!')
@@ -102,7 +98,6 @@ class RecvThread:
             else:
                 # return a ControllerMsg object
                 resp = pickle.loads(conf)
-                # resp = json.loads(conf.decoded())
                 print('Unpickled response object!')
 
                 # if received a continue message from server
@@ -124,8 +119,9 @@ class RecvThread:
                     currIdx = -1
                     print('Got new restart data: numbers', nums)
                     print('Got new restart data: winNum ', winNum)
-
+                    # guiobj.exit()
                     guiobj = GameWindow(button_callback)
+
 
                     iWonFlag.unlock()
                     restartFlag.unlock()
@@ -239,7 +235,7 @@ def main():
     recv_thread.start()
 
     print('Sender + Receiver Threads Started')
-    print('Setting up GUI...')
+    print('Now moving onto GUI...')
 
     # Setup the GUI object and return it
     gui_thread = Thread(target=setup_gui)
@@ -251,7 +247,6 @@ def main():
     while True:
         restartFlag.lock()
         if restartFlag.get_int() == 1:
-            print("I'm here forever")
             guiobj.setButtonText('RESTARTINGGGGG!')
             guiobj.enableButton()
             restartFlag.set_int(0)

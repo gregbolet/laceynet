@@ -4,10 +4,13 @@ import numpy as np
 import random
 from threading import Lock
 
+
+MAX_GUESS = 100
+
 class GuessingGame:
 
     # Game constructor
-    def __init__(self, max_guess = 100):
+    def __init__(self, max_guess = MAX_GUESS):
         # Keep a list/mapping of all the players
         self.players = {}
         self.lock = Lock()
@@ -15,25 +18,28 @@ class GuessingGame:
         # This is an INCLUSIVE maxGuess value
         # (i.e: if maxGuess = 100, guesses are in [1,100])
         self.max_guess = max_guess
-        self.win_guess = np.random.randint(1, self.max_guess+1)
-        print('Winning number is: ', self.win_guess)
+        self.win_guess = np.random.randint(1, self.max_guess+1) # generate a random winning number
+        # print('Winning number is: ', self.win_guess)
     
 
+    # get the number of players in the game
     def get_num_players(self):
         return len(self.players.keys())
     
 
-    # Re-generate player guesses whenever a player is added
+    # Re-generate guesses for all players
     def __gen_player_guesses(self):
 
         # empty each player's list
-        for player in self.players:
-            self.lock.acquire()
+        self.lock.acquire()
+        for player in self.players.items():
+            # self.lock.acquire()
             self.players[player] = []
-            self.lock.release()
+            # self.lock.release()
+        self.lock.release()
 
         # generate a list of maxGuess integers in random order
-        #randIntList = np.random.choice(self.maxGuess, self.maxGuess)
+        # randIntList = np.random.choice(self.maxGuess, self.maxGuess)
         rand_int_list = np.array(random.sample(range(self.max_guess), self.max_guess))
 
         # Bump up all the values so min(randIntList) == 1
@@ -58,7 +64,6 @@ class GuessingGame:
 
             curr_player = (curr_player+1) % self.get_num_players()
 
-        print("maybe here?")
         for player in self.players:
             self.lock.acquire()
             print(player, ': ', self.players[player], sep='')
@@ -76,7 +81,7 @@ class GuessingGame:
         print('Added player:', alias)
 
 
-    # Drop player
+    # Drop a player
     def drop_player(self, alias):
         self.lock.acquire()
         del self.players[alias]
@@ -91,12 +96,15 @@ class GuessingGame:
         return res
 
 
+    # Get the winning number 
     def get_win_guess(self):
         return self.win_guess
 
 
     # Restart the game
     def restart_game(self):
+        self.lock.acquire()
         self.win_guess = np.random.randint(1, self.max_guess+1)
         self.__gen_player_guesses()
         print("The winning number is now: " + str(self.win_guess))
+        self.lock.release()

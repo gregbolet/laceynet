@@ -3,7 +3,6 @@
 from config import *
 from guessingGame import GuessingGame
 from threading import Lock, Thread
-import json
 import select
 
 
@@ -14,13 +13,12 @@ def restart_all_workers():
 
     game.restart_game()
     for alias in conn_list:
-
         conn_lock.acquire()
         player = conn_list[alias]
         conn_lock.release()
 
         msg = ControllerMsg(ControllerMsg.GAME_RESTART)
-        print("number Im sending: {}".format(game.get_guesses_for_alias(alias)))
+        print("number I'm sending: {}".format(game.get_guesses_for_alias(alias)))
         msg.numbers_to_guess = game.get_guesses_for_alias(alias)
         msg.winning_num = game.get_win_guess()
         send_msg(player, msg)
@@ -33,51 +31,50 @@ class ConnectionThread:
 
     # This is what the threading.Thread.start will call 
     def __call__(self, *args, **kwargs):
-        conn = args[0]
-        # print(conn)
-        print("Forked connection thread")
         global game
         global conn_list
         global conn_lock
 
+        conn = args[0]
+        print("Forked connection thread")
         last_time_heartbeat = get_cts()
 
         while True:
-            ready = select.select([conn], [], [], 0.5)
-            if ready[0]:
+            # ready = select.select([conn], [], [], 0.5)
+            # if ready[0]:
+
             # Blocking calls, max MSG_BUFF_SIZE bytes
-                data = conn.recv(MSG_BUFF_SIZE)
-                alias = get_alias_from_conn(conn)
+            # only ack if received anything 
+            data = conn.recv(MSG_BUFF_SIZE)
+            alias = get_alias_from_conn(conn)
 
-                if not data: # if there's no data being sent to server from client
-                    print('Connection to [', alias, '] closed...', sep='')
+            if not data: # if there's no data being sent to server from client
+                print('Connection to [', alias, '] closed...', sep='')
+                break
+            else:
+                # Expecting a worker data packet
+                workermsg = pickle.loads(data)
+
+                # if received a hearbeat message
+                if workermsg.request == WorkerMsg.HEARTBEAT:
+                    print('Heartbeat from:', alias)
+                    cntrl_msg = ControllerMsg(ControllerMsg.CONTINUE)
+                    last_time_heartbeat = get_cts()
+                    send_msg(conn, cntrl_msg) 
+
+                # handles when a worker registers (joined the game)
+                elif workermsg.request == WorkerMsg.REGISTER:
+                    print('Registration request from:', alias)
+                    game.add_new_player(alias)
+                    restart_all_workers()
+
+                # handles if a worker won the game
+                elif workermsg.request == WorkerMsg.IWON:
+                    print('We have a winner! -- Restarting game')
+                    restart_all_workers()
+
+                if get_ts_diff(get_cts(), last_time_heartbeat) > HEARTBEAT_TIMEOUT:
                     break
-                else:
-                    # Expecting a worker data packet
-                    workermsg = pickle.loads(data)
-                    # print(workermsg)
-                    # workermsg = json.loads(data.decode())['data']
-
-                    # if received a hearbeat message
-                    if workermsg.request == WorkerMsg.HEARTBEAT:
-                        print('Heartbeat from:', alias)
-                        cntrl_msg = ControllerMsg(ControllerMsg.CONTINUE)
-                        last_time_heartbeat = get_cts()
-                        send_msg(conn, cntrl_msg) 
-
-                    # handles when a worker registers (joined the game)
-                    elif workermsg.request == WorkerMsg.REGISTER:
-                        print('Registration request from:', alias)
-                        game.add_new_player(alias)
-                        restart_all_workers()
-
-                    # handles if a worker won the game
-                    elif workermsg.request == WorkerMsg.IWON:
-                        print('We have a winner! -- Restarting game')
-                        restart_all_workers()
-
-                    if get_ts_diff(get_cts(), last_time_heartbeat) > HEARTBEAT_TIMEOUT:
-                        break
 
         # close connection if no more data
         conn.close()

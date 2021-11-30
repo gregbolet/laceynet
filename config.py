@@ -2,7 +2,7 @@
 
 import datetime
 import socket
-import pickle, json
+import pickle
 import time
 from threading import Lock
 
@@ -39,8 +39,6 @@ def send_msg(s, obj):
     # Pickle the object to send over the network
     print("sending: {}".format(obj))
     tosend = pickle.dumps(obj)
-    # tosend = json.dumps({"data": obj})
-    # s.send(tosend.encode()) 
     s.send(tosend)
 
 
@@ -61,6 +59,7 @@ def get_ts_diff(ts1, ts2):
 
 # This object will allow the server to keep track of 
 # the state of an individual worker
+# TODO: not being used at the moment
 class WorkerState:
 
     NOT_REGISTERED = 0
@@ -92,7 +91,7 @@ class WorkerMsg:
         self.timestamp = get_cts() 
 
     def __str__(self):
-        message = "worker is sending {}".format(self.request)
+        message = "worker sent {}".format(self.request)
         return message
 
 
