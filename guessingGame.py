@@ -35,8 +35,8 @@ class GuessingGame:
         for player in self.players:
             self.lock.acquire()
             self.players[player] = []
-            print(f"player: {player}")
             self.lock.release()
+            print(f"player: {player}")
         # self.lock.release()
 
         # generate a list of maxGuess integers in random order
