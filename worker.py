@@ -14,7 +14,6 @@ iWonFlag = AtomicInt(0)
 #isRegFlag = AtomicInt(0)
 globalDataLock = Lock()
 guiobj = None
-App = None
 
 class SenderThread:
     def __init__(self):
@@ -180,6 +179,13 @@ def button_callback():
 
     globalDataLock.acquire()
 
+    restartFlag.lock()
+    if restartFlag.get_int() == 1:
+        guiobj.setButtonText('RESTARTINGGGGG!')
+        guiobj.enableButton()
+        restartFlag.set_int(0)
+    restartFlag.unlock()
+
     if len(nums) > 0:
         # If we won
         if (currIdx != -1) & (nums[currIdx] == winNum):
@@ -199,7 +205,7 @@ def button_callback():
 
     globalDataLock.release()
 
-
+"""
 def setup_gui():
     global App
     global guiobj
@@ -208,7 +214,7 @@ def setup_gui():
     guiobj = GameWindow(button_callback)
     # App.exec()
     sys.exit(App.exec())
-
+"""
 
 def main():
     global conn
@@ -235,19 +241,24 @@ def main():
     print('Now moving onto GUI...')
 
     # Setup the GUI object and return it
-    gui_thread = Thread(target=setup_gui)
-    gui_thread.start()
+    # gui_thread = Thread(target=setup_gui)
+    # gui_thread.start()
+
+    app = QApplication(sys.argv)
+    guiobj = GameWindow(button_callback)
+    # app.exec()
+    sys.exit(app.exec())
 
     print('GUI set up')
 
     # Now we loop waiting for a restart game signal
-    while True:
-        restartFlag.lock()
-        if restartFlag.get_int() == 1:
-            guiobj.setButtonText('RESTARTINGGGGG!')
-            guiobj.enableButton()
-            restartFlag.set_int(0)
-        restartFlag.unlock()
+    # while True:
+    #     restartFlag.lock()
+    #     if restartFlag.get_int() == 1:
+    #         guiobj.setButtonText('RESTARTINGGGGG!')
+    #         guiobj.enableButton()
+    #         restartFlag.set_int(0)
+    #     restartFlag.unlock()
 
     time.sleep(5)
 
