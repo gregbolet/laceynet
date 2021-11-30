@@ -97,6 +97,7 @@ class RecvThread:
 
                 if not conf:
                     print("[error] timeout")
+                    sys.exit(-1)
                 else:
                     # return a ControllerMsg object
                     resp = pickle.loads(conf)
@@ -247,6 +248,7 @@ def main():
     while True:
         restartFlag.lock()
         if restartFlag.get_int() == 1:
+            print("I'm here forever")
             guiobj.setButtonText('RESTARTINGGGGG!')
             guiobj.enableButton()
             restartFlag.set_int(0)
