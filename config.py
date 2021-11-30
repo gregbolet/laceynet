@@ -37,7 +37,7 @@ def get_alias_from_conn(conn):
 # Sends an object over the socket s
 def send_msg(s, obj):
     # Pickle the object to send over the network
-    print("sending: {}".format(obj.numbers_to_guess))
+    print("sending: {}".format(obj))
     tosend = pickle.dumps(obj)
     # tosend = json.dumps({"data": obj})
     # s.send(tosend.encode()) 
@@ -91,6 +91,10 @@ class WorkerMsg:
         self.request = request_code
         self.timestamp = get_cts() 
 
+    def __str__(self):
+        message = "worker is sending {}".format(self.request)
+        return message
+
 
 # These are the messages the server sends to the clients
 class ControllerMsg:
@@ -109,6 +113,10 @@ class ControllerMsg:
         # The list of numbers this worker will be "guessing"
         self.numbers_to_guess = []
         self.winning_num = -1
+
+    def __str__(self):
+        message = "server is sending {} with numbers to guess as {}".format(self.response, self.numbers_to_guess)
+        return message
 
 
 # Override the print function to show timestamps
