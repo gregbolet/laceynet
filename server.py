@@ -43,41 +43,41 @@ class ConnectionThread:
         last_time_heartbeat = get_cts()
 
         while True:
-            ready = select.select([conn], [], [], 0.5)
-            if ready[0]:
+            # ready = select.select([conn], [], [], 0.5)
+            # if ready[0]:
             # Blocking calls, max MSG_BUFF_SIZE bytes
-                data = conn.recv(MSG_BUFF_SIZE)
-                alias = get_alias_from_conn(conn)
+            data = conn.recv(MSG_BUFF_SIZE)
+            alias = get_alias_from_conn(conn)
 
-                if not data: # if there's no data being sent to server from client
-                    print('Connection to [', alias, '] closed...', sep='')
+            if not data: # if there's no data being sent to server from client
+                print('Connection to [', alias, '] closed...', sep='')
+                break
+            else:
+                # Expecting a worker data packet
+                workermsg = pickle.loads(data)
+                # print(workermsg)
+                # workermsg = json.loads(data.decode())['data']
+
+                # if received a hearbeat message
+                if workermsg.request == WorkerMsg.HEARTBEAT:
+                    print('Heartbeat from:', alias)
+                    cntrl_msg = ControllerMsg(ControllerMsg.CONTINUE)
+                    last_time_heartbeat = get_cts()
+                    send_msg(conn, cntrl_msg) 
+
+                # handles when a worker registers (joined the game)
+                elif workermsg.request == WorkerMsg.REGISTER:
+                    print('Registration request from:', alias)
+                    game.add_new_player(alias)
+                    restart_all_workers()
+
+                # handles if a worker won the game
+                elif workermsg.request == WorkerMsg.IWON:
+                    print('We have a winner! -- Restarting game')
+                    restart_all_workers()
+
+                if get_ts_diff(get_cts(), last_time_heartbeat) > HEARTBEAT_TIMEOUT:
                     break
-                else:
-                    # Expecting a worker data packet
-                    workermsg = pickle.loads(data)
-                    # print(workermsg)
-                    # workermsg = json.loads(data.decode())['data']
-
-                    # if received a hearbeat message
-                    if workermsg.request == WorkerMsg.HEARTBEAT:
-                        print('Heartbeat from:', alias)
-                        cntrl_msg = ControllerMsg(ControllerMsg.CONTINUE)
-                        last_time_heartbeat = get_cts()
-                        send_msg(conn, cntrl_msg) 
-
-                    # handles when a worker registers (joined the game)
-                    elif workermsg.request == WorkerMsg.REGISTER:
-                        print('Registration request from:', alias)
-                        game.add_new_player(alias)
-                        restart_all_workers()
-
-                    # handles if a worker won the game
-                    elif workermsg.request == WorkerMsg.IWON:
-                        print('We have a winner! -- Restarting game')
-                        restart_all_workers()
-
-                    if get_ts_diff(get_cts(), last_time_heartbeat) > HEARTBEAT_TIMEOUT:
-                        break
 
         # close connection if no more data
         conn.close()
