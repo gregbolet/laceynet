@@ -23,7 +23,7 @@ def restartAllWorkers():
     for alias in connList:
         conn = connList[alias]
         msg = ControllerMsg(ControllerMsg.GAME_RESTART)
-        msg.winningNum = int(str(sys.argv[1]))
+        msg.winningNum = 11#int(str(sys.argv[1]))
         msg.numbersToGuess = defaultLists[currentList]
         #msg.numbersToGuess = game.getGuessesForAlias(alias)
         #msg.winningNum = game.getWinGuess()
