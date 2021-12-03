@@ -37,11 +37,16 @@ class SenderThread:
 
     def __check_if_won(self):
         global iWonFlag
+        global restartFlag
         
         iWonFlag.lock()
-        if iWonFlag.get_int() == 1:
+        restartFlag.lock()
+        # winning condition: win flag true AND game started
+        if iWonFlag.get_int() == 1 and restartFlag.get_int() == 1:
+            restartFlag.unlock()
             iWonFlag.unlock()
             return True
+        restartFlag.unlock()
         iWonFlag.unlock()
         return False
 
@@ -66,6 +71,9 @@ class SenderThread:
             if self.__check_if_won():
                 winnermsg = WorkerMsg(WorkerMsg.IWON)
                 send_msg(conn, winnermsg)
+                iWonFlag.lock()
+                iWonFlag.set_int(0) # set to not won
+                iWonFlag.unlock()
 
 
 class RecvThread:
@@ -108,9 +116,9 @@ class RecvThread:
 
                     globalDataLock.acquire()
                     restartFlag.lock()
-                    iWonFlag.lock()
+                    # iWonFlag.lock()
                     restartFlag.set_int(1)
-                    iWonFlag.set_int(0)
+                    # iWonFlag.set_int(0)
 
                     nums = resp.numbers_to_guess
                     winNum = resp.winning_num
@@ -126,7 +134,7 @@ class RecvThread:
                         restartFlag.set_int(0)
                     # restartFlag.unlock()
 
-                    iWonFlag.unlock()
+                    # iWonFlag.unlock()
                     restartFlag.unlock()
                     globalDataLock.release()
 
