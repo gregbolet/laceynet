@@ -174,7 +174,7 @@ class GameWindow(QMainWindow):
         else:
             self.button.setText(text)
             self.button.setStyleSheet("")
-            self.button.repaint()
+        #self.button.repaint()
 
 
 def button_callback():
