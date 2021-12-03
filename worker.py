@@ -188,7 +188,8 @@ def button_callback():
 
     if len(nums) > 0:
         # If we won
-        if (currIdx != -1) & (nums[currIdx] == winNum):
+        print("current index: {}".format(currIdx))
+        if (currIdx != -1) and (nums[currIdx] == winNum):
             guiobj.setWinnerStyle()
 
             iWonFlag.lock()
