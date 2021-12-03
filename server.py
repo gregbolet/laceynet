@@ -185,7 +185,7 @@ def main():
 
             ready_flag.lock()
             if ready_flag.get_int() == 0: # if still adding players
-                ready_flag.unlock()
+                # ready_flag.unlock()
                 # keep track of the new connection
                 conn_lock.acquire()
                 conn_list[alias] = conn
@@ -195,7 +195,10 @@ def main():
                 connection_thread = Thread(target=ConnectionThread(), args=(conn,))
                 connection_thread.start()
             else:
-                ready_flag.unlock()
+                print("{} missed the game :(".format(alias))
+                cntrl_msg = ControllerMsg(ControllerMsg.REGIST_FAIL)
+                send_msg(conn, cntrl_msg)
+            ready_flag.unlock()
             
             # check_if_time_up()
 
