@@ -50,7 +50,11 @@ class ConnectionThread:
         last_time_heartbeat = get_cts()
 
         while True:
-            check_if_time_up()
+
+            ready_flag.lock()
+            if ready_flag.get_int() == 0:
+                check_if_time_up()
+            ready_flag.unlock()
             ready = select.select([conn], [], [], 0.5) # wait for 5 sec to see if there's data received
             if ready[0]: # only read when there's data available
             # Blocking calls, max MSG_BUFF_SIZE bytes
@@ -114,10 +118,10 @@ def check_if_time_up():
 
     res = False 
     # check if is time to start the game
-    ready_flag.lock()
+    # ready_flag.lock()
     time_lock.acquire()
     # if waiting room is open and the timer is up
-    if get_ts_diff(get_cts(), target_time) > WAITING_ROOM_TIMER and ready_flag.get_int() == 0:
+    if get_ts_diff(get_cts(), target_time) > WAITING_ROOM_TIMER:
         # time_lock.release()
         # ready_flag.unlock()
         # start the game!
@@ -127,7 +131,7 @@ def check_if_time_up():
     else:
         print("I'm checking waiting room timer")
     time_lock.release()
-    ready_flag.unlock()
+    # ready_flag.unlock()
     return res
 
 
@@ -176,8 +180,8 @@ def main():
             alias = get_alias_from_conn(conn)
             print('Connected by:', alias)
             
-            if check_if_time_up():
-                continue
+            # if check_if_time_up():
+            #     continue
 
             ready_flag.lock()
             if ready_flag.get_int() == 0: # if still adding players
