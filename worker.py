@@ -103,7 +103,7 @@ class RecvThread:
                 if resp.response is ControllerMsg.CONTINUE:
                     print('Continuing game...')
 
-                elif resp.response is ControllerMsg.GAME_RESTART:
+                elif resp.response is ControllerMsg.GAME_START:
                     print('Restarting game...')
 
                     globalDataLock.acquire()
@@ -118,6 +118,13 @@ class RecvThread:
                     currIdx = -1
                     print('Got new restart data: numbers', nums)
                     print('Got new restart data: winNum ', winNum)
+
+                    restartFlag.lock()
+                    if restartFlag.get_int() == 1:
+                        guiobj.setButtonText('Starting')
+                        guiobj.enableButton()
+                        restartFlag.set_int(0)
+                    restartFlag.unlock()
 
                     iWonFlag.unlock()
                     restartFlag.unlock()
@@ -143,7 +150,7 @@ class GameWindow(QMainWindow):
         self.exitButton.setGeometry(100,100,250,250)
 
     def UIComponents(self):
-        self.button = QPushButton("Connecting...",self)
+        self.button = QPushButton("Waiting...",self)
         self.exitButton = QPushButton("EXIT", self)
         self.button.setFont(QFont('Times', 45))
         self.button.clicked.connect(self.button_callback)
@@ -178,13 +185,6 @@ def button_callback():
     global iWonFlag
 
     globalDataLock.acquire()
-
-    restartFlag.lock()
-    if restartFlag.get_int() == 1:
-        guiobj.setButtonText('RESTARTINGGGGG!')
-        guiobj.enableButton()
-        restartFlag.set_int(0)
-    restartFlag.unlock()
 
     if len(nums) > 0:
         # If we won

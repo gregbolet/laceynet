@@ -30,6 +30,9 @@ HEARTBEAT_INTERVAL = 10 #2
 HEARTBEAT_TIMEOUT = 20
 
 
+WAITING_ROOM_TIMER = 10
+
+
 def get_alias_from_conn(conn):
     return socket.gethostbyaddr(conn.getpeername()[0])[0]
 
@@ -101,7 +104,7 @@ class ControllerMsg:
     # Let the device know what the game state is
     # these are response codes
     CONTINUE = 2
-    GAME_RESTART = 3
+    GAME_START = 3
     REGIST_SUCC = 4
     REGIST_FAIL = 5
 
