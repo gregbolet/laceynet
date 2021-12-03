@@ -69,10 +69,14 @@ class SenderThread:
             self.do_heartbeat()
 
             if self.__check_if_won():
+                print("I won!")
                 winnermsg = WorkerMsg(WorkerMsg.IWON)
                 send_msg(conn, winnermsg)
                 iWonFlag.lock()
+                restartFlag.lock()
                 iWonFlag.set_int(0) # set to not won
+                restartFlag.set_int(0)
+                restartFlag.unlock()
                 iWonFlag.unlock()
 
 
@@ -131,7 +135,7 @@ class RecvThread:
                     if restartFlag.get_int() == 1:
                         guiobj.setButtonText('Starting')
                         guiobj.enableButton()
-                        restartFlag.set_int(0)
+                        # restartFlag.set_int(0)
                     # restartFlag.unlock()
 
                     # iWonFlag.unlock()
