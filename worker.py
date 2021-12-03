@@ -119,12 +119,12 @@ class RecvThread:
                     print('Got new restart data: numbers', nums)
                     print('Got new restart data: winNum ', winNum)
 
-                    restartFlag.lock()
+                    # restartFlag.lock()
                     if restartFlag.get_int() == 1:
                         guiobj.setButtonText('Starting')
                         guiobj.enableButton()
                         restartFlag.set_int(0)
-                    restartFlag.unlock()
+                    # restartFlag.unlock()
 
                     iWonFlag.unlock()
                     restartFlag.unlock()
