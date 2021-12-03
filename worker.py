@@ -201,9 +201,9 @@ def button_callback():
         if (currIdx != -1) and (nums[currIdx] == winNum):
             guiobj.setWinnerStyle()
 
-            iWonFlag.lock()
-            iWonFlag.set_int(1)
-            iWonFlag.unlock()
+            # iWonFlag.lock()
+            # iWonFlag.set_int(1)
+            # iWonFlag.unlock()
 
         else:
             currIdx = currIdx + 1
