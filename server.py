@@ -50,48 +50,54 @@ class ConnectionThread:
         last_time_heartbeat = get_cts()
 
         while True:
+            check_if_time_up()
+            ready = select.select([conn], [], [], 0.5) # wait for 5 sec to see if there's data received
+            if ready[0]: # only read when there's data available
             # Blocking calls, max MSG_BUFF_SIZE bytes
             # only ack if received anything 
-            data = conn.recv(MSG_BUFF_SIZE)
-            alias = get_alias_from_conn(conn)
+                data = conn.recv(MSG_BUFF_SIZE)
+                alias = get_alias_from_conn(conn)
 
-            if not data: # if there's no data being sent to server from client
-                print('Connection to [', alias, '] closed...', sep='')
-                break
-            else:
-                # Expecting a worker data packet
-                workermsg = pickle.loads(data)
+                if not data: # if there's no data being sent to server from client
+                    print('Connection to [', alias, '] closed...', sep='')
+                    break
+                else:
+                    # Expecting a worker data packet
+                    workermsg = pickle.loads(data)
 
-                # if received a hearbeat message
-                if workermsg.request == WorkerMsg.HEARTBEAT:
-                    print('Heartbeat from:', alias)
-                    # send continue signal
-                    cntrl_msg = ControllerMsg(ControllerMsg.CONTINUE)
-                    last_time_heartbeat = get_cts()
-                    send_msg(conn, cntrl_msg) 
+                    # if received a hearbeat message
+                    if workermsg.request == WorkerMsg.HEARTBEAT:
+                        print('Heartbeat from:', alias)
+                        # send continue signal
+                        cntrl_msg = ControllerMsg(ControllerMsg.CONTINUE)
+                        last_time_heartbeat = get_cts()
+                        send_msg(conn, cntrl_msg)
 
-                # handles when a worker registers (joined the game)
-                elif workermsg.request == WorkerMsg.REGISTER:
-                    print('Registration request from:', alias)
-                    game.add_new_player(alias)
+                    # handles when a worker registers (joined the game)
+                    elif workermsg.request == WorkerMsg.REGISTER:
+                        print('Registration request from:', alias)
+                        game.add_new_player(alias)
 
-                    # restart the timer
-                    time_lock.acquire()
-                    target_time = time.time() + WAITING_ROOM_TIMER
-                    time_lock.acquire()
-                    # restart_all_workers()
+                        cntrl_msg = ControllerMsg(ControllerMsg.REGIST_SUCC)
+                        send_msg(conn, cntrl_msg)
+                        # restart the timer
+                        time_lock.acquire()
+                        target_time = get_cts()
+                        print("updated target time to be {}".format(target_time))
+                        time_lock.release()
+                        # restart_all_workers()
 
-                # handles if a worker won the game
-                elif workermsg.request == WorkerMsg.IWON:
-                    print('We have a winner! -- Restarting game')
-                    ready_flag.lock()
-                    ready_flag.set_int(0) # not ready
-                    ready_flag.unlock()
+                    # handles if a worker won the game
+                    elif workermsg.request == WorkerMsg.IWON:
+                        print('We have a winner! -- Restarting game')
+                        ready_flag.lock()
+                        ready_flag.set_int(0) # not ready
+                        ready_flag.unlock()
 
-                    time_lock.acquire()
-                    target_time = -1 # reset the waiting room timer
-                    time_lock.acquire()
-                    # restart_all_workers()
+                        time_lock.acquire()
+                        target_time = -1 # reset the waiting room timer
+                        time_lock.acquire()
+                        # restart_all_workers()
 
 
                 if get_ts_diff(get_cts(), last_time_heartbeat) > HEARTBEAT_TIMEOUT:
@@ -101,11 +107,36 @@ class ConnectionThread:
         conn.close()
 
 
+def check_if_time_up():
+    global time_lock
+    global target_time
+    global ready_flag
+
+    res = False 
+    # check if is time to start the game
+    ready_flag.lock()
+    time_lock.acquire()
+    # if waiting room is open and the timer is up
+    if get_ts_diff(get_cts(), target_time) > WAITING_ROOM_TIMER and ready_flag.get_int() == 0:
+        # time_lock.release()
+        # ready_flag.unlock()
+        # start the game!
+        ready_flag.set_int(1)
+        restart_all_workers()
+        res = True
+    else:
+        print("I'm checking waiting room timer")
+    time_lock.release()
+    ready_flag.unlock()
+    return res
+
+
 def main():
     global game
     global conn_list
     global conn_lock
     global time_lock
+    global target_time
 
     try:
         print("Controller Starting...")
@@ -131,26 +162,23 @@ def main():
         time_lock = Lock()
         print("Socket server ready!")
 
-        while True:
-            # check if is time to start the game
-            time_lock.acquire()
-            if target_time < time.time() and target_time != -1:
-                time_lock.release()
-                # start the game!
-                ready_flag.lock()
-                ready_flag.set_int(1)
-                ready_flag.unlock()
-                restart_all_workers()
-            time_lock.release()
+        time_lock.acquire()
+        target_time = get_cts()
+        time_lock.release()
 
+        while True:
             # Block and wait for an incoming connection
             conn, addr = s.accept()
 
-            # receives a new connection
+            # ready = select.select([conn], [], [], 0.5) # wait for 5 sec to see if there's data received
+            # if ready[0]: # only read when there's data available
+                # receives a new connection
             alias = get_alias_from_conn(conn)
             print('Connected by:', alias)
             
-            
+            if check_if_time_up():
+                continue
+
             ready_flag.lock()
             if ready_flag.get_int() == 0: # if still adding players
                 ready_flag.unlock()
@@ -162,7 +190,10 @@ def main():
                 # start a new connection thread
                 connection_thread = Thread(target=ConnectionThread(), args=(conn,))
                 connection_thread.start()
-            ready_flag.unlock()
+            else:
+                ready_flag.unlock()
+            
+            # check_if_time_up()
 
     finally:
         # Close the socket
