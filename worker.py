@@ -171,6 +171,7 @@ class GameWindow(QMainWindow):
     def setButtonText(self, text):
         if text == "Game Over":
             self.button.setStyleSheet("background-color : red")
+            self.button.setText(text)
         else:
             self.button.setText(text)
             self.button.setStyleSheet("")

@@ -99,7 +99,7 @@ class ConnectionThread:
                         ready_flag.unlock()
 
                         time_lock.acquire()
-                        target_time = -1 # reset the waiting room timer
+                        target_time = get_cts() # reset the waiting room timer
                         time_lock.acquire()
                         # restart_all_workers()
 
