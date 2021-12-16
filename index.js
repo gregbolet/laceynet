@@ -30,19 +30,66 @@ let weGotAWinner = false;
 let winnerId = -1;
 
 app.get('/', (req, res) => {
-
-
 	res.render('pages/index');
 	//res.send('pages/index');
 });
 
-// For each client, generate an array of numbers
-function restart_game(){
+
+function generate_all_player_nums(max_nums=10){
+
+	let allnums = [];
+
+	let temp = max_nums;
+
+	// Create an array from 1 to max_nums
+	for(;temp > 0; temp--){
+		allnums.push(temp);
+	}
+
+	// Now have each client randomly grab numbers from the list
+	let numsPerClient = Math.floor(max_nums/clients.length);
+
 	clients.forEach(client => {
 		const clientId = client.id;
+		let myquota = numsPerClient;
 
-		clientDict[clientId] = [0,1,2,3,4,5];
+		clientDict[clientId] = [];
+
+		for(;myquota > 0; myquota--){
+			// remove an item at random from the list
+			let randIdx = Math.floor(Math.random()*allnums.length);
+			var val = allnums.splice(randIdx,1)[0];
+
+			// Add the item to the list
+			clientDict[clientId].push(val);
+		}
+
+
 		clientPositions[clientId] = 0;
+	});
+
+	let leftoverNums = max_nums - (numsPerClient*clients.length);
+
+	// Assign the leftover in roundrobin style
+	clients.forEach(client => {
+		
+		if(leftoverNums > 0){
+			const clientId = client.id;
+			leftoverNums--;
+
+			clientDict[clientId].push(allnums[leftoverNums]);
+		}
+	});
+
+	winningNum = Math.floor(Math.random()*max_nums) + 1;
+}
+
+// For each client, generate an array of numbers
+function restart_game(){
+	generate_all_player_nums(10);
+
+	clients.forEach(client => {
+		const clientId = client.id;
 
 		// For this client, tell them to write restarting text
 		const data = JSON.stringify({"clientId":`${clientId}`, "command":'restart'});
@@ -50,11 +97,10 @@ function restart_game(){
 		client.response.write(message);
 	})
 
-	winningNum = 4;
-
 	console.log('Restarting game!');
 	console.log(clientDict);
 	console.log(clientPositions);
+	console.log(winningNum);
 }
 
 // When someone accesses the /events page, they will use the Server-Sent Events API
