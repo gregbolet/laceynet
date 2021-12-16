@@ -26,6 +26,8 @@ let clientDict = {};
 let clientPositions = {};
 let winningNum = -1;
 let facts = [];
+let weGotAWinner = false;
+let winnerId = -1;
 
 app.get('/', (req, res) => {
 
@@ -127,12 +129,14 @@ function eventsHandler(request, response, next) {
 
 app.get('/events', eventsHandler);
 
+
 app.post('/', (req, resp) => {
 
 	var data = req.body;
 	var clientId = data.clientId;
 	console.log(data);
 
+	// This is the only registered event we have for the game rn
 	if(data.buttonevent == 'press'){
 		// get the numbers for this client
 		var clientNums = clientDict[clientId];
@@ -141,8 +145,54 @@ app.post('/', (req, resp) => {
 		var dataToSend;
 		var message;
 
+		// If we advance the winner button, restart the game
+		if(weGotAWinner && winnerId == clientId){
+
+			weGotAWinner = false;
+			winnerId = -1;
+
+			restart_game();
+			resp.sendStatus(200);
+			return;
+		}
+
+		// Check if the last element was a winner
+		else if((currPos-1 >= 0) && clientNums[currPos-1] == winningNum){
+
+			weGotAWinner = true;
+			winnerId = clientId;
+
+			// For this client, notify them that they're a winner! 
+			dataToSend = JSON.stringify({"clientId":`${clientId}`, 
+						     "command":'winner'});
+			message = `id:${clientId}\ndata: ${dataToSend}\n\n`;
+
+			clients.forEach(client => {
+				if(client.id == clientId){
+					client.response.write(message);
+				}
+			});
+
+
+			// Tell everyone the game is over
+			clients.forEach(client => {
+				// For this client, tell them to write restarting text
+				dataToSend = JSON.stringify({"clientId":`${client.id}`, 
+							     "command":'gameover'});
+				message = `id:${client.id}\ndata: ${dataToSend}\n\n`;
+
+				if(client.id != clientId){
+					client.response.write(message);
+				}
+			});
+
+			// exit
+			resp.sendStatus(200);
+			return;
+
+		}
 		// If we finished our numbers, it's game over for us
-		if(clientNums.length <= currPos){
+		else if(clientNums.length <= currPos){
 			// For this client, tell them to write restarting text
 			dataToSend = JSON.stringify({"clientId":`${clientId}`, 
 						     "command":'gameover'});
@@ -150,19 +200,16 @@ app.post('/', (req, resp) => {
 		}
 		else{
 			// get the next number on their list
-			var nextNum = clientNums[clientPositions[clientId]];
+			var nextNum = clientNums[currPos];
 
-			// advance their number
-			clientPositions[clientId] = clientPositions[clientId] + 1;
-
-
-			// For this client, tell them to write restarting text
+			// For this client, tell them to continue playing 
 			dataToSend = JSON.stringify({"clientId":`${clientId}`, 
 						     "command":'continue', 
 						     "nextnum": nextNum});
 			message = `id:${clientId}\ndata: ${dataToSend}\n\n`;
 
-			//clients[clientId].response.write(message);
+			// advance their number
+			clientPositions[clientId] = clientPositions[clientId] + 1;
 		}
 
 
