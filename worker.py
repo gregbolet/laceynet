@@ -115,6 +115,10 @@ class RecvThread:
                 if resp.response is ControllerMsg.CONTINUE:
                     print('Continuing game...')
 
+                elif resp.response is ControllerMsg.REGIST_FAIL:
+                    print('Registration failed, game already started...')
+                    sys.exit() # exit thread 
+
                 elif resp.response is ControllerMsg.GAME_START:
                     print('Restarting game...')
 

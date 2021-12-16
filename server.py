@@ -52,10 +52,11 @@ class ConnectionThread:
         while True:
 
             ready_flag.lock()
-            if ready_flag.get_int() == 0:
+            if ready_flag.get_int() == 0: # only check if time's up when in waiting room
                 check_if_time_up()
             ready_flag.unlock()
-            ready = select.select([conn], [], [], 0.5) # wait for 5 sec to see if there's data received
+
+            ready = select.select([conn], [], [], 0.5) # wait for .5 sec to see if there's data received
             if ready[0]: # only read when there's data available
             # Blocking calls, max MSG_BUFF_SIZE bytes
             # only ack if received anything 
@@ -102,10 +103,9 @@ class ConnectionThread:
                         target_time = get_cts() # reset the waiting room timer
                         time_lock.acquire()
                         # restart_all_workers()
-
-
-                if get_ts_diff(get_cts(), last_time_heartbeat) > HEARTBEAT_TIMEOUT:
-                    break
+            # contantly checking, regardless whether received msg or not
+            if get_ts_diff(get_cts(), last_time_heartbeat) > HEARTBEAT_TIMEOUT:
+                break
 
         # close connection if no more data
         conn.close()
@@ -118,20 +118,16 @@ def check_if_time_up():
 
     res = False 
     # check if is time to start the game
-    # ready_flag.lock()
     time_lock.acquire()
     # if waiting room is open and the timer is up
     if get_ts_diff(get_cts(), target_time) > WAITING_ROOM_TIMER:
-        # time_lock.release()
-        # ready_flag.unlock()
-        # start the game!
-        ready_flag.set_int(1)
-        restart_all_workers()
+        # flag lock acquired outside
+        ready_flag.set_int(1) # ready is true
+        restart_all_workers() # start the game
         res = True
-    else:
+    else: # for printing only
         print("I'm checking waiting room timer")
     time_lock.release()
-    # ready_flag.unlock()
     return res
 
 
@@ -174,19 +170,13 @@ def main():
             # Block and wait for an incoming connection
             conn, addr = s.accept()
 
-            # ready = select.select([conn], [], [], 0.5) # wait for 5 sec to see if there's data received
-            # if ready[0]: # only read when there's data available
-                # receives a new connection
+            # receives a new connection
             alias = get_alias_from_conn(conn)
             print('Connected by:', alias)
-            
-            # if check_if_time_up():
-            #     continue
 
             ready_flag.lock()
             if ready_flag.get_int() == 0: # if still adding players
-                # ready_flag.unlock()
-                # keep track of the new connection
+                # accept conn and keep track of the new connection
                 conn_lock.acquire()
                 conn_list[alias] = conn
                 conn_lock.release()
@@ -200,8 +190,6 @@ def main():
                 send_msg(conn, cntrl_msg)
             ready_flag.unlock()
             
-            # check_if_time_up()
-
     finally:
         # Close the socket
         s.close()
