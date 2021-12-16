@@ -112,13 +112,6 @@ function eventsHandler(request, response, next) {
 		'Cache-Control': 'no-cache'
 	};
 
-	//const data = `data: ${JSON.stringify(facts)}\n\n`;
-
-	// Keep the response object open, when they refresh the page, close it
-	// This means that on each refresh, it's acting like a new player
-	//response.write('blah blah');
-	//response.setStatus(200);
-
 	// Arrival time is the assigned client ID
 	const clientId = Date.now();
 
