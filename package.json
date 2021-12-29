@@ -1,10 +1,10 @@
 {
   "dependencies": {
     "express": "^4.17.2",
+    "socket.io": "^4.4.0",
     "ws": "^8.4.0"
-  }
-
-  "scripts" {
-    "start":"node ./app/server.js"
+  },
+  "scripts": {
+    "start": "node ./app/server.js"
   }
 }
