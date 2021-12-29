@@ -3,4 +3,8 @@
     "express": "^4.17.2",
     "ws": "^8.4.0"
   }
+
+  "scripts" {
+    "start":"node ./app/server.js"
+  }
 }
