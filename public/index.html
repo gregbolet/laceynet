@@ -7,7 +7,6 @@
     <script src="bootstrap.min.js" ></script>
     <script src="/socket.io/socket.io.js"></script>
 
-
     <title>Guessing Game!</title>
   </head>
 
@@ -25,33 +24,78 @@
 
   </body>
 
-    <script>
-      // URL defaults to window.location
-      let socket = io();
-      let el;
+  <script>
 
-      socket.on('time', (timeString) => {
-              el = document.getElementById('server-time');
-              el.innerHTML = 'Server time: ' + timeString;
-            });
+    // Use JQuery to grab our button object
+    var button = $( "#mainbutton" );
 
-      // Handle incoming messages
-      socket.on('command', (msg) => {
+    function setContinueMode(){
+          button.removeClass( "btn-warning" );
+          button.addClass( "btn-primary" );
+        }
+
+    function setRestartMode(){
+          button.removeClass( "btn-danger" )
+          button.removeClass( "btn-primary" )
+          button.removeClass( "btn-success" )
+          button.addClass( "btn-warning" )
+        }
+
+    function setLoserMode(){
+          button.removeClass( "btn-primary" )
+          button.addClass( "btn-danger" )
+        }
+
+    function setWinnerMode(){
+          button.removeClass( "btn-primary" )
+          button.addClass( "btn-success" )
+        }
+
+    // URL defaults to window.location
+    let socket = io();
+    let el;
+
+    socket.on('time', (timeString) => {
+          el = document.getElementById('server-time');
+          el.innerHTML = 'Server time: ' + timeString;
+        });
+
+    // Handle incoming messages
+    socket.on('command', (msg) => {
+          console.log(msg);
+
+          let command = msg.command;
+          if(command == 'restart'){
+                console.log('RESTARTING GAME');
+                setRestartMode();
+              }
+          else if(command == 'update'){
+                console.log('Got a state update!');
+                let clientData = msg.clientData;
+                let currIdx = clientData.currIdx;
+                //let 
+
+                // Check if we should fail the game
+                //if(currIdx >= ){
+
+                //}
 
 
-            });
+                setContinueMode();
+              }
+
+        });
 
     // Setup the outgoing message handlers
     var clientId = -1;
     var didGameOver = false;
-    const button = document.getElementById('mainbutton');
 
     // When the main button is pressed, do something
-    button.addEventListener('click', function(e) {
+    button.click(function() {
           console.log('button was clicked');
           socket.emit("clicked", {myState: didGameOver});
         });
 
-    </script>
+  </script>
 
 </html>
