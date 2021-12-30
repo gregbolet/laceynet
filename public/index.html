@@ -1,7 +1,32 @@
 <html>
   <head>
+    <!-- Load Bootstrap/CSS/Popper/Jquery/Socket.io -->
+    <link rel="stylesheet" href="bootstrap.min.css"> </link>
+    <script src="jquery-3.6.0.min.js"></script>
+    <script src="popper.min.js" ></script>
+    <script src="bootstrap.min.js" ></script>
     <script src="/socket.io/socket.io.js"></script>
+
+
+    <title>Guessing Game!</title>
+  </head>
+
+
+  <body>
+    <p id="server-time"></p>
+
+    <div class="container" style="width:100%; height:100%;">
+      <div class="col-md-12 text-center align-middle" style="width:100%; height:100%;">
+        <button id="mainbutton" type="button" class="btn btn-primary btn-block" style="font-size:500%; width:100%; height:100%; height:50%; position: absolute; top:25%;">
+          TEST BUTTON	
+        </button>
+      </div>
+    </div>
+
+  </body>
+
     <script>
+      // URL defaults to window.location
       let socket = io();
       let el;
 
@@ -9,9 +34,24 @@
               el = document.getElementById('server-time');
               el.innerHTML = 'Server time: ' + timeString;
             });
+
+      // Handle incoming messages
+      socket.on('command', (msg) => {
+
+
+            });
+
+    // Setup the outgoing message handlers
+    var clientId = -1;
+    var didGameOver = false;
+    const button = document.getElementById('mainbutton');
+
+    // When the main button is pressed, do something
+    button.addEventListener('click', function(e) {
+          console.log('button was clicked');
+          socket.emit("clicked", {myState: didGameOver});
+        });
+
     </script>
-  </head>
-  <body>
-    <p id="server-time"></p>
-  </body>
+
 </html>
