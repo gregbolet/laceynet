@@ -51,7 +51,12 @@ module.exports = class GameManager{
       // There may be a share at the end which has less than
       // the expected share size.
       let share = [];
-      let toGrab = shareSize % allNums.length;
+      let toGrab = shareSize;
+
+      // If we can't grab as many as we need
+      if(shareSize > allNums.length){
+        toGrab = allNums.length;
+      }
 
       for(;toGrab > 0; toGrab--){
         // remove an item at random from the list
@@ -69,9 +74,11 @@ module.exports = class GameManager{
     // We also select a winning number at random that is
     // shipped with each share for quick verification of 
     // having found a winner
-    this.#winningNum = Math.floor(Math.random()*maxNums) + 1;
+    this.#winningNum = Math.floor(Math.random()*this.#maxNums) + 1;
 
     console.log('New game started.');
+    console.log(`Winning Num: ${this.#winningNum}`);
+    console.log('Shares: ',JSON.stringify(this.#sharesToExplore));
   }
 
 
@@ -81,7 +88,7 @@ module.exports = class GameManager{
     console.info(`Adding player [id=${socket.id}]`);
 
     // Map the socket to its assigned chunks
-    this.#clients.set(socket, {currentShare:[], acceptedShares:[]});
+    this.#clients.set(socket, {acceptedShares:[]});
   }
 
   // Remove player by socket

@@ -19,7 +19,7 @@ const server = app.listen(PORT, function() {
 const io = socketIO(server);
 
 // Now let's setup a new gameManager instance
-let GameMan = new GameManager(10, 4);
+let GameMan = new GameManager(10, 1);
 
 
 // Handle a new user connection
