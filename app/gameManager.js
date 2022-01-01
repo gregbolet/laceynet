@@ -110,7 +110,7 @@ module.exports = class GameManager{
   }
 
   // Share comparison function
-  #areSharesEqual(shareA, shareB){
+  static #areSharesEqual(shareA, shareB){
       if(shareA.length !== shareB.length){
         return false;
       }
@@ -132,12 +132,13 @@ module.exports = class GameManager{
 
     // Check if the share is already in the completion list
     // if it is, then we increment the rejected shares of this worker
-    this.#completedShares.forEach(complShare => {
-      if(this.#areSharesEqual(complShare, share)){
+    this.#completedShares.every(complShare => {
+      if(GameManager.#areSharesEqual(complShare, share)){
         clientData.rejectedShares++;
         rejected = true;
-        break;
+        return false;
       }
+      return true;
     });
 
     // Otherwise, we can add to the number of accepted shares for the worker
@@ -148,11 +149,11 @@ module.exports = class GameManager{
       clientData.acceptedShares++;
 
       // Add the share to the completion list
-      this.#completedShares.append(share);
+      this.#completedShares.push(share);
 
       // Remove the share from the in-progress list
       this.#inProgressShares.forEach(function(inProgShare, index, object) {
-          if (this.#areSharesEqual(inProgShare, share)) {
+          if (GameManager.#areSharesEqual(inProgShare, share)) {
                 object.splice(index, 1);
           }
       });
@@ -172,7 +173,7 @@ module.exports = class GameManager{
       var nextShare = this.#incompleteShares.splice(0,1)[0];
 
       // Consider the share to be in-progress
-      this.#inProgressShares.append(nextShare);
+      this.#inProgressShares.push(nextShare);
 
       // Return the share and the winning number
       return {share:nextShare, winNum:this.#winningNum};

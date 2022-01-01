@@ -54,48 +54,59 @@
     // URL defaults to window.location
     let socket = io();
     let el;
+    let currentShare = [];
+    let winningNum = -1;
 
     socket.on('time', (timeString) => {
           el = document.getElementById('server-time');
           el.innerHTML = 'Server time: ' + timeString;
         });
 
-    // Handle incoming messages
-    socket.on('command', (msg) => {
-          console.log(msg);
-
-          let command = msg.command;
-          if(command == 'restart'){
-                console.log('RESTARTING GAME');
-                setRestartMode();
-              }
-          else if(command == 'update'){
-                console.log('Got a state update!');
-                let clientData = msg.clientData;
-                let currIdx = clientData.currIdx;
-                //let 
-
-                // Check if we should fail the game
-                //if(currIdx >= ){
-
-                //}
-
-
-                setContinueMode();
-              }
-
+    // Handle the message where we are confirmed to have registered
+    socket.on('registered', (msg) => {
+          console.log('Requesitng a new share');
+          socket.emit('needNewShare');
         });
 
-    // Setup the outgoing message handlers
-    var clientId = -1;
-    var didGameOver = false;
+    // Handle incoming message for the requested share
+    socket.on('newShare', (msg) => {
+          console.log('Got a new share');
+          currentShare = msg.share;
+          winningNum = msg.winNum;
 
-    // When the main button is pressed, do something
-    button.click(function() {
-          console.log('button was clicked');
-          socket.emit("clicked", {myState: didGameOver});
+          // Let the server know we completed the share
+          socket.emit('completedShare', {share:currentShare});
         });
 
+    // On share acceptance, request a new share fo work
+    socket.on('shareAccepted', (msg) => {
+          socket.emit('needNewShare'); 
+        });
+
+    // On share rejection, request a new share fo work
+    socket.on('shareRejected', (msg) => {
+          socket.emit('needNewShare'); 
+        });
+
+    // Handle the case where we have a winner 
+    socket.on('weGotAWinner', (msg) => {
+          setLoserMode();
+        });
+
+    // Handle the case where we are told to idle
+    socket.on('idle', (msg) => {
+          setLoserMode();
+        });
+
+    // Handle the case where we are told we lost 
+    socket.on('youDidNotWin', (msg) => {
+          socket.emit('needNewShare'); 
+        });
+
+    // Handle the case where we ARE the winner 
+    socket.on('youAreTheWinner', (msg) => {
+          setWinnerMode();
+        });
   </script>
 
 </html>

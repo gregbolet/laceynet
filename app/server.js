@@ -64,7 +64,7 @@ io.on('connection', (socket) => {
 
   });
 
-  socket.on('iAmAWinner', (msg) ={
+  socket.on('iAmAWinner', (msg) =>{
     let share = msg.share;
     let isWinningShare = GameMan.isWinningShare(share);
 
