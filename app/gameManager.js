@@ -14,8 +14,11 @@ module.exports = class GameManager{
   #maxNums;
   #shareSize;
   #clients;
-  #sharesToExplore;
+  #incompleteShares;
   #winningNum;
+  #inProgressShares;
+  #repeatSharesIdx;
+  #completedShares;
 
   // Let's set up the game to play
   // We assume maxNums > shareSize and only 
@@ -28,7 +31,14 @@ module.exports = class GameManager{
     this.#maxNums = maxNums;
     this.#shareSize = shareSize;
     this.#clients = new Map();
-    this.#sharesToExplore = [];
+    this.#incompleteShares = [];
+
+    // These are to track the shares that are being worked on
+    this.#inProgressShares = [];
+    this.#repeatSharesIdx = 0;
+
+    // This is to track the completed shares
+    this.#completedShares = [];
 
     let allNums = [];
 
@@ -66,7 +76,7 @@ module.exports = class GameManager{
       }
 
       // Once we construct the share, add it to the list
-      this.#sharesToExplore.push(share);
+      this.#incompleteShares.push(share);
     }
 
     // Once all the shares have been prepared, they can be
@@ -78,35 +88,118 @@ module.exports = class GameManager{
 
     console.log('New game started.');
     console.log(`Winning Num: ${this.#winningNum}`);
-    console.log('Shares: ',JSON.stringify(this.#sharesToExplore));
+    console.log('Shares: ',JSON.stringify(this.#incompleteShares));
   }
 
 
   // Add a player to the game, needs to be by socket
   // as the socket is the identifier
-  addPlayer(socket){
+  addWorker(socket){
     console.info(`Adding player [id=${socket.id}]`);
 
     // Map the socket to its assigned chunks
-    this.#clients.set(socket, {acceptedShares:[]});
+    this.#clients.set(socket, {acceptedShares:0, rejectedShares:0});
   }
 
   // Remove player by socket
-  removePlayer(socket){
+  removeWorker(socket){
     console.info(`Removing player [id=${socket.id}]`);
 
     // Remove the client
     this.#clients.delete(socket);
   }
 
+  // Share comparison function
+  #areSharesEqual(shareA, shareB){
+      if(shareA.length !== shareB.length){
+        return false;
+      }
+      shareA.forEach(shareAItem => {
+        if(!shareB.includes(shareAItem)){
+          return false;
+        }
+      });
+      return true;
+  }
+
   // Report to the game manager that the worker completed their share
+  // It is assumed that this share is NOT the winning share
   reportCompletedShare(socket, share){
-    console.info(`Accepting share from [id=${socket.id}]`);
+    console.info(`Accepting share ${share} from [id=${socket.id}]`);
+
+    let clientData = this.#clients.get(socket);
+    let rejected = false;
+
+    // Check if the share is already in the completion list
+    // if it is, then we increment the rejected shares of this worker
+    this.#completedShares.forEach(complShare => {
+      if(this.#areSharesEqual(complShare, share)){
+        clientData.rejectedShares++;
+        rejected = true;
+        break;
+      }
+    });
+
+    // Otherwise, we can add to the number of accepted shares for the worker
+    // need to also remove the share from the list of in-progress shares
+    if(!rejected){
+      // Accept the share they completed and 
+      // increment their accepted share count
+      clientData.acceptedShares++;
+
+      // Add the share to the completion list
+      this.#completedShares.append(share);
+
+      // Remove the share from the in-progress list
+      this.#inProgressShares.forEach(function(inProgShare, index, object) {
+          if (this.#areSharesEqual(inProgShare, share)) {
+                object.splice(index, 1);
+          }
+      });
+    }
+
+    return rejected;
   }
 
   // Request a new chunk of work
-  getNewShareOfWorkForWorker(socket){
+  getNewShareObjForWorker(socket){
     console.info(`Assigning new share to [id=${socket.id}]`);
+
+    // If we have enough shares to hand out
+    if(this.#incompleteShares.length > 0){
+
+      // Remove the first share from the share list
+      var nextShare = this.#incompleteShares.splice(0,1)[0];
+
+      // Consider the share to be in-progress
+      this.#inProgressShares.append(nextShare);
+
+      // Return the share and the winning number
+      return {share:nextShare, winNum:this.#winningNum};
+    }
+
+    // No more shares left to hand out
+    // but we have in-progress shares
+    else if(this.#inProgressShares.length > 0){
+
+      // Let's hand out the in-progress shares
+      // in a round-robin style. This will duplicate
+      // work, in the hopes that faster workers explore
+      // the leftover space faster
+      let nextShare = this.#inProgressShares[this.#repeatSharesIdx];
+      this.#repeatSharesIdx = (this.#repeatSharesIdx+1) % this.#inProgressShares.length;
+
+      return {share:nextShare, winNum:this.#winningNum};
+    }
+    else{
+      // If we have 0 work to hand out, tell the worker to wait
+      return null;
+    }
+  }
+
+  isWinningShare(share){
+    // let's check if we have a winner
+    return share.includes(this.#winningNum);
   }
 
   // For the server to check if the game is over
@@ -115,7 +208,7 @@ module.exports = class GameManager{
   }
 
   // Restart the game with all the players still connected
-  restartGameWithCurrentPlayers(){
+  restartGameWithCurrentWorkers(){
     return this.#clients;
   }
 
