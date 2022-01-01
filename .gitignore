@@ -6,6 +6,7 @@ npm-debug.log
 *.env
 *.dev
 *.swp
+.*.swp
 .DS_Store
 
 # Docker
