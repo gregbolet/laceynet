@@ -111,15 +111,21 @@ module.exports = class GameManager{
 
   // Share comparison function
   static #areSharesEqual(shareA, shareB){
-      if(shareA.length !== shareB.length){
+    if(shareA.length !== shareB.length){
+      return false;
+    }
+
+    let equal = true;
+    shareA.every(shareAItem => {
+      if(!shareB.includes(shareAItem)){
+        equal = false;
         return false;
       }
-      shareA.forEach(shareAItem => {
-        if(!shareB.includes(shareAItem)){
-          return false;
-        }
-      });
       return true;
+    });
+
+    return equal;
+
   }
 
   // Report to the game manager that the worker completed their share
@@ -153,9 +159,9 @@ module.exports = class GameManager{
 
       // Remove the share from the in-progress list
       this.#inProgressShares.forEach(function(inProgShare, index, object) {
-          if (GameManager.#areSharesEqual(inProgShare, share)) {
-                object.splice(index, 1);
-          }
+        if (GameManager.#areSharesEqual(inProgShare, share)) {
+          object.splice(index, 1);
+        }
       });
     }
 
@@ -174,6 +180,7 @@ module.exports = class GameManager{
 
       // Consider the share to be in-progress
       this.#inProgressShares.push(nextShare);
+      console.info(`Share from incomplete list [${nextShare}]`);
 
       // Return the share and the winning number
       return {share:nextShare, winNum:this.#winningNum};
@@ -190,10 +197,13 @@ module.exports = class GameManager{
       let nextShare = this.#inProgressShares[this.#repeatSharesIdx];
       this.#repeatSharesIdx = (this.#repeatSharesIdx+1) % this.#inProgressShares.length;
 
+      console.info(`Share from in-progress list [${nextShare}]`);
+
       return {share:nextShare, winNum:this.#winningNum};
     }
     else{
       // If we have 0 work to hand out, tell the worker to wait
+      console.info(`Idle signal to be sent`);
       return null;
     }
   }

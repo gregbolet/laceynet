@@ -78,12 +78,12 @@
           socket.emit('completedShare', {share:currentShare});
         });
 
-    // On share acceptance, request a new share fo work
+    // On share acceptance, request a new share of work
     socket.on('shareAccepted', (msg) => {
           socket.emit('needNewShare'); 
         });
 
-    // On share rejection, request a new share fo work
+    // On share rejection, request a new share of work
     socket.on('shareRejected', (msg) => {
           socket.emit('needNewShare'); 
         });

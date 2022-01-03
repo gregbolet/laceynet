@@ -19,7 +19,7 @@ const server = app.listen(PORT, function() {
 const io = socketIO(server);
 
 // Now let's setup a new GameManager instance
-let GameMan = new GameManager(10, 2);
+let GameMan = new GameManager(10, 4);
 
 // Handle a new user connection
 io.on('connection', (socket) => {
@@ -36,15 +36,18 @@ io.on('connection', (socket) => {
 
   // Setup the new share request handler
   socket.on('needNewShare', (msg) => {
+	  console.info(`Client needs new share [id=${socket.id}]`);
 
     // Get the next share for it to work on
     let shareObj = GameMan.getNewShareObjForWorker(socket);
 
     // If there are no shares to hand out, tell the worker to idle
     if(shareObj == null){
+	    console.info(`No shares left to hand out`);
       socket.emit('idle');
     }
     else{
+	    console.info(`Sending new share ${shareObj.share}`);
       socket.emit('newShare', shareObj);
     }
   });
@@ -52,13 +55,16 @@ io.on('connection', (socket) => {
   // Setup the completed share request handler
   // This is for shares that are not claimed to be winners
   socket.on('completedShare', (msg) => {
+	  console.info(`Client completed a share [share=${msg.share} id=${socket.id}]`);
     let share = msg.share;
     let wasRejected = GameMan.reportCompletedShare(socket, share);
 
     if(wasRejected){
+	    console.info(`share rejected`);
       socket.emit('shareRejected');
     }
     else{
+	    console.info(`share accepted`);
       socket.emit('shareAccepted');
     }
 
