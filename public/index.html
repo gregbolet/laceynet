@@ -8,16 +8,32 @@
     <script src="/socket.io/socket.io.js"></script>
 
     <title>Guessing Game!</title>
+
+    <style>
+      .navbar-nav {
+        margin-left: auto;
+      }
+    </style>
   </head>
 
 
   <body>
-    <p id="server-time"></p>
+
+    <nav class="navbar navbar-expand-lg sticky-top navbar-light bg-light">
+      <ul class="navbar-nav ml-0">
+        <li class="nav-item">
+          <button class="btn btn-primary" id="restartButton">Restart Game</button>
+          <a class="btn btn-warning" href="adminPanel">Admin Panel</a>
+        </li>
+      </ul>
+        <p class="navbar-text ml-auto pb-0" style="padding-bottom:0px ! important;" id="server-time"></p>
+    </nav>
+
 
     <div class="container" style="width:100%; height:100%;">
       <div class="col-md-12 text-center align-middle" style="width:100%; height:100%;">
         <button id="mainbutton" type="button" class="btn btn-primary btn-block" style="font-size:500%; width:100%; height:100%; height:50%; position: absolute; top:25%;">
-          TEST BUTTON	
+          Connecting to game server...
         </button>
       </div>
     </div>
@@ -28,9 +44,12 @@
 
     // Use JQuery to grab our button object
     var button = $( "#mainbutton" );
+    var restartBtn = $( "#restartButton" );
 
     function setContinueMode(){
+          button.removeClass( "btn-danger" )
           button.removeClass( "btn-warning" );
+          button.removeClass( "btn-success" )
           button.addClass( "btn-primary" );
         }
 
@@ -42,11 +61,15 @@
         }
 
     function setLoserMode(){
+          button.removeClass( "btn-warning" )
           button.removeClass( "btn-primary" )
+          button.removeClass( "btn-success" )
           button.addClass( "btn-danger" )
         }
 
     function setWinnerMode(){
+          button.removeClass( "btn-danger" )
+          button.removeClass( "btn-warning" )
           button.removeClass( "btn-primary" )
           button.addClass( "btn-success" )
         }
@@ -55,7 +78,32 @@
     let socket = io();
     let el;
     let currentShare = [];
+    let currentPos = -1;
     let winningNum = -1;
+
+    restartBtn.click(function(){
+      socket.emit('restartGame', {share:currentShare});
+    });
+
+    // Setup the logic for when the button is pressed
+    button.click(function(){
+          // If we have over-clicked, let's request new work
+          // and let the server know we completed our share
+          if(currentPos >= currentShare.length - 1){
+                socket.emit('completedShare', {share:currentShare});
+              }  
+          // If we click on the winning number, let the server know
+          else if(winningNum == currentShare[currentPos]){
+                console.log('I think I\'m a winner!');
+                socket.emit('iAmAWinner', {share:currentShare});
+              }
+          // Otherwise, advance to the next number in the share
+          else{
+                setContinueMode();
+                currentPos++;
+                button.html(`${currentShare[currentPos]}`);   
+              }
+        });
 
     socket.on('time', (timeString) => {
           el = document.getElementById('server-time');
@@ -73,9 +121,12 @@
           console.log('Got a new share');
           currentShare = msg.share;
           winningNum = msg.winNum;
+          currentPos = 0;
 
-          // Let the server know we completed the share
-          socket.emit('completedShare', {share:currentShare});
+          // Set the button text to the first element
+          button.html(`${currentShare[currentPos]}`);   
+          setContinueMode();
+
         });
 
     // On share acceptance, request a new share of work
@@ -106,6 +157,12 @@
     // Handle the case where we ARE the winner 
     socket.on('youAreTheWinner', (msg) => {
           setWinnerMode();
+        });
+
+    // Handle the case of restarting the game
+    socket.on('restartGame', (msg) => {
+          setLoserMode();
+          socket.emit('needNewShare');
         });
   </script>
 

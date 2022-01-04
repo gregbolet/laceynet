@@ -20,25 +20,19 @@ module.exports = class GameManager{
   #repeatSharesIdx;
   #completedShares;
 
-  // Let's set up the game to play
-  // We assume maxNums > shareSize and only 
-  // account for this case
-  constructor(maxNums, shareSize){
-    console.log('Starting new game...');
+  #generateShares(){
 
-    // Setup the game. This means the client list
-    // and the problem space for the clients to explore
-    this.#maxNums = maxNums;
-    this.#shareSize = shareSize;
-    this.#clients = new Map();
-    this.#incompleteShares = [];
+    let maxNums = this.#maxNums;
+    let shareSize = this.#shareSize;
 
     // These are to track the shares that are being worked on
+    this.#incompleteShares = [];
     this.#inProgressShares = [];
-    this.#repeatSharesIdx = 0;
-
-    // This is to track the completed shares
     this.#completedShares = [];
+
+    // This tells us where we are in the RR inProgress Shares
+    // that will be handed out when we run out of incompleteShares
+    this.#repeatSharesIdx = 0;
 
     let allNums = [];
 
@@ -86,9 +80,25 @@ module.exports = class GameManager{
     // having found a winner
     this.#winningNum = Math.floor(Math.random()*this.#maxNums) + 1;
 
-    console.log('New game started.');
     console.log(`Winning Num: ${this.#winningNum}`);
     console.log('Shares: ',JSON.stringify(this.#incompleteShares));
+  }
+
+  // Let's set up the game to play
+  // We assume maxNums > shareSize and only 
+  // account for this case
+  constructor(maxNums, shareSize){
+    console.log('Starting new game...');
+
+    // Setup the game. This means the client list
+    // and the problem space for the clients to explore
+    this.#maxNums = maxNums;
+    this.#shareSize = shareSize;
+    this.#clients = new Map();
+
+    this.#generateShares();
+
+    console.log('New game started.');
   }
 
 
@@ -213,14 +223,18 @@ module.exports = class GameManager{
     return share.includes(this.#winningNum);
   }
 
-  // For the server to check if the game is over
-  isGameOver(){
-    return false;
-  }
-
   // Restart the game with all the players still connected
   restartGameWithCurrentWorkers(){
-    return this.#clients;
+
+    // Regenerate all the shares
+    this.#generateShares();
+
+    this.#clients.forEach((clientData, client) => {
+      clientData.acceptedShares = 0;
+      clientData.rejectedShares = 0;
+    });
+
+    console.log('New game started.');
   }
 
   // Allow the server to retrieve a list of the clients
