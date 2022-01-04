@@ -15,7 +15,7 @@ const server = app.listen(PORT, function() {
 });
 
 // socketIO will serve the websockets and handle reverse
-// compatibility and fallback
+// compatibility and protocol fallback
 const io = socketIO(server);
 
 // Now let's setup a new GameManager instance

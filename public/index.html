@@ -1,10 +1,10 @@
 <html>
   <head>
     <!-- Load Bootstrap/CSS/Popper/Jquery/Socket.io -->
-    <link rel="stylesheet" href="bootstrap.min.css"> </link>
-    <script src="jquery-3.6.0.min.js"></script>
-    <script src="popper.min.js" ></script>
-    <script src="bootstrap.min.js" ></script>
+    <link rel="stylesheet" href="/css/bootstrap.min.css"> </link>
+    <script src="/js/jquery-3.6.0.min.js"></script>
+    <script src="/js/popper.min.js" ></script>
+    <script src="/js/bootstrap.min.js" ></script>
     <script src="/socket.io/socket.io.js"></script>
 
     <title>Guessing Game!</title>
@@ -45,10 +45,10 @@
     // Use JQuery to grab our button object
     var button = $( "#mainbutton" );
     var restartBtn = $( "#restartButton" );
-    let inLoserMode = false;
+    let isGameOver = false;
 
     function setContinueMode(){
-          if(!inLoserMode){
+          if(!isGameOver){
           button.removeClass( "btn-danger" )
           button.removeClass( "btn-warning" );
           button.removeClass( "btn-success" )
@@ -57,7 +57,7 @@
         }
 
     function setRestartMode(){
-          if(!inLoserMode){
+          if(!isGameOver){
           button.removeClass( "btn-danger" )
           button.removeClass( "btn-primary" )
           button.removeClass( "btn-success" )
@@ -66,18 +66,18 @@
         }
 
     function setLoserMode(){
-          if(!inLoserMode){
+          if(!isGameOver){
           button.removeClass( "btn-warning" )
           button.removeClass( "btn-primary" )
           button.removeClass( "btn-success" )
           button.addClass( "btn-danger" )
 
-          inLoserMode = true;
+          isGameOver = true;
               }
         }
 
     function setWinnerMode(){
-          if(!inLoserMode){
+          if(!isGameOver){
           button.removeClass( "btn-danger" )
           button.removeClass( "btn-warning" )
           button.removeClass( "btn-primary" )
@@ -99,7 +99,7 @@
     // Setup the logic for when the button is pressed
     button.click(function(){
 
-          if(inLoserMode){
+          if(isGameOver){
             return;
           }
 
@@ -165,7 +165,7 @@
     // Handle the case where we are told to idle
     socket.on('idle', (msg) => {
           setLoserMode();
-          inLoserMode = true;
+          isGameOver = true;
         });
 
     // Handle the case where we are told we lost 
@@ -176,13 +176,13 @@
     // Handle the case where we ARE the winner 
     socket.on('youAreTheWinner', (msg) => {
           setWinnerMode();
-          inLoserMode = true;
+          isGameOver = true;
         });
 
     // Handle the case of restarting the game
     socket.on('restartGame', (msg) => {
           setLoserMode();
-          inLoserMode = false;
+          isGameOver = false;
           socket.emit('needNewShare');
         });
   </script>
