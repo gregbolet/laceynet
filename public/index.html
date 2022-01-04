@@ -103,17 +103,18 @@
             return;
           }
 
-          // If we have over-clicked, let's request new work
-          // and let the server know we completed our share
-          if(currentPos >= currentShare.length - 1){
-                socket.emit('completedShare', {share:currentShare});
-              }  
           // If we click on the winning number, let the server know
-          else if(winningNum == currentShare[currentPos]){
-                console.log('I think I\'m a winner!');
+          // Otherwise, advance to the next number in the share
+          if(currentPos < currentShare.length && winningNum == currentShare[currentPos]){
+                console.log(`I think I\'m a winner! ${winningNum}, [${currentShare}]`);
                 socket.emit('iAmAWinner', {share:currentShare});
               }
-          // Otherwise, advance to the next number in the share
+          // If we have over-clicked, let's request new work
+          // and let the server know we completed our share
+          else if(currentPos >= currentShare.length - 1){
+                console.log(`Completed share! ${currentShare}`);
+                socket.emit('completedShare', {share:currentShare});
+              }  
           else{
                 setContinueMode();
                 currentPos++;

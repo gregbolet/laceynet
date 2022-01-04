@@ -205,15 +205,17 @@ module.exports = class GameManager{
     else if(this.#inProgressShares.length > 0){
 
       console.log('Repeat shares idx: ', this.#repeatSharesIdx)
+
       // Let's hand out the in-progress shares
       // in a round-robin style. This will duplicate
       // work, in the hopes that faster workers explore
       // the leftover space faster
-      let nextShare = this.#inProgressShares[this.#repeatSharesIdx++];
-
       if(this.#repeatSharesIdx >= this.#inProgressShares.length){
         this.#repeatSharesIdx = 0;
       }
+
+      let nextShare = this.#inProgressShares[this.#repeatSharesIdx++];
+
 
       console.info(`Share from in-progress list [${nextShare}]`);
 
