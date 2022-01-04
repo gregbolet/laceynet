@@ -1,6 +1,7 @@
 <html>
   <head>
     <!-- Load Bootstrap/CSS/Popper/Jquery/Socket.io -->
+    <link rel="stylesheet" href="/css/gamestyle.css"> </link>
     <link rel="stylesheet" href="/css/bootstrap.min.css"> </link>
     <script src="/js/jquery-3.6.0.min.js"></script>
     <script src="/js/popper.min.js" ></script>
@@ -49,39 +50,39 @@
 
     function setContinueMode(){
           if(!isGameOver){
-          button.removeClass( "btn-danger" )
-          button.removeClass( "btn-warning" );
-          button.removeClass( "btn-success" )
-          button.addClass( "btn-primary" );
+                button.removeClass( "btn-danger" )
+                button.removeClass( "btn-warning" );
+                button.removeClass( "btn-success" )
+                button.addClass( "btn-primary" );
               }
         }
 
     function setRestartMode(){
           if(!isGameOver){
-          button.removeClass( "btn-danger" )
-          button.removeClass( "btn-primary" )
-          button.removeClass( "btn-success" )
-          button.addClass( "btn-warning" )
+                button.removeClass( "btn-danger" )
+                button.removeClass( "btn-primary" )
+                button.removeClass( "btn-success" )
+                button.addClass( "btn-warning" )
               }
         }
 
     function setLoserMode(){
           if(!isGameOver){
-          button.removeClass( "btn-warning" )
-          button.removeClass( "btn-primary" )
-          button.removeClass( "btn-success" )
-          button.addClass( "btn-danger" )
+                button.removeClass( "btn-warning" )
+                button.removeClass( "btn-primary" )
+                button.removeClass( "btn-success" )
+                button.addClass( "btn-danger" )
 
-          isGameOver = true;
+                isGameOver = true;
               }
         }
 
     function setWinnerMode(){
           if(!isGameOver){
-          button.removeClass( "btn-danger" )
-          button.removeClass( "btn-warning" )
-          button.removeClass( "btn-primary" )
-          button.addClass( "btn-success" )
+                button.removeClass( "btn-danger" )
+                button.removeClass( "btn-warning" )
+                button.removeClass( "btn-primary" )
+                button.addClass( "btn-success" )
               }
         }
 
@@ -93,15 +94,15 @@
     let winningNum = -1;
 
     restartBtn.click(function(){
-      socket.emit('restartGame', {share:currentShare});
-    });
+          socket.emit('restartGame', {share:currentShare});
+        });
 
     // Setup the logic for when the button is pressed
     button.click(function(){
 
           if(isGameOver){
-            return;
-          }
+                return;
+              }
 
           // If we click on the winning number, let the server know
           // Otherwise, advance to the next number in the share

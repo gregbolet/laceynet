@@ -1,0 +1,22 @@
+.testbox {
+  border:0px transparent;
+  width:100%;
+  height:100%;
+  background:
+  /*M - O*/
+  linear-gradient(to top right,
+  transparent calc(50% - 3px),red calc(50% - 20px),
+  red calc(50% + 20px),transparent calc(50% + 3px)) top left,
+
+  /*N - L*/  
+  linear-gradient(to bottom right,
+  transparent calc(51% - 3px),red calc(51% - 2px),
+  red calc(51% + 2px),transparent calc(51% + 3px)) bottom left;
+
+  background-repeat:no-repeat;
+  background-size:0 0;
+  transition:0.5s ease-out;
+}
+.testbox:hover {
+  background-size:100% 100%;
+}
