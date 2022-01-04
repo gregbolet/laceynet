@@ -75,6 +75,7 @@ io.on('connection', (socket) => {
 
   });
 
+  // This handles shares that claim to be winners
   socket.on('iAmAWinner', (msg) =>{
 
     if(gameOver){
@@ -117,6 +118,7 @@ io.on('connection', (socket) => {
     GameMan.restartGameWithCurrentWorkers();  
     gameOver = false;
 
+    // Tell all the players we restarted
     io.emit('restartGame');
   });
 

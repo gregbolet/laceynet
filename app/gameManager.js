@@ -180,7 +180,11 @@ module.exports = class GameManager{
 
   // Request a new chunk of work
   getNewShareObjForWorker(socket){
-    console.info(`Assigning new share to [id=${socket.id}]`);
+    //console.info(`Assigning new share to [id=${socket.id}]`);
+
+    console.log('Incomplete Shares: ',JSON.stringify(this.#incompleteShares));
+    console.log('In-Progress Shares: ',JSON.stringify(this.#inProgressShares));
+    console.log('Completed Shares: ',JSON.stringify(this.#completedShares));
 
     // If we have enough shares to hand out
     if(this.#incompleteShares.length > 0){
@@ -200,12 +204,16 @@ module.exports = class GameManager{
     // but we have in-progress shares
     else if(this.#inProgressShares.length > 0){
 
+      console.log('Repeat shares idx: ', this.#repeatSharesIdx)
       // Let's hand out the in-progress shares
       // in a round-robin style. This will duplicate
       // work, in the hopes that faster workers explore
       // the leftover space faster
-      let nextShare = this.#inProgressShares[this.#repeatSharesIdx];
-      this.#repeatSharesIdx = (this.#repeatSharesIdx+1) % this.#inProgressShares.length;
+      let nextShare = this.#inProgressShares[this.#repeatSharesIdx++];
+
+      if(this.#repeatSharesIdx >= this.#inProgressShares.length){
+        this.#repeatSharesIdx = 0;
+      }
 
       console.info(`Share from in-progress list [${nextShare}]`);
 

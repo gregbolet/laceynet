@@ -45,33 +45,44 @@
     // Use JQuery to grab our button object
     var button = $( "#mainbutton" );
     var restartBtn = $( "#restartButton" );
+    let inLoserMode = false;
 
     function setContinueMode(){
+          if(!inLoserMode){
           button.removeClass( "btn-danger" )
           button.removeClass( "btn-warning" );
           button.removeClass( "btn-success" )
           button.addClass( "btn-primary" );
+              }
         }
 
     function setRestartMode(){
+          if(!inLoserMode){
           button.removeClass( "btn-danger" )
           button.removeClass( "btn-primary" )
           button.removeClass( "btn-success" )
           button.addClass( "btn-warning" )
+              }
         }
 
     function setLoserMode(){
+          if(!inLoserMode){
           button.removeClass( "btn-warning" )
           button.removeClass( "btn-primary" )
           button.removeClass( "btn-success" )
           button.addClass( "btn-danger" )
+
+          inLoserMode = true;
+              }
         }
 
     function setWinnerMode(){
+          if(!inLoserMode){
           button.removeClass( "btn-danger" )
           button.removeClass( "btn-warning" )
           button.removeClass( "btn-primary" )
           button.addClass( "btn-success" )
+              }
         }
 
     // URL defaults to window.location
@@ -87,6 +98,11 @@
 
     // Setup the logic for when the button is pressed
     button.click(function(){
+
+          if(inLoserMode){
+            return;
+          }
+
           // If we have over-clicked, let's request new work
           // and let the server know we completed our share
           if(currentPos >= currentShare.length - 1){
@@ -142,11 +158,13 @@
     // Handle the case where we have a winner 
     socket.on('weGotAWinner', (msg) => {
           setLoserMode();
+          button.html('Winner found! Waiting for restart...');
         });
 
     // Handle the case where we are told to idle
     socket.on('idle', (msg) => {
           setLoserMode();
+          inLoserMode = true;
         });
 
     // Handle the case where we are told we lost 
@@ -157,11 +175,13 @@
     // Handle the case where we ARE the winner 
     socket.on('youAreTheWinner', (msg) => {
           setWinnerMode();
+          inLoserMode = true;
         });
 
     // Handle the case of restarting the game
     socket.on('restartGame', (msg) => {
           setLoserMode();
+          inLoserMode = false;
           socket.emit('needNewShare');
         });
   </script>
