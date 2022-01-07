@@ -1,26 +1,3 @@
-.testbox {
-  border:0px transparent;
-  width:100%;
-  height:100%;
-  background:
-  /*M - O*/
-  linear-gradient(to top right,
-  transparent calc(50% - 3px),red calc(50% - 20px),
-  red calc(50% + 20px),transparent calc(50% + 3px)) top left,
-
-  /*N - L*/  
-  linear-gradient(to bottom right,
-  transparent calc(51% - 3px),red calc(51% - 2px),
-  red calc(51% + 2px),transparent calc(51% + 3px)) bottom left;
-
-  background-repeat:no-repeat;
-  background-size:0 0;
-  transition:0.5s ease-out;
-}
-.testbox:hover {
-  background-size:100% 100%;
-}
-
 .navbar-nav {
   margin-left: auto;
 }
@@ -29,6 +6,33 @@
   font-size:400% !important; 
   width:100%; 
   height:50%; 
-  position: absolute; 
   top:25%;
+}
+
+#responseOverlay{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width:100%;
+  height:100%;
+  background: rgba(0,0,0,0.5);
+  opacity: 0;
+  transition:opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.container:hover #responseOverlay{
+  opacity: 1;
+}
+
+.container{
+  width:100%;
+  height:100%;
+  display: flex;
+  align-items: center;
+
+}
+
+body {
+  overflow: hidden;
 }
