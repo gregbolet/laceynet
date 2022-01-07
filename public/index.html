@@ -86,14 +86,15 @@
               }
         }
 
-    const fadeDuration = 300;
+    const fadeDuration = 200;
+    const fadeWait = 500;
 
     function showOverlayRedX(callback){
-         $("#redXOverlay").fadeIn(fadeDuration).delay(1000).fadeOut(fadeDuration, callback); 
+         $("#redXOverlay").fadeIn(fadeDuration).delay(fadeWait).fadeOut(fadeDuration, callback); 
     }
 
     function showOverlayGreenCheck(callback){
-         $("#greenCheckOverlay").fadeIn(fadeDuration).delay(1000).fadeOut(fadeDuration, callback); 
+         $("#greenCheckOverlay").fadeIn(fadeDuration).delay(fadeWait).fadeOut(fadeDuration, callback); 
     }
 
     // URL defaults to window.location
