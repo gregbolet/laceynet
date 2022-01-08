@@ -152,6 +152,11 @@
 
     // Handle incoming message for the requested share
     socket.on('newShare', (msg) => {
+
+          if(isGameOver){
+                return;
+              }
+
           console.log('Got a new share');
           currentShare = msg.share;
           winningNum = msg.winNum;
