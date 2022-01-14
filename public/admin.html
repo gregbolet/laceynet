@@ -60,10 +60,10 @@
             resetGrid();
             var count = 1;
             for(let i =0;i<clientlist.length -1;i++) {
-                    let color = COLORS[_.random(COLORS.length - 1)];
-                    let client_num = i+1;
-                    let num = "Client " + client_num.toString() +": " + clientlist[i]; //_.random(10000);
-                    container.append(Mustache.render(template, { color, num }));
+                let color = COLORS[_.random(COLORS.length - 1)];
+                let client_num = i+1;
+                let num = "Client " + client_num.toString() +": " + clientlist[i]; //_.random(10000);
+                container.append(Mustache.render(template, { color, num }));
             }
         }
 
