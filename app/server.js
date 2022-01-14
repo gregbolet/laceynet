@@ -124,11 +124,19 @@ io.on('connection', (socket) => {
 
   // Let the client know they are registered
   socket.emit('registered');
+
+  socket.on('refreshResponse', (msg) => {
+    console.log("Getting all clients current numbers");
+    var clientinfo = GameMan.getMyClients();
+    console.log("heres the client info, clientinfo")
+    socket.emit('clientssent', clientinfo)
+  })
 });
 
 // Update the page time every second
 setInterval(() => {
   io.emit('time', new Date().toTimeString());
 } , 1000);
+
 
 

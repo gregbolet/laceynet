@@ -252,6 +252,31 @@ module.exports = class GameManager{
     return this.#clients;
   }
 
+  getClientIDs(){  //don thibk i need this anymore
+    var clientinfo ="";
+    var count = 1;
+    this.#clients.forEach((clientData, client) => {
+      if(count >= this.#clients.size){
+        clientinfo += JSON.stringify("Admin: "  + client.id, null, 2)
+      }else {
+        clientinfo += JSON.stringify("Client " + count + ": " + client.id, null, 2)
+      }
+      count++;
+    })
+    
+    return clientinfo;
+  }
+
+  getMyClients(){
+    var arrayOfIDs = [];
+    var count = 0;
+    this.#clients.forEach((clientData, client) => {
+      arrayOfIDs[count] = client.id;
+      count++;
+    })
+    return arrayOfIDs;
+  }
+
 }
 
 
