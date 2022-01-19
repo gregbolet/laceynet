@@ -208,6 +208,14 @@
           isGameOver = false;
           socket.emit('needNewShare');
         });
+
+    socket.on('getClientNumber', (msg) => {
+        //get the number
+        let mynum = currentShare[currentPos];
+        let myid = socket.id;
+        console.info("give me the number");
+        socket.emit('returnClientNumber', [myid,mynum]);
+    });
   </script>
 
 </html>

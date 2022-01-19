@@ -52,19 +52,28 @@
         const container = $('#panel');
         const tmpl = $('#client_temp').html();
         
+        //resets container for display
         function resetGrid(){
             document.querySelectorAll(".item").forEach((e) => e.parentNode.removeChild(e));
         }
 
-        function addItem(container, template, clientlist) { //adds alll client ids to grid EXCEPT admin
+        //adds current clients to display page
+        function addItem(container, template, clientlist) { //adds all client ids to grid EXCEPT admin
             resetGrid();
             var count = 1;
-            for(let i =0;i<clientlist.length -1;i++) {
+            for(let id in clientlist){
                 let color = COLORS[_.random(COLORS.length - 1)];
-                let client_num = i+1;
-                let num = "Client " + client_num.toString() +": " + clientlist[i]; //_.random(10000);
+                let client_num = count;
+                let num = "Client " + id.toString() +": " + clientlist[id];
                 container.append(Mustache.render(template, { color, num }));
+                count++;
             }
+            // for(let i =0;i<clientlist.length -1;i++) {
+            //     let color = COLORS[_.random(COLORS.length - 1)];
+            //     let client_num = i+1;
+            //     let num = "Client " + client_num.toString() +": " + clientlist[i]; //_.random(10000);
+            //     container.append(Mustache.render(template, { color, num }));
+            // }
         }
 
          // URL defaults to window.location
@@ -80,7 +89,8 @@
 
         refreshBtn.click(function(){
             console.log("refresh button was clicked")
-            socket.emit('refreshResponse');
+            //socket.emit('refreshResponse');
+            socket.emit('askClientResponse');
         });
 
 
@@ -89,9 +99,15 @@
                 el.innerHTML = 'Server time: ' + timeString;
             });
 
-        socket.on('clientssent', (msg) => {
+        socket.on('clientssent', (msg) => { //probably dont need anymore
             addItem(container,tmpl,msg);
         });
+
+        socket.on('getClientDict', (msg) => {
+            console.log('heres the dict')
+            console.log(JSON.stringify(msg));
+            addItem(container,tmpl,msg);
+        })
 
 
     </script>

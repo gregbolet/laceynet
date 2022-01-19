@@ -267,7 +267,7 @@ module.exports = class GameManager{
     return clientinfo;
   }
 
-  getMyClients(){  //returns array of client id's
+  getMyClients(){  //returns array of client id's //can probably delete this
     var arrayOfIDs = [];
     var count = 0;
     this.#clients.forEach((clientData, client) => {
@@ -275,6 +275,10 @@ module.exports = class GameManager{
       count++;
     })
     return arrayOfIDs;
+  }
+
+  getClientSize() {
+    return this.#clients.size;
   }
 
 }

@@ -24,6 +24,10 @@ let GameMan = new GameManager(10, 4);
 // Keep track of whether we need to restart the game
 let gameOver = false;
 
+let adminAsked = false;
+
+let numberDict = {};
+
 // Handle a new user connection
 io.on('connection', (socket) => {
 	console.info(`Client connected [id=${socket.id}]`);
@@ -125,12 +129,31 @@ io.on('connection', (socket) => {
   // Let the client know they are registered
   socket.emit('registered');
 
-  socket.on('refreshResponse', (msg) => {
+  socket.on('refreshResponse', (msg) => { //can probably get rid of this
     console.log("Getting all clients current numbers");
     var clientinfo = GameMan.getMyClients();
     console.log("heres the client info, clientinfo")
     socket.emit('clientssent', clientinfo)
   })
+
+  socket.on('askClientResponse',(msg) => {
+    console.info("ask client response");
+    numberDict = {}; //need to clear dict each time this is called
+    socket.broadcast.emit('getClientNumber');
+  });
+
+  socket.on('returnClientNumber', (msg) => {
+    //populate dictionary
+    console.info("heres the number");
+    console.info(msg[0] + " " + msg[1]);
+    numberDict[msg[0]] = msg[1];
+    if(Object.keys(numberDict).length == (GameMan.getClientSize() - 1)){ //dictionary is full
+      console.info('going to dict');
+      socket.broadcast.emit('getClientDict', numberDict); //send dictionary to admin
+    }
+  });
+
+  
 });
 
 // Update the page time every second
