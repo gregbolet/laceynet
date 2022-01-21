@@ -212,7 +212,7 @@
     socket.on('getClientNumber', (msg) => {
         //get the number
         let mynum = currentShare[currentPos];
-        let myid = socket.id;
+        let myid = socket.id; //socket.id;
         console.info("give me the number");
         socket.emit('returnClientNumber', [myid,mynum]);
     });

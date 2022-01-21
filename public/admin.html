@@ -57,8 +57,10 @@
             console.info("resetting grid");
             document.querySelectorAll(".item").forEach((e) => e.parentNode.removeChild(e));
         }
-
-        //adds current clients to display page
+        function sortObjectByKeys(o) {
+            return Object.keys(o).sort().reduce((r, k) => (r[k] = o[k], r), {});
+        }
+                //adds current clients to display page
         function addItem(container, template, clientlist) { //adds all client ids to grid EXCEPT admin
             console.info("adding items");
             resetGrid();
@@ -66,7 +68,7 @@
             for(let id in clientlist){
                 let color = COLORS[_.random(COLORS.length - 1)];
                 let client_num = count;
-                let num = "Client " + client_num.toString() +": " + clientlist[id];
+                let num = "Client " + id.toString() +": " + clientlist[id];
                 container.append(Mustache.render(template, { color, num }));
                 count++;
             }
@@ -85,7 +87,7 @@
         let currentPos = -1;
         let winningNum = -1;
 
-        restartBtn.click(function(){
+        restartBtn.click(function(){ //need to finx doesnt work rn
             socket.emit('restartGame', {share:currentShare});
             });
 
@@ -108,7 +110,8 @@
         socket.on('getClientDict', (msg) => {
             console.log('heres the dict')
             console.log(JSON.stringify(msg));
-            addItem(container,tmpl,msg);
+            var sortedDict = sortObjectByKeys(msg);
+            addItem(container,tmpl,sortedDict);
         })
 
         socket.on('getClientNumber', (msg) => {
