@@ -8,6 +8,7 @@
   .container .item {
     flex: 0 0 calc(25% - 1em);
     min-height: 100px;
+    min-width: 25px;
     margin: 0.25em 0.5em;
     font-size: large;
   }

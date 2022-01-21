@@ -54,17 +54,19 @@
         
         //resets container for display
         function resetGrid(){
+            console.info("resetting grid");
             document.querySelectorAll(".item").forEach((e) => e.parentNode.removeChild(e));
         }
 
         //adds current clients to display page
         function addItem(container, template, clientlist) { //adds all client ids to grid EXCEPT admin
+            console.info("adding items");
             resetGrid();
             var count = 1;
             for(let id in clientlist){
                 let color = COLORS[_.random(COLORS.length - 1)];
                 let client_num = count;
-                let num = "Client " + id.toString() +": " + clientlist[id];
+                let num = "Client " + client_num.toString() +": " + clientlist[id];
                 container.append(Mustache.render(template, { color, num }));
                 count++;
             }
@@ -77,7 +79,7 @@
         }
 
          // URL defaults to window.location
-        let socket = io();
+        let socket = io('/admin.html');
         let el;
         let currentShare = [];
         let currentPos = -1;
@@ -109,6 +111,10 @@
             addItem(container,tmpl,msg);
         })
 
+        socket.on('getClientNumber', (msg) => {
+            console.log('oops mistake');
+            console.info('oops mistake');
+        });
 
     </script>
 </html>

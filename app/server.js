@@ -28,8 +28,40 @@ let adminAsked = false;
 
 let numberDict = {};
 
+const adminIo = io.of('/admin.html');
+
+const clientIo = io.of('/');
+
+//admin client namespace
+adminIo.on('connection', (socket) => {
+  console.info(`Admin Client connected [id=${socket.id}]`);
+
+  socket.on('disconnect', () => {
+		console.log('Admin Client disconnected');
+    //GameMan.removeWorker(socket);
+	});
+
+  socket.on('askClientResponse',(msg) => {
+    console.info("ask client response - admin");
+    numberDict = {}; //need to clear dict each time this is called
+    clientIo.emit('getClientNumber');
+  });
+
+  socket.on('returnClientNumber', (msg) => {
+    //populate dictionary
+    console.info("heres the number");
+    console.info(msg[0] + " " + msg[1]);
+    numberDict[msg[0]] = msg[1];
+    console.info("map size= ",Object.keys(numberDict).length);
+    console.info("client size= GameMan.getClientSize()");
+    if(Object.keys(numberDict).length == (GameMan.getClientSize())){ //dictionary is full //need minus  -1 to ignore the admin as a client
+      console.info('going to dict');
+      socket.broadcast.emit('getClientDict', numberDict); //send dictionary to admin
+    }
+  });
+});
 // Handle a new user connection
-io.on('connection', (socket) => {
+clientIo.on('connection', (socket) => {
 	console.info(`Client connected [id=${socket.id}]`);
 
   // Let's add the player to the game
@@ -147,18 +179,25 @@ io.on('connection', (socket) => {
     console.info("heres the number");
     console.info(msg[0] + " " + msg[1]);
     numberDict[msg[0]] = msg[1];
-    if(Object.keys(numberDict).length == (GameMan.getClientSize() - 1)){ //dictionary is full
+    if(Object.keys(numberDict).length == (GameMan.getClientSize())){ //dictionary is full //need minus  -1 to ignore the admin as a client
       console.info('going to dict');
-      socket.broadcast.emit('getClientDict', numberDict); //send dictionary to admin
+      adminIo.emit('getClientDict', numberDict); //send dictionary to admin
     }
   });
+
+  
 
   
 });
 
 // Update the page time every second
 setInterval(() => {
-  io.emit('time', new Date().toTimeString());
+  clientIo.emit('time', new Date().toTimeString());
+} , 1000);
+
+// Update the page time every second for admin
+setInterval(() => {
+  adminIo.emit('time', new Date().toTimeString());
 } , 1000);
 
 
