@@ -10,8 +10,8 @@ const app = express();
 // Given public/index.html it will be served from myaddress.com/index.html
 app.use(express.static('public'))
 
-const server = app.listen(PORT, function() {
-	console.log(`Game Server UI listening on port ${PORT}!`)
+const server = app.listen(PORT, function () {
+  console.log(`Game Server UI listening on port ${PORT}!`)
 });
 
 // socketIO will serve the websockets and handle reverse
@@ -24,8 +24,6 @@ let GameMan = new GameManager(10, 4);
 // Keep track of whether we need to restart the game
 let gameOver = false;
 
-let adminAsked = false;
-
 let numberDict = {};
 
 const adminIo = io.of('/admin.html');
@@ -37,56 +35,53 @@ adminIo.on('connection', (socket) => {
   console.info(`Admin Client connected [id=${socket.id}]`);
 
   socket.on('disconnect', () => {
-		console.log('Admin Client disconnected');
-    //GameMan.removeWorker(socket);
-	});
+    console.log('Admin Client disconnected');
+  });
 
-  socket.on('askClientResponse',(msg) => {
+  socket.on('askClientResponse', (msg) => {
     console.info("ask client response - admin");
     numberDict = {}; //need to clear dict each time this is called
     clientIo.emit('getClientNumber');
   });
 
-  socket.on('returnClientNumber', (msg) => {
-    //populate dictionary
-    console.info("heres the number");
-    console.info(msg[0] + " " + msg[1]);
-    numberDict[msg[0]] = msg[1];
-    console.info("map size= ",Object.keys(numberDict).length);
-    console.info("client size= GameMan.getClientSize()");
-    if(Object.keys(numberDict).length == (GameMan.getClientSize())){ //dictionary is full //need minus  -1 to ignore the admin as a client
-      console.info('going to dict');
-      socket.broadcast.emit('getClientDict', numberDict); //send dictionary to admin
-    }
+  // Handle a request to restart the game
+  socket.on('restartGame', (msg) => {
+    console.log(`Restarting game with current workers!`);
+    GameMan.restartGameWithCurrentWorkers();
+    gameOver = false;
+
+    // Tell all the players we restarted
+    adminIo.emit('restartGame');
+    clientIo.emit('restartGame');
   });
+
 });
 // Handle a new user connection
 clientIo.on('connection', (socket) => {
-	console.info(`Client connected [id=${socket.id}]`);
-
+  console.info(`Client connected [id=${socket.id}]`);
   // Let's add the player to the game
   GameMan.addWorker(socket);
 
-	// Set the socket disconnect event handler
-	socket.on('disconnect', () => {
-		console.log('Client disconnected');
+  // Set the socket disconnect event handler
+  socket.on('disconnect', () => {
+    console.log('Client disconnected');
     GameMan.removeWorker(socket);
-	});
+  });
 
   // Setup the new share request handler
   socket.on('needNewShare', (msg) => {
-    if(!gameOver){
+    if (!gameOver) {
       console.info(`Client needs new share [id=${socket.id}]`);
 
       // Get the next share for it to work on
       let shareObj = GameMan.getNewShareObjForWorker(socket);
 
       // If there are no shares to hand out, tell the worker to idle
-      if(shareObj == null){
+      if (shareObj == null) {
         console.info(`No shares left to hand out`);
         socket.emit('idle');
       }
-      else{
+      else {
         console.info(`Sending new share ${shareObj.share}`);
         socket.emit('newShare', shareObj);
       }
@@ -100,11 +95,11 @@ clientIo.on('connection', (socket) => {
     let share = msg.share;
     let wasRejected = GameMan.reportCompletedShare(socket, share);
 
-    if(wasRejected){
+    if (wasRejected) {
       console.info(`share rejected`);
       socket.emit('shareRejected');
     }
-    else{
+    else {
       console.info(`share accepted`);
       socket.emit('shareAccepted');
     }
@@ -112,21 +107,22 @@ clientIo.on('connection', (socket) => {
   });
 
   // This handles shares that claim to be winners
-  socket.on('iAmAWinner', (msg) =>{
+  socket.on('iAmAWinner', (msg) => {
 
-    if(gameOver){
+    if (gameOver) {
       return;
     }
 
     let share = msg.share;
+    let id = msg.id;
     let isWinningShare = GameMan.isWinningShare(share);
 
     console.log(`Checking for winning share...`);
 
-    if(isWinningShare){
+    if (isWinningShare) {
       let wasRejected = GameMan.reportCompletedShare(socket, share);
 
-      if(wasRejected){
+      if (wasRejected) {
         socket.emit('youDidNotWin');
         return;
       }
@@ -136,13 +132,16 @@ clientIo.on('connection', (socket) => {
       // Emit to everyone EXCEPT this worker that won
       socket.broadcast.emit('weGotAWinner');
 
+      //emit to admin that we have a winner and which worker it is
+      adminIo.emit('weGotAWinner', id);
+
       // Let the worker know that it did in fact win
       socket.emit('youAreTheWinner');
 
       // Set the game state to over
       gameOver = true;
     }
-    else{
+    else {
       // Just in case the share is actually a losing share
       socket.emit('youDidNotWin');
     }
@@ -151,54 +150,45 @@ clientIo.on('connection', (socket) => {
   // Handle a request to restart the game
   socket.on('restartGame', (msg) => {
     console.log(`Restarting game with current workers!`);
-    GameMan.restartGameWithCurrentWorkers();  
+    GameMan.restartGameWithCurrentWorkers();
     gameOver = false;
 
     // Tell all the players we restarted
     io.emit('restartGame');
+    adminIo.emit('restartGame');
   });
 
   // Let the client know they are registered
   socket.emit('registered');
 
-  socket.on('refreshResponse', (msg) => { //can probably get rid of this
-    console.log("Getting all clients current numbers");
-    var clientinfo = GameMan.getMyClients();
-    console.log("heres the client info, clientinfo")
-    socket.emit('clientssent', clientinfo)
-  })
-
-  socket.on('askClientResponse',(msg) => {
-    console.info("ask client response");
-    numberDict = {}; //need to clear dict each time this is called
-    socket.broadcast.emit('getClientNumber');
-  });
-
   socket.on('returnClientNumber', (msg) => {
     //populate dictionary
-    console.info("heres the number");
-    console.info(msg[0] + " " + msg[1]);
+    //console.info("heres the number");
+    //console.info(msg[0] + " " + msg[1]);
     numberDict[msg[0]] = msg[1];
-    if(Object.keys(numberDict).length == (GameMan.getClientSize())){ //dictionary is full //need minus  -1 to ignore the admin as a client
+    if (Object.keys(numberDict).length == (GameMan.getClientSize())) { //dictionary is full 
       console.info('going to dict');
       adminIo.emit('getClientDict', numberDict); //send dictionary to admin
     }
   });
 
-  
-
-  
 });
 
 // Update the page time every second
 setInterval(() => {
   clientIo.emit('time', new Date().toTimeString());
-} , 1000);
+}, 1000);
 
 // Update the page time every second for admin
 setInterval(() => {
   adminIo.emit('time', new Date().toTimeString());
-} , 1000);
+}, 1000);
+
+// Refresh display/admin every 30 seconds
+setInterval(() => {
+  console.info('calling client response');
+  adminIo.emit('requestRefresh', new Date().toTimeString());
+}, 1000);
 
 
 

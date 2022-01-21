@@ -33,11 +33,10 @@
 
           </div>
           <template id="client_temp">
-              <div class ="item" style="background: {{color}}">
-            <p>
-                {{num}}
-            </p>
-        </div>
+              <div class ="item" style="background:  {{color}}">
+                <div id=client_name>{{client_name}}</div>
+                <div id=num>{{num}}</div>
+             </div>
           </template>
     </body>
 
@@ -51,33 +50,58 @@
         const COLORS = ['#FE9','#9AF','#F9A',"#AFA","#FA7"];
         const container = $('#panel');
         const tmpl = $('#client_temp').html();
+        let winningId = "";
+        isGameOver = false;
         
         //resets container for display
         function resetGrid(){
             console.info("resetting grid");
             document.querySelectorAll(".item").forEach((e) => e.parentNode.removeChild(e));
         }
+
+        //sort map by keys
         function sortObjectByKeys(o) {
             return Object.keys(o).sort().reduce((r, k) => (r[k] = o[k], r), {});
         }
-                //adds current clients to display page
+        
+        
+        //adds current clients to display page
         function addItem(container, template, clientlist) { //adds all client ids to grid EXCEPT admin
-            console.info("adding items");
             resetGrid();
+            console.info("adding items");
             var count = 1;
             for(let id in clientlist){
                 let color = COLORS[_.random(COLORS.length - 1)];
                 let client_num = count;
-                let num = "Client " + id.toString() +": " + clientlist[id];
-                container.append(Mustache.render(template, { color, num }));
+                let client_name = "Client " + id.toString() +": ";
+                let num = clientlist[id];
+                container.append(Mustache.render(template, { color, client_name, num }));
                 count++;
             }
-            // for(let i =0;i<clientlist.length -1;i++) {
-            //     let color = COLORS[_.random(COLORS.length - 1)];
-            //     let client_num = i+1;
-            //     let num = "Client " + client_num.toString() +": " + clientlist[i]; //_.random(10000);
-            //     container.append(Mustache.render(template, { color, num }));
-            // }
+        }
+
+         //adds current clients to display page - displays winner on screen
+         function addItemWinner(container, template, clientlist, winningID) { //adds all client ids to grid 
+            resetGrid();
+            console.info("adding items -- winner");
+            var count = 1;
+            for(let id in clientlist){
+                if(id.normalize()===winningID.normalize()){
+                    let color = "#2ECC71";
+                    let client_num = count;
+                    let client_name = "Client " + id.toString() +": ";
+                    let num = clientlist[id];
+                    container.append(Mustache.render(template, { color, client_name, num }));
+                    count++;
+                }else {
+                    let color = "#E74C3C";
+                    let client_num = count;
+                    let client_name = "Client " + id.toString() +": ";
+                    let num = clientlist[id];
+                    container.append(Mustache.render(template, { color, client_name, num }));
+                    count++;
+                }
+            }
         }
 
          // URL defaults to window.location
@@ -93,8 +117,16 @@
 
         refreshBtn.click(function(){
             console.log("refresh button was clicked")
-            //socket.emit('refreshResponse');
             socket.emit('askClientResponse');
+        });
+
+        // Handle the case of restarting the game
+        socket.on('restartGame', (msg) => {
+            isGameOver = false;
+            console.log("Restarting the admin");
+            resetGrid();
+            winningId = "";
+            //socket.emit('askClientResponse');
         });
 
 
@@ -103,21 +135,30 @@
                 el.innerHTML = 'Server time: ' + timeString;
             });
 
-        socket.on('clientssent', (msg) => { //probably dont need anymore
-            addItem(container,tmpl,msg);
-        });
-
         socket.on('getClientDict', (msg) => {
             console.log('heres the dict')
-            console.log(JSON.stringify(msg));
+            //console.log(JSON.stringify(msg));
             var sortedDict = sortObjectByKeys(msg);
-            addItem(container,tmpl,sortedDict);
-        })
-
-        socket.on('getClientNumber', (msg) => {
-            console.log('oops mistake');
-            console.info('oops mistake');
+            if(isGameOver){
+                addItemWinner(container,tmpl,sortedDict,winningId);
+            }
+            else {
+                addItem(container,tmpl,sortedDict);
+            }
         });
 
+        socket.on('weGotAWinner', (msg) => {
+            console.log('We have a winner - admin');
+            console.log("winner: ", msg);
+            winningId = msg;
+            isGameOver = true;
+            socket.emit('askClientResponse');
+        })
+
+        socket.on('requestRefresh', (msg) => {
+          console.log('Requesting admin panel refresh');
+          socket.emit('askClientResponse');
+          
+        });
     </script>
 </html>
