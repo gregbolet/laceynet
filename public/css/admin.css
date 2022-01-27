@@ -1,9 +1,14 @@
+.navbar-nav {
+  margin-right: auto;
+}
+
 .container {
     width: 100%;
     display: flex;
     flex-flow: row wrap;
     justify-content: flex-start;
     overflow: auto;
+    padding-bottom: 150px;
   }
   .container .item {
     flex: 0 0 calc(25% - 1em);
@@ -12,7 +17,34 @@
     margin: 0.25em 0.5em;
     font-size: 100%;
     align-items: center;
+    
   }
+
+  /* .container .item::after {
+    flex: 0 0 calc(25% - 1em);
+    min-height: 100px;
+    min-width: 25px;
+    margin: 0.25em 0.5em;
+    font-size: 100%;
+    align-items: center;
+    animation: pulse 1.4s infinite ease-out
+  }
+
+  @keyframes pulse {
+    to {
+        box-shadow: 0 0 0 16px 
+    }
+} */
+
+.block{
+    flex: 0 0 calc(25% - 1em);
+    min-height: 100px;
+    min-width: 25px;
+    margin: 0.25em 0.5em;
+    font-size: 100%;
+    align-items: center;
+    background: dodgerblue;
+}
 
   #client_name{
     font-size: 100%;

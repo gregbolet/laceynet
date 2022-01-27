@@ -245,11 +245,27 @@ module.exports = class GameManager{
     });
 
     console.log('New game started.');
+    console.log('Current parameters: ' + this.#maxNums + " range and " + this.#shareSize +" share size");
   }
 
   // Allow the server to retrieve a list of the clients
   getClients(){
     return this.#clients;
+  }
+
+  resetGameParameters(input){
+    console.log('Resetting parameters...');
+    let newRange = parseInt(input[0]);
+    let newShareSize = parseInt(input[1]);
+    // Setup the game. This means the client list
+    // and the problem space for the clients to explore
+    this.#maxNums = newRange;
+    this.#shareSize = newShareSize;
+  }
+
+  getParams() {
+    let params = [this.#maxNums,this.#shareSize];
+    return params;
   }
 
   getClientIDs(){  //don thibk i need this anymore

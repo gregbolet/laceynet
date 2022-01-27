@@ -12,8 +12,6 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 
-
-        
         <title>Guessing Game!</title>
     </head>
 
@@ -21,9 +19,11 @@
         <nav class="navbar navbar-expand-lg sticky-top navbar-light bg-light">
             <ul class="navbar-nav ml-0">
               <li class="nav-item">
+                <input type="text" placeholder="Type something..." id="myInput">
+                <button class="btn btn-warning" id="paramButton" >Set Game Params </button>
                 <button class="btn btn-primary" id="restartButton">Restart Game</button>
                 <button class="btn btn-info" id="refreshButton">Refresh Game Responses</button>
-                <a class="btn btn-warning" href="index.html">Back To Game</a>
+                <a class="btn btn-danger" href="index.html">Back To Game</a>
               </li>
             </ul>
             <p class="navbar-text ml-auto pb-0" id="server-time"></p>
@@ -47,16 +47,22 @@
 
         var restartBtn = $( "#restartButton" );
         var refreshBtn = $( "#refreshButton" );
+        var paramBtn = $( "#paramButton" );
         const COLORS = ['#FE9','#9AF','#F9A',"#AFA","#FA7"];
         const container = $('#panel');
         const tmpl = $('#client_temp').html();
         let winningId = "";
         isGameOver = false;
+        var clientDict = new Map();
         
         //resets container for display
         function resetGrid(){
-            console.info("resetting grid");
+            //console.info("resetting grid");
             document.querySelectorAll(".item").forEach((e) => e.parentNode.removeChild(e));
+        }
+
+        function removeBlocks() {
+            document.querySelectorAll(".block").forEach((e) => e.remove(e));
         }
 
         //sort map by keys
@@ -68,10 +74,83 @@
         //adds current clients to display page
         function addItem(container, template, clientlist) { //adds all client ids to grid EXCEPT admin
             resetGrid();
-            console.info("adding items");
+            //console.info("adding items");
             var count = 1;
             for(let id in clientlist){
                 let color = COLORS[_.random(COLORS.length - 1)];
+                let client_num = count;
+                let client_name = "Client " + count.toString() +": ";
+                let num = clientlist[id];
+                container.append(Mustache.render(template, { color, client_name, num }));
+                count++;
+            }
+        }
+
+        function dictCompare(dict){
+            console.log(dict);
+            console.log(clientDict);
+            for(let [key,value] of dict){
+                if(!(clientDict.has(key))){
+                    console.log('Houston we have a problem');
+                }
+                else if(value != clientDict.get(key)){
+                    console.log('Was ' + clientDict.get(key) + "  now " + value);
+                    //clientDict[k] = dict[k];
+                    clientDict.set(key,value);
+                    console.log("heres the key")
+                    console.log(key);
+                    updateClient(key,value);
+                }else {
+                    console.log('key ' + key + ' for value ' + value +' has not been changed');
+                }
+            }
+        }
+
+        function addClient(name, number){
+            console.log('testing the new div function');
+             var clientName = document.createElement("div");
+             clientName.innerHTML = "Client " + name;
+             clientName.setAttribute('id', "client_name");
+             clientName.className = "client_name";
+             //clientName.id = name;
+
+             var clientNum = document.createElement("div");
+             clientNum.innerHTML = parseInt(number);
+             clientNum.setAttribute('id', "num");
+
+             var block = document.createElement("div");
+             block.appendChild(clientName);
+             block.appendChild(clientNum);
+             block.setAttribute('id', name);
+             block.className = "block";
+
+             container.append(block);
+             
+        }
+
+        function updateClient(myString,number){
+            var client = document.getElementById(myString);
+            var clientNum = client.lastElementChild;
+            clientNum.innerHTML = parseInt(number);
+        }
+
+        function removeClient(name,number){
+            var client = document.getElementById(name);
+            client.remove();
+        }
+
+         //adds current clients to display page - displays winner on screen
+         function addItemWinner(container, template, clientlist, winningID) { //adds all client ids to grid 
+            resetGrid();
+            console.info("adding items -- winner");
+            var count = 1;
+            let color = "";
+            for(let id in clientlist){
+                if(id.normalize()===winningID.normalize()){
+                    color = "#2ECC71";
+                } else {
+                    color = "#E74C3C";
+                }
                 let client_num = count;
                 let client_name = "Client " + id.toString() +": ";
                 let num = clientlist[id];
@@ -80,29 +159,27 @@
             }
         }
 
-         //adds current clients to display page - displays winner on screen
-         function addItemWinner(container, template, clientlist, winningID) { //adds all client ids to grid 
-            resetGrid();
-            console.info("adding items -- winner");
-            var count = 1;
-            for(let id in clientlist){
-                if(id.normalize()===winningID.normalize()){
-                    let color = "#2ECC71";
-                    let client_num = count;
-                    let client_name = "Client " + id.toString() +": ";
-                    let num = clientlist[id];
-                    container.append(Mustache.render(template, { color, client_name, num }));
-                    count++;
-                }else {
-                    let color = "#E74C3C";
-                    let client_num = count;
-                    let client_name = "Client " + id.toString() +": ";
-                    let num = clientlist[id];
-                    container.append(Mustache.render(template, { color, client_name, num }));
-                    count++;
+        function updateBlockWinner(id) {
+            if(isGameOver){
+                console.log(clientDict);
+                for(let [key,value] of clientDict){
+                    if(key == id){
+                        var client = document.getElementById(id);
+                        client.style.background = "#2ECC71";
+                    }
+                    else {
+                        var client = document.getElementById(key);
+                        client.style.background = "#E74C3C";
+                    }
                 }
             }
         }
+
+        function setRangeAndShareSize(){
+            var inputVal = document.getElementById("myInput").value;
+        }
+
+    
 
          // URL defaults to window.location
         let socket = io('/admin.html');
@@ -117,14 +194,28 @@
 
         refreshBtn.click(function(){
             console.log("refresh button was clicked")
-            socket.emit('askClientResponse');
+            //socket.emit('askClientResponse');
+            socket.emit('refreshPress');
         });
+
+        paramBtn.click(function() {
+             // Selecting the input element and get its value 
+            var inputVal = document.getElementById("myInput").value;
+            var params = inputVal.split(",");
+            console.log(typeof params)
+            console.log(typeof params[0]);
+            // Displaying the value
+            //alert(inputVal);
+            socket.emit('setNewGameParams', params);
+        })
 
         // Handle the case of restarting the game
         socket.on('restartGame', (msg) => {
             isGameOver = false;
             console.log("Restarting the admin");
             resetGrid();
+            removeBlocks();
+            clientDict = new Map();
             winningId = "";
             //socket.emit('askClientResponse');
         });
@@ -136,7 +227,7 @@
             });
 
         socket.on('getClientDict', (msg) => {
-            console.log('heres the dict')
+            //console.log('heres the dict')
             //console.log(JSON.stringify(msg));
             var sortedDict = sortObjectByKeys(msg);
             if(isGameOver){
@@ -152,13 +243,43 @@
             console.log("winner: ", msg);
             winningId = msg;
             isGameOver = true;
-            socket.emit('askClientResponse');
+            updateBlockWinner(winningId);
+            //socket.emit('askClientResponse');
         })
 
         socket.on('requestRefresh', (msg) => {
-          console.log('Requesting admin panel refresh');
-          socket.emit('askClientResponse');
+         // console.log('Requesting admin panel refresh');
+          //socket.emit('askClientResponse');
           
+        });
+
+        socket.on('numberSwitch', (msg)  => {
+            //compare dictionaries
+            //console.log('Client '+ msg.id + " selected " + msg.currNum);
+            console.log('switching the values');
+            var newMap = new Map(JSON.parse(msg));
+            dictCompare(newMap);
+            //addClient(container,msg.id,msg.currNum);
+        });
+
+        socket.on('addClient', (msg) => {
+            console.log('adding to screen');
+            clientDict.set(msg.id,msg.num);
+            //clientDict[msg.id] = msg.num;
+            addClient(msg.id,msg.num);
+        });
+
+        socket.on('registered', (msg) => {
+            var newMap = new Map(JSON.parse(msg));
+            clientDict = newMap;
+            for(let [key,value] of clientDict){
+                addClient(key,value);
+            }
+        });
+
+        socket.on('removeClient', (msg) => {
+            console.log('Client disconnected, removing from game')
+            removeClient(msg);
         });
     </script>
 </html>
