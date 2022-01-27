@@ -36,7 +36,6 @@ const clientIo = io.of('/');
 adminIo.on('connection', (socket) => {
   console.info(`Admin Client connected [id=${socket.id}]`);
  
-
   socket.on('disconnect', () => {
     console.log('Admin Client disconnected');
     
@@ -45,12 +44,6 @@ adminIo.on('connection', (socket) => {
   socket.on('refreshPress', (msg) => { //kind of useless now?
     let transitString = JSON.stringify(Array.from(clientDict));
     adminIo.emit('numberSwitch',transitString);
-  })
-
-  socket.on('askClientResponse', (msg) => {
-    console.info("ask client response - admin");
-    numberDict = {}; //need to clear dict each time this is called
-    clientIo.emit('getClientNumber');
   });
 
   // Handle a request to restart the game
@@ -63,6 +56,10 @@ adminIo.on('connection', (socket) => {
     adminIo.emit('restartGame');
     io.emit('restartGame');
   });
+
+  socket.on('getParams', (msg) => {
+    
+  })
 
   socket.on('setNewGameParams', (msg) =>{
     console.log('Changing the game parameters');
@@ -85,12 +82,11 @@ clientIo.on('connection', (socket) => {
   // Let's add the player to the game
   GameMan.addWorker(socket);
  
-  //need to add client to the clientDictionary
-
   // Set the socket disconnect event handler
   socket.on('disconnect', () => {
     console.log('Client disconnected');
     GameMan.removeWorker(socket);
+    clientDict.delete(socket.id);
     adminIo.emit('removeClient',socket.id);
   });
 
@@ -110,17 +106,14 @@ clientIo.on('connection', (socket) => {
       else {
         console.info(`Sending new share ${shareObj.share}`);
         socket.emit('newShare', shareObj);
-        console.info('This is my messgae ' + msg);
-        if(msg.newClient){
+
+        if(msg.newClient){ //occurs when there is a new client
             console.info('ADDING CLIENT TO CLIENT DICT');
             let myNum = shareObj.share[0];
-            //console.log(socket.id);
             clientDict.set(socket.id,myNum);
-            //clientDict[socket.id] = myNum;
             adminIo.emit('addClient',{id:socket.id,num:myNum});
-        }else {
+        }else { //when exisiting client wants new share 
           let myNum = shareObj.share[0];
-            //console.log(socket.id);
           clientDict.set(socket.id,myNum);
           console.info('switching the nums');
           let transitString = JSON.stringify(Array.from(clientDict));
@@ -211,28 +204,16 @@ clientIo.on('connection', (socket) => {
       console.info('switching the nums');
       clientDict.set(msg.id,msg.currNum);
       console.log("ID " + msg.id + " num "+ msg.currNum + " map size " + clientDict.size);
-      //clientDict[msg.id] = msg.currNum;
 
       let transitString = JSON.stringify(Array.from(clientDict));
-      
-
       adminIo.emit('numberSwitch',transitString);
-    }else {
-      //should add??
-    }
-    //adminIo.emit('numberSwitch',clientDict);
-  })
 
-  socket.on('returnClientNumber', (msg) => {
-    //populate dictionary
-    //console.info("heres the number");
-    //console.info(msg[0] + " " + msg[1]);
-    numberDict[msg[0]] = msg[1];
-    if (Object.keys(numberDict).length == (GameMan.getClientSize())) { //dictionary is full 
-      console.info('going to dict');
-      adminIo.emit('getClientDict', numberDict); //send dictionary to admin
+    }else {
+      console.log('something went wrong - server - buttonPressed')
     }
   });
+
+
 
 });
 
@@ -254,3 +235,22 @@ setInterval(() => {
 
 
 
+
+
+// socket.on('returnClientNumber', (msg) => {
+//   //populate dictionary
+//   //console.info("heres the number");
+//   //console.info(msg[0] + " " + msg[1]);
+//   numberDict[msg[0]] = msg[1];
+//   if (Object.keys(numberDict).length == (GameMan.getClientSize())) { //dictionary is full 
+//     console.info('going to dict');
+//     adminIo.emit('getClientDict', numberDict); //send dictionary to admin
+//   }
+// });
+
+
+// socket.on('askClientResponse', (msg) => {
+//   console.info("ask client response - admin");
+//   numberDict = {}; //need to clear dict each time this is called
+//   clientIo.emit('getClientNumber');
+// });
