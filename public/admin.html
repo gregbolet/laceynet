@@ -245,7 +245,6 @@
         socket.on('addClient', (msg) => {
             console.log('adding to screen');
             clientDict.set(msg.id,msg.obj);
-            //clientDict[msg.id] = msg.num;
             addClient(msg.id,msg.obj);
         });
 

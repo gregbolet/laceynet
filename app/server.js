@@ -137,20 +137,18 @@ clientIo.on('connection', (socket) => {
         socket.emit('newShare', shareObj);
         let myNum = shareObj.share[0];
 
-        if(msg.newClient){ //occurs when there is a new client
+        if(!(clientDict.has(socket.id))){ //occurs when there is a new client
             console.info('ADDING NEW CLIENT OBJ TO CLIENT DICT');
             let newName = generateName();
             let newColor = generateColor();
             var newC = new ClientObj(newName,socket.id,newColor,myNum);
             clientDict.set(socket.id,newC);
-            // adminIo.emit('addClient',{id:socket.id,num:myNum});
             adminIo.emit('addClient',{id:socket.id, obj: newC});
             socket.emit('getMyInfo', {color: newColor, name: newName});
             count++;
         }else { //when exisiting client wants new share 
 
           let currClient = clientDict.get(socket.id);
-          //console.log(currClient);
           currClient.num = myNum;
           console.info('switching the nums');
           let transitString = JSON.stringify(Array.from(clientDict));

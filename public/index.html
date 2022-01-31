@@ -221,7 +221,7 @@
     socket.on('restartGame', (msg) => {
           setLoserMode();
           isGameOver = false;
-          nC = false;
+          nC = true;
           socket.emit('needNewShare',{newClient: nC});
           nC = false;
         });
