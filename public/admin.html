@@ -11,6 +11,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+        <script src="/js/ClientObj.js"></script>
 
         <title>Guessing Game!</title>
     </head>
@@ -33,8 +34,10 @@
                         <a class="btn btn-danger" href="index.html">Back To Game</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="#">Current Game Params:</a>
+                        <a class="dropdown-item" href="#" id="range"></a>
+                        <a class="dropdown-item" href="#" id="shareSize"></a>
                         <div class="dropdown-divider"></div>
-                        <input type="text" placeholder="Type something..." id="myInput">
+                        <input type="text" placeholder="Range,Share Size..." id="myInput">
                         <button class="btn btn-warning" id="paramButton" >Set Game Params </button>
                         
                         
@@ -52,10 +55,15 @@
           
     </body>
 
+   
+
     <script>
         //var button = $( "#mainbutton" );
         // link for grid https://stackoverflow.com/questions/43115822/can-i-make-a-css-grid-with-dynamic-number-of-rows-or-columns
         //link for rese https://stackoverflow.com/questions/61155301/how-to-remove-divs-inside-a-grid
+        //const Client = require('../app/ClientObj.js');
+        //https://stackoverflow.com/questions/64859592/how-can-i-make-div-content-appear-with-animation-when-clicking-a-button-that-inj
+        
 
         var restartBtn = $( "#restartButton" );
         var refreshBtn = $( "#refreshButton" );
@@ -66,6 +74,8 @@
         let winningId = "";
         isGameOver = false;
         var clientDict = new Map();
+        let range = 1;
+        let shareSize = 1;
         
     function resetGrid(){
         //console.info("resetting grid");
@@ -76,7 +86,7 @@
             document.querySelectorAll(".block").forEach((e) => e.remove(e));
         }
 
-        //sort map by keys
+        //sort map by keys //dont think i need this anymore
         function sortObjectByKeys(o) {
             return Object.keys(o).sort().reduce((r, k) => (r[k] = o[k], r), {});
         }
@@ -88,9 +98,8 @@
                 if(!(clientDict.has(key))){
                     console.log('Houston we have a problem');
                 }
-                else if(value != clientDict.get(key)){
-                    console.log('Was ' + clientDict.get(key) + "  now " + value);
-                    //clientDict[k] = dict[k];
+                else if(value.num != clientDict.get(key).num){
+                    console.log('Was ' + clientDict.get(key).num + "  now " + value.num);
                     clientDict.set(key,value);
                     console.log("heres the key")
                     console.log(key);
@@ -101,40 +110,45 @@
             }
         }
 
-        function addClient(name, number){
+        function addClient(id, obj){
             console.log('testing the new div function');
+            console.log(obj);
+            let myC = obj;
              var clientName = document.createElement("div");
-             clientName.innerHTML = "Client " + name;
+             clientName.innerHTML = myC.name;
              clientName.setAttribute('id', "client_name");
              clientName.className = "client_name";
-             //clientName.id = name;
 
              var clientNum = document.createElement("div");
-             clientNum.innerHTML = parseInt(number);
+             clientNum.innerHTML = parseInt(myC.num);
              clientNum.setAttribute('id', "num");
 
              var block = document.createElement("div");
              block.appendChild(clientName);
              block.appendChild(clientNum);
-             block.setAttribute('id', name);
+             block.setAttribute('id', id);
              block.className = "block";
 
              let colorNum = Math.floor(Math.random() * 5);
-             block.style.background = COLORS[colorNum];
+             block.style.background = obj.color;
 
-             container.append(block);
-             
+
+
+             container.append(block);             
         }
 
-        function updateClient(myString,number){
-            var client = document.getElementById(myString);
+        function updateClient(id,obj){
+            var client = document.getElementById(id);
             var clientNum = client.lastElementChild;
-            clientNum.innerHTML = parseInt(number);
-            client.style.animation ="pulse 2s";
+            clientNum.innerHTML = parseInt(obj.num);
+            client.classList.add("animate");
+            setTimeout(function() {
+                client.classList.remove("animate");
+            }, 2500); // 500 is the same time as the CSS animation
         }
 
-        function removeClient(name,number){
-            var client = document.getElementById(name);
+        function removeClient(id){
+            var client = document.getElementById(id);
             client.remove();
         }
 
@@ -165,8 +179,8 @@
         let currentPos = -1;
         let winningNum = -1;
 
-        restartBtn.click(function(){ //need to finx doesnt work rn
-            socket.emit('restartGame', {share:currentShare});
+        restartBtn.click(function(){ 
+            socket.emit('restartGame');
             });
 
         refreshBtn.click(function(){
@@ -179,11 +193,16 @@
              // Selecting the input element and get its value 
             var inputVal = document.getElementById("myInput").value;
             var params = inputVal.split(",");
-            console.log(typeof params)
-            console.log(typeof params[0]);
-            // Displaying the value
-            //alert(inputVal);
-            socket.emit('setNewGameParams', params);
+            if(params.length == 2){
+                console.log(typeof params)
+                console.log(typeof params[0]);
+                range = params[0];
+                document.getElementById('range').innerHTML = "Range: " + range;
+                shareSize = params[1];
+                document.getElementById('shareSize').innerHTML = "Share size: " + shareSize;
+                socket.emit('setNewGameParams', params);
+            }
+
         })
 
         // Handle the case of restarting the game
@@ -229,15 +248,19 @@
 
         socket.on('addClient', (msg) => {
             console.log('adding to screen');
-            clientDict.set(msg.id,msg.num);
+            clientDict.set(msg.id,msg.obj);
             //clientDict[msg.id] = msg.num;
-            addClient(msg.id,msg.num);
+            addClient(msg.id,msg.obj);
         });
 
         socket.on('registered', (msg) => {
             resetGrid();
             removeBlocks();
-            var newMap = new Map(JSON.parse(msg));
+            range = msg.par[0];
+            document.getElementById('range').innerHTML = "Range: " + range;
+            shareSize = msg.par[1];
+            document.getElementById('shareSize').innerHTML = "Share size: " + shareSize;
+            var newMap = new Map(JSON.parse(msg.map));
             clientDict = newMap;
             for(let [key,value] of clientDict){
                 addClient(key,value);
