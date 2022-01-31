@@ -20,11 +20,16 @@
           <button class="btn btn-primary" id="restartButton">Restart Game</button>
           <a class="btn btn-warning" href="admin.html">Admin Panel</a>
         </li>
+        
       </ul>
+      <a class="navbar-brand mx-auto" href="#" id="playername">Player: </a>
       <p class="navbar-text ml-auto pb-0" id="server-time"></p>
     </nav>
 
+<!--<div class="clientName"> This is the title</div> -->
+
     <div class="container col-md-12 align-middle">
+
       <div id="redXOverlay"> 
         <img class="overlayimg" src="/svg/redX.svg" />
       </div>
@@ -47,6 +52,7 @@
     var button = $( "#mainbutton" );
     var restartBtn = $( "#restartButton" );
     let isGameOver = false;
+    let playername = "";
     
 
     function setContinueMode(){
@@ -215,7 +221,7 @@
     socket.on('restartGame', (msg) => {
           setLoserMode();
           isGameOver = false;
-          nC = true;
+          nC = false;
           socket.emit('needNewShare',{newClient: nC});
           nC = false;
         });
@@ -228,6 +234,13 @@
         console.log("give me the number");
         socket.emit('returnClientNumber', [myid,mynum]);
     });
+
+    socket.on('getMyInfo', (msg) => {
+      playername = msg.name;
+      document.getElementById('playername').innerHTML = "Player: " + playername;
+      //document.getElementById('mainbutton').style.backgroundColor = msg.color;
+
+    })
     
   </script>
 

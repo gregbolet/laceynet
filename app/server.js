@@ -32,9 +32,9 @@ let count = 1;
 
 var arduinoObj = {key: "hello world"};
 
-const clientNames = ["Abraham Lincoln", "George Washington", "Ben Franklin", "Ada Lovelace", 
+const clientNames = ["Abraham " + "\n" + "Lincoln", "George Washington", "Ben" + "\n"+ "Franklin", "Ada Lovelace", 
 "Martin Luther King Jr.",  "Malcolm X", "Louis Armstrong", "Frank Sinatra", "Henry Ford", 
-"Sacagewea", "Steve Jobs", "Muhammad Ali"];
+"Sacagewea", "Steve Jobs", "Muhammad Ali", "Harriet Tubman", "Grace Hopper"];
 
 const chosenClients = []
 
@@ -82,7 +82,7 @@ adminIo.on('connection', (socket) => {
     console.log(`Restarting game with current workers!`);
     GameMan.restartGameWithCurrentWorkers();
     gameOver = false;
-    clientDict = new Map();
+    //clientDict = new Map();
     count = 1;
     // Tell all the players we restarted
     adminIo.emit('restartGame');
@@ -143,13 +143,14 @@ clientIo.on('connection', (socket) => {
             let newColor = generateColor();
             var newC = new ClientObj(newName,socket.id,newColor,myNum);
             clientDict.set(socket.id,newC);
-           // adminIo.emit('addClient',{id:socket.id,num:myNum});
-           adminIo.emit('addClient',{id:socket.id, obj: newC});
+            // adminIo.emit('addClient',{id:socket.id,num:myNum});
+            adminIo.emit('addClient',{id:socket.id, obj: newC});
+            socket.emit('getMyInfo', {color: newColor, name: newName});
             count++;
         }else { //when exisiting client wants new share 
 
           let currClient = clientDict.get(socket.id);
-          console.log(currClient);
+          //console.log(currClient);
           currClient.num = myNum;
           console.info('switching the nums');
           let transitString = JSON.stringify(Array.from(clientDict));
@@ -225,7 +226,7 @@ clientIo.on('connection', (socket) => {
     console.log(`Restarting game with current workers! - CLIENT`);
     GameMan.restartGameWithCurrentWorkers();
     gameOver = false;
-    clientDict = new Map();
+    //clientDict = new Map();
     count = 1
     // Tell all the players we restarted
     io.emit('restartGame');

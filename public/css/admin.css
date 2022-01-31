@@ -10,6 +10,7 @@
     overflow: auto;
     padding-bottom: 150px;
     padding-top: 100px;
+    
    
   }
   .container .item {
@@ -76,6 +77,9 @@
   #client_name{
     font-size: 100%;
     text-align: center;
+    position: relative;
+    overflow: auto;
+    font-weight:bold;
   }
 
   #num{
