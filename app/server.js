@@ -10,6 +10,7 @@ const ClientObj = require('../public/js/ClientObj.js');
 const PORT = process.env.PORT || 5000;
 const app = express();
 
+
 // Serve all the files from the /public folder
 // Given public/index.html it will be served from myaddress.com/index.html
 app.use(express.static('public'))  
@@ -21,6 +22,36 @@ const server = app.listen(PORT, function () {
 // socketIO will serve the websockets and handle reverse
 // compatibility and protocol fallback
 const io = socketIO(server);
+
+app.use(
+  express.urlencoded({
+    extended: true
+  })
+)
+
+app.use(express.json())
+
+app.set('/ardiono', io);
+
+app.get('/arduino', (req,res)=>{
+  res.send('Hello\n');
+})
+
+app.post('/arduino', (req, res)=>{
+  console.info(req.body.myIP); // the field named IP
+  var newSeq = generateTappingSequence();
+  res.send(newSeq);
+})
+
+function generateTappingSequence(){
+  var arr = [];
+  while(arr.length < 3){
+      var r = Math.floor(Math.random() * 3) + 1;
+      if(arr.indexOf(r) === -1) arr.push(r);
+  }
+  // console.log(arr);
+  return arr;
+}
 
 // Now let's setup a new GameManager instance
 let GameMan = new GameManager(10, 4);
