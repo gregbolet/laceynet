@@ -44,12 +44,12 @@ app.post('/arduino', (req, res)=>{
 })
 
 function generateTappingSequence(){
-  var arr = [];
+  var arr = "";
   while(arr.length < 3){
       var r = Math.floor(Math.random() * 3) + 1;
-      if(arr.indexOf(r) === -1) arr.push(r);
+      if(arr.indexOf(r) === -1) arr+=r;
   }
-  // console.log(arr);
+  console.log(arr);
   return arr;
 }
 
