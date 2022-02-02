@@ -32,11 +32,13 @@ let count = 1;
 
 var arduinoObj = {key: "hello world"};
 
+let winningClient = "";
+
 const clientNames = ["Abraham " + "\n" + "Lincoln", "George Washington", "Ben" + "\n"+ "Franklin", "Ada Lovelace", 
 "Martin Luther King Jr.",  "Malcolm X", "Louis Armstrong", "Frank Sinatra", "Henry Ford", 
 "Sacagewea", "Steve Jobs", "Muhammad Ali", "Harriet Tubman", "Grace Hopper"];
 
-const chosenClients = []
+const chosenClients = [];
 
 const clientColors =  ['#FE9','#9AF','#F9A',"#AFA","#FA7"];
 
@@ -84,6 +86,7 @@ adminIo.on('connection', (socket) => {
     gameOver = false;
     //clientDict = new Map();
     count = 1;
+    winningClient = "";
     // Tell all the players we restarted
     adminIo.emit('restartGame');
     io.emit('restartGame');
@@ -95,17 +98,21 @@ adminIo.on('connection', (socket) => {
     console.info(`Restarting game with current workers! - ADMIN`);
     GameMan.restartGameWithCurrentWorkers();
     gameOver = false;
-
+    winningClient = "";
     // Tell all the players we restarted
     io.emit('restartGame');
     adminIo.emit('restartGame');
+
+    GameMan.updateWinningNum(msg[2]);
   });
   let transitString = JSON.stringify(Array.from(clientDict));
   let params = GameMan.getParams();
-  socket.emit('registered',{map: transitString, par: params}); //when admin is added, pass client dictionary and populate screen
+  socket.emit('registered',{gameStatus: gameOver, winner: winningClient, map: transitString, par: params}); //when admin is added, pass client dictionary and populate screen
 
 });
-// Handle a new user connection
+
+
+// Handle a new client connection
 clientIo.on('connection', (socket) => {
   console.info(`Client connected [id=${socket.id}]`);
   // Let's add the player to the game
@@ -139,7 +146,7 @@ clientIo.on('connection', (socket) => {
 
         if(!(clientDict.has(socket.id))){ //occurs when there is a new client
             console.info('ADDING NEW CLIENT OBJ TO CLIENT DICT');
-            let newName = generateName();
+            let newName = socket.id;//generateName();
             let newColor = generateColor();
             var newC = new ClientObj(newName,socket.id,newColor,myNum);
             clientDict.set(socket.id,newC);
@@ -199,6 +206,8 @@ clientIo.on('connection', (socket) => {
         return;
       }
 
+      winningClient = socket.id;
+
       console.log(`Got a WINNER!`);
 
       // Emit to everyone EXCEPT this worker that won
@@ -225,7 +234,8 @@ clientIo.on('connection', (socket) => {
     GameMan.restartGameWithCurrentWorkers();
     gameOver = false;
     //clientDict = new Map();
-    count = 1
+    count = 1;
+    winningClient = "";
     // Tell all the players we restarted
     io.emit('restartGame');
     adminIo.emit('restartGame');

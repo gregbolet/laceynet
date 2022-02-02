@@ -36,6 +36,7 @@
                         <a class="dropdown-item" href="#">Current Game Params:</a>
                         <a class="dropdown-item" href="#" id="range"></a>
                         <a class="dropdown-item" href="#" id="shareSize"></a>
+                        <a class="dropdown-item" href="#" id="winNum"></a>
                         <div class="dropdown-divider"></div>
                         <input type="text" placeholder="Range,Share Size..." id="myInput">
                         <button class="btn btn-warning" id="paramButton" >Set Game Params </button>
@@ -48,7 +49,7 @@
             <p class="navbar-text ml-auto pb-0" id="server-time"></p>
           </nav>
 
-          <div id="panel" class="container">
+          <div id="panel" class="container-fluid">
           </div>
           
     </body>
@@ -122,8 +123,6 @@
              let colorNum = Math.floor(Math.random() * 5);
              block.style.background = obj.color;
 
-
-
              container.append(block);             
         }
 
@@ -192,13 +191,15 @@
              // Selecting the input element and get its value 
             var inputVal = document.getElementById("myInput").value;
             var params = inputVal.split(",");
-            if(params.length == 2){
+            if(params.length == 3){
                 console.log(typeof params)
                 console.log(typeof params[0]);
                 range = params[0];
                 document.getElementById('range').innerHTML = "Range: " + range;
                 shareSize = params[1];
                 document.getElementById('shareSize').innerHTML = "Share size: " + shareSize;
+                winNum = params[2];
+                document.getElementById('winNum').innerHTML = "Winning Number: " + winNum;
                 socket.emit('setNewGameParams', params);
             }
 
@@ -249,16 +250,25 @@
         });
 
         socket.on('registered', (msg) => {
+            console.log("ADMIN IS REGISTERED");
             resetGrid();
             removeBlocks();
             range = msg.par[0];
             document.getElementById('range').innerHTML = "Range: " + range;
             shareSize = msg.par[1];
             document.getElementById('shareSize').innerHTML = "Share size: " + shareSize;
+            winner = msg.par[2];
+            document.getElementById('winNum').innerHTML = "Winning Number: " + winner;
             var newMap = new Map(JSON.parse(msg.map));
             clientDict = newMap;
             for(let [key,value] of clientDict){
                 addClient(key,value);
+            }
+
+            if(msg.gameStatus){
+                console.log(" WOOP WOOP");
+                isGameOver = true;
+                updateBlockWinner(msg.winner);
             }
         });
 

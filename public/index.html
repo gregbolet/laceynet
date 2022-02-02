@@ -173,6 +173,7 @@
               }
 
           console.log('Got a new share');
+          console.log(msg.share);
           currentShare = msg.share;
           winningNum = msg.winNum;
           currentPos = 0;
@@ -197,6 +198,7 @@
     socket.on('weGotAWinner', (msg) => {
           setLoserMode();
           button.html('Winner found! Waiting for restart...');
+          console.log("im a loser :(");
         });
 
     // Handle the case where we are told to idle

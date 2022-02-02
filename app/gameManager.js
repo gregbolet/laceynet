@@ -78,7 +78,11 @@ module.exports = class GameManager{
     // We also select a winning number at random that is
     // shipped with each share for quick verification of 
     // having found a winner
-    this.#winningNum = Math.floor(Math.random()*this.#maxNums) + 1;
+    
+      this.#winningNum = Math.floor(Math.random()*this.#maxNums) + 1;
+    
+
+    
 
     console.log(`Winning Num: ${this.#winningNum}`);
     console.log('Shares: ',JSON.stringify(this.#incompleteShares));
@@ -263,8 +267,13 @@ module.exports = class GameManager{
     this.#shareSize = newShareSize;
   }
 
+  updateWinningNum(newWin){
+    console.log("THE NEW WINNING NUMBER IS " + winNum);
+    this.#winningNum = newWin;
+  }
+
   getParams() {
-    let params = [this.#maxNums,this.#shareSize];
+    let params = [this.#maxNums,this.#shareSize, this.#winningNum];
     return params;
   }
 
