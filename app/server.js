@@ -146,7 +146,7 @@ clientIo.on('connection', (socket) => {
 
         if(!(clientDict.has(socket.id))){ //occurs when there is a new client
             console.info('ADDING NEW CLIENT OBJ TO CLIENT DICT');
-            let newName = socket.id;//generateName();
+            let newName = generateName();
             let newColor = generateColor();
             var newC = new ClientObj(newName,socket.id,newColor,myNum);
             clientDict.set(socket.id,newC);
