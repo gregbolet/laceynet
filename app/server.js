@@ -38,7 +38,7 @@ app.get('/arduino', (req,res)=>{
 })
 
 app.post('/arduino', (req, res)=>{
-  console.info(req.body.myIP); // the field named IP
+  console.info(req.body); // the field named IP
   var newSeq = generateTappingSequence();
   res.send(newSeq);
 })
