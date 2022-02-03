@@ -251,6 +251,8 @@
             winningId = msg;
             isGameOver = true;
             updateBlockWinner(winningId);
+            arduinoGameState = "preparing";
+            socket.emit('updateArdStatus', arduinoGameState);
             //socket.emit('askClientResponse');
         })
 
