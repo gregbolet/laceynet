@@ -126,6 +126,11 @@ adminIo.on('connection', (socket) => {
     io.emit('restartGame');
   });
 
+  socket.on('updateArdStatus', (msg) => { //updating arduino status
+    arduinoGameState = msg;
+    console.log("The arduino status has changed to " + arduinoGameState);
+  })
+
   socket.on('setNewGameParams', (msg) =>{
     console.log('Changing the game parameters');
     GameMan.resetGameParameters(msg);
@@ -139,7 +144,7 @@ adminIo.on('connection', (socket) => {
   });
   let transitString = JSON.stringify(Array.from(clientDict));
   let params = GameMan.getParams();
-  socket.emit('registered',{map: transitString, par: params}); //when admin is added, pass client dictionary and populate screen
+  socket.emit('registered',{map: transitString, par: params, ardStatus: arduinoGameState}); //when admin is added, pass client dictionary and populate screen
 
 });
 // Handle a new user connection
