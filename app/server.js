@@ -23,6 +23,12 @@ const server = app.listen(PORT, function () {
 // compatibility and protocol fallback
 const io = socketIO(server);
 
+// the global variable indicating the game 
+// state for arduinos, only changed by the
+// button on the admin panel. Will say "ready"
+// when the game is ready for the arduinos
+var arduinoGameState = 'preparing';
+
 app.use(
   express.urlencoded({
     extended: true
@@ -34,7 +40,7 @@ app.use(express.json())
 app.set('/ardiono', io);
 
 app.get('/arduino', (req,res)=>{
-  res.send('Hello\n');
+  res.send(arduinoGameState);
 })
 
 app.post('/arduino', (req, res)=>{
