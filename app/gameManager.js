@@ -234,6 +234,10 @@ module.exports = class GameManager{
 
   isWinningShare(share){
     // let's check if we have a winner
+    // console.log('type of winning number: ' + typeof(this.#winningNum));
+    // console.log("my share "+ share);
+    // console.log("winning number: " + this.#winningNum);
+    // console.log("the winning share is in here?: " + share.includes(this.#winningNum));
     return share.includes(this.#winningNum);
   }
 
@@ -268,8 +272,8 @@ module.exports = class GameManager{
   }
 
   updateWinningNum(newWin){
-    console.log("THE NEW WINNING NUMBER IS " + winNum);
-    this.#winningNum = newWin;
+    //console.log("THE NEW WINNING NUMBER IS " + newWin);
+    this.#winningNum = parseInt(newWin);
   }
 
   getParams() {

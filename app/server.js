@@ -4,6 +4,7 @@ const socketIO = require('socket.io');
 //const { Client } = require('socket.io/dist/client');
 const GameManager = require('./gameManager.js');
 const ClientObj = require('../public/js/ClientObj.js');
+const { param } = require('express/lib/request');
 //import ClientObj from '../public/js/ClientObj.js';
 //const { parse } = require('ws/lib/extension');
 
@@ -28,33 +29,43 @@ let GameMan = new GameManager(10, 4);
 // Keep track of whether we need to restart the game
 let gameOver = false;
 
-let count = 1;
-
 var arduinoObj = {key: "hello world"};
 
-let winningClient = "";
+let winningClient = ""; //id of winningClient
 
-const clientNames = ["Abraham " + "\n" + "Lincoln", "George Washington", "Ben" + "\n"+ "Franklin", "Ada Lovelace", 
+const clientNames = ["Abraham Lincoln", "George Washington", "Ben Franklin", "Ada Lovelace", 
 "Martin Luther King Jr.",  "Malcolm X", "Louis Armstrong", "Frank Sinatra", "Henry Ford", 
-"Sacagewea", "Steve Jobs", "Muhammad Ali", "Harriet Tubman", "Grace Hopper"];
+"Sacagawea", "Steve Jobs", "Muhammad Ali", "Harriet Tubman", "Grace Hopper"];
 
 const chosenClients = [];
 
-const clientColors =  ['#FE9','#9AF','#F9A',"#AFA","#FA7"];
+const chosenColors = [];
 
-let clientDict = new Map();
+const clientColors =  ['#FE9',"#AFA","#FA7", '#9AF','#FFEFD5','#C2F0D1',"#FFB6C1","#D9D7FA"];//'#9AF','#F9A', '#E2CFE2'
 
+let clientDict = new Map(); //map of client ids to client objects
+
+
+
+//Namespaces for client/admin/arduino
 const adminIo = io.of('/admin.html');
 
 const clientIo = io.of('/');
 
 const arduinoIo = io.of('/arduino.html');
 
+//generates a random color
 function generateColor(){
-  let colorNum = Math.floor(Math.random() * 5)
-  return clientColors[colorNum];
+  if (chosenColors.length === 0){
+    for (var i = 0; i < clientColors.length; i++) chosenColors.push(i);
+  }
+  var randomValueIndex = Math.floor(Math.random() * chosenColors.length);
+  var indextOfItemInMyArray = chosenColors[randomValueIndex];
+  chosenColors.splice(randomValueIndex,1);
+  return clientColors[indextOfItemInMyArray];
 }
 
+//generates a random name
 function generateName() {
   if (chosenClients.length === 0){
     for (var i = 0; i < clientNames.length; i++) chosenClients.push(i);
@@ -81,17 +92,17 @@ adminIo.on('connection', (socket) => {
 
   // Handle a request to restart the game
   socket.on('restartGame', (msg) => {
-    console.log(`Restarting game with current workers!`);
+    console.log(`Restarting game with current workers! - ADMIN`);
     GameMan.restartGameWithCurrentWorkers();
     gameOver = false;
     //clientDict = new Map();
-    count = 1;
     winningClient = "";
     // Tell all the players we restarted
     adminIo.emit('restartGame');
     io.emit('restartGame');
   });
 
+  //resets game with new parameters
   socket.on('setNewGameParams', (msg) =>{
     console.log('Changing the game parameters');
     GameMan.resetGameParameters(msg);
@@ -104,10 +115,19 @@ adminIo.on('connection', (socket) => {
     adminIo.emit('restartGame');
 
     GameMan.updateWinningNum(msg[2]);
+    io.emit('updateWinningNumber',msg[2]);
+    //adminIo.emit('updateWinningNumber');
   });
+
+  socket.on('getParams', (msg) => {
+    let params = GameMan.getParams();
+    socket.emit('updateParams',params);
+  })
+
+  //initial registration
   let transitString = JSON.stringify(Array.from(clientDict));
-  let params = GameMan.getParams();
-  socket.emit('registered',{gameStatus: gameOver, winner: winningClient, map: transitString, par: params}); //when admin is added, pass client dictionary and populate screen
+  //let params = GameMan.getParams();
+  socket.emit('registered',{gameStatus: gameOver, winner: winningClient, map: transitString}); //when admin is added, pass client dictionary and populate screen
 
 });
 
@@ -152,7 +172,6 @@ clientIo.on('connection', (socket) => {
             clientDict.set(socket.id,newC);
             adminIo.emit('addClient',{id:socket.id, obj: newC});
             socket.emit('getMyInfo', {color: newColor, name: newName});
-            count++;
         }else { //when exisiting client wants new share 
 
           let currClient = clientDict.get(socket.id);
@@ -199,14 +218,16 @@ clientIo.on('connection', (socket) => {
     console.log(`Checking for winning share...`);
 
     if (isWinningShare) {
+      console.log("WERE GETTING THE WINNING SHARE")
       let wasRejected = GameMan.reportCompletedShare(socket, share);
 
       if (wasRejected) {
+        console.log('BOO I GOT REJECTED');
         socket.emit('youDidNotWin');
         return;
       }
 
-      winningClient = socket.id;
+      winningClient = socket.id; //save id of winning client
 
       console.log(`Got a WINNER!`);
 
@@ -234,7 +255,6 @@ clientIo.on('connection', (socket) => {
     GameMan.restartGameWithCurrentWorkers();
     gameOver = false;
     //clientDict = new Map();
-    count = 1;
     winningClient = "";
     // Tell all the players we restarted
     io.emit('restartGame');
@@ -245,14 +265,13 @@ clientIo.on('connection', (socket) => {
   // Let the client know they are registered
   socket.emit('registered');
 
+  //let admin panel know a client has switched numbers
   socket.on('buttonPressed', (msg) =>{
     
     if(clientDict.has(msg.id)){
       console.info('switching the nums');
       let thisC = clientDict.get(msg.id);
       thisC.num = msg.currNum;
-      //thisC.setNum(msg.currNum);
-      //clientDict.set(msg.id,msg.currNum);
       console.log("ID " + msg.id + " num "+ msg.currNum + " map size " + clientDict.size);
 
       let transitString = JSON.stringify(Array.from(clientDict));
@@ -277,9 +296,9 @@ setInterval(() => {
 }, 1000);
 
 // Update the page time every second for admin
-// setInterval(() => {
-//   adminIo.emit('time', new Date().toTimeString());
-// }, 1000);
+setInterval(() => {
+  adminIo.emit('time', new Date().toTimeString());
+}, 1000);
 
 // Refresh display/admin every 30 seconds
 setInterval(() => {
@@ -288,7 +307,7 @@ setInterval(() => {
 }, 1000000);
 
 
-
+//old code below
 
 
 // socket.on('returnClientNumber', (msg) => {

@@ -50,6 +50,7 @@
           </nav>
 
           <div id="panel" class="container-fluid">
+              
           </div>
           
     </body>
@@ -57,24 +58,37 @@
    
 
     <script>
-        //var button = $( "#mainbutton" );
+        //References;
         // link for grid https://stackoverflow.com/questions/43115822/can-i-make-a-css-grid-with-dynamic-number-of-rows-or-columns
         //link for rese https://stackoverflow.com/questions/61155301/how-to-remove-divs-inside-a-grid
-        //const Client = require('../app/ClientObj.js');
         //https://stackoverflow.com/questions/64859592/how-can-i-make-div-content-appear-with-animation-when-clicking-a-button-that-inj
         
 
         var restartBtn = $( "#restartButton" );
         var refreshBtn = $( "#refreshButton" );
         var paramBtn = $( "#paramButton" );
-        const COLORS = ['#FE9','#9AF','#F9A',"#AFA","#FA7"];
+        const COLORS = ['#FE9','#9AF','#F9A',"#AFA","#FA7"]; //not really used anyomre
         const container = $('#panel');
-        const tmpl = $('#client_temp').html();
+        const tmpl = $('#client_temp').html(); //not used?
         let winningId = "";
         isGameOver = false;
         var clientDict = new Map();
         let range = 1;
         let shareSize = 1;
+
+        const fadeDuration = 200;
+        const fadeWait = 500;
+
+        function showWinnerOverlay(id, callback){
+            var winner = document.getElementById("winnerDiv");
+            var winnerName = clientDict.get(id).name;
+            var winnerNum = clientDict.get(id).num;
+            winner.innerHTML = "Congrats! Our winner " + winnerName + "guessed the number " + winnerNum;
+            winner.style.background = "#2ECC71";
+            $("#winnerDiv").fadeIn(fadeDuration).delay(fadeWait).fadeOut(fadeDuration, callback); 
+        }
+
+
         
         function resetGrid(){
             document.querySelectorAll(".item").forEach((e) => e.parentNode.removeChild(e));
@@ -83,7 +97,8 @@
         function removeBlocks() {
             document.querySelectorAll(".block").forEach((e) => e.remove(e));
         }
-     
+        
+        /*Compares admin and server dictionary to see if there are changes in the numbers*/
         function mapCompare(dict){
 
             for(let [key,value] of dict){
@@ -102,6 +117,7 @@
             }
         }
 
+        /*Adds new client div to the admin panel*/
         function addClient(id, obj){
 
             let myC = obj;
@@ -114,18 +130,25 @@
              clientNum.innerHTML = parseInt(myC.num);
              clientNum.setAttribute('id', "num");
 
+            //  var img = document.createElement("img");
+            //  img.className ="picture";
+            //  img.setAttribute("src","images/benfrank.png");
+             
+
              var block = document.createElement("div");
              block.appendChild(clientName);
              block.appendChild(clientNum);
+             //clientNum.appendChild(img);
              block.setAttribute('id', id);
-             block.className = "block";
+             block.className = "block ";
 
-             let colorNum = Math.floor(Math.random() * 5);
+             //let colorNum = Math.floor(Math.random() * 5);
              block.style.background = obj.color;
 
              container.append(block);             
         }
 
+        /*Updates client div in admin panel*/
         function updateClient(id,obj){
             var client = document.getElementById(id);
             var clientNum = client.lastElementChild;
@@ -136,13 +159,21 @@
                 client.classList.remove("animate");
             }, 2500); // 500 is the same time as the CSS animation
             void client.offsetWidth;
+
+            let box = client;
+            let width = box.clientWidth;
+            let height = box.clientHeight;
+            console.log("THIS IS THE WIDTH " + width);
+            console.log("THIS IS THE HEIGHT " + height);
         }
 
+        /*Removes client from admin panel*/
         function removeClient(id){
             var client = document.getElementById(id);
             client.remove();
         }
 
+        /*Updates div to proper colors based on winner*/
         function updateBlockWinner(id) {
             if(isGameOver){
                 console.log(clientDict);
@@ -156,18 +187,33 @@
                         client.style.background = "#E74C3C";
                     }
                 }
+                //console.log('time to display winner');
+                //showWinnerOverlay(id);
             }
+            
         }
 
+        /*dont think this is used anymore*/
         function setRangeAndShareSize(){
             var inputVal = document.getElementById("myInput").value;
         }
 
+        /*Resets divvs back to original colors*/
         function resetDivColors(){
             for(let [key,value] of clientDict){
                 //console.log("this is my color " + value.color);
                 document.getElementById(key).style.backgroundColor = value.color;
             }
+        }
+
+        /*Updates game parameters */
+        function updateParams(params){
+            range = params[0];
+            document.getElementById('range').innerHTML = "Range: " + range;
+            shareSize = params[1];
+            document.getElementById('shareSize').innerHTML = "Share size: " + shareSize;
+            winNum = params[2];
+            document.getElementById('winNum').innerHTML = "Winning Number: " + winNum;
         }
 
          // URL defaults to window.location
@@ -179,11 +225,10 @@
 
         restartBtn.click(function(){ 
             socket.emit('restartGame');
-            });
+        });
 
         refreshBtn.click(function(){
             console.log("refresh button was clicked")
-            //socket.emit('askClientResponse');
             socket.emit('refreshPress');
         });
 
@@ -194,12 +239,7 @@
             if(params.length == 3){
                 console.log(typeof params)
                 console.log(typeof params[0]);
-                range = params[0];
-                document.getElementById('range').innerHTML = "Range: " + range;
-                shareSize = params[1];
-                document.getElementById('shareSize').innerHTML = "Share size: " + shareSize;
-                winNum = params[2];
-                document.getElementById('winNum').innerHTML = "Winning Number: " + winNum;
+                updateParams(params);
                 socket.emit('setNewGameParams', params);
             }
 
@@ -209,17 +249,14 @@
         socket.on('restartGame', (msg) => {
             isGameOver = false;
             console.log("Restarting the admin");
-            // resetGrid();
-            // removeBlocks();
-            // //clientDict = new Map();
-            // //resetDivColors();
-            // for(let [key,value] of clientDict){
-            //     addClient(key,value);
-            // }
             resetDivColors();
             winningId = "";
-            //socket.emit('askClientResponse');
+            socket.emit('getParams');
         });
+
+        socket.on('updateParams', (msg) => {
+            updateParams(msg);
+        })
 
 
         socket.on('time', (timeString) => {
@@ -227,38 +264,34 @@
                 el.innerHTML = 'Server time: ' + timeString;
             });
 
+
         socket.on('weGotAWinner', (msg) => {
             console.log('We have a winner - admin');
             console.log("winner: ", msg);
             winningId = msg;
             isGameOver = true;
             updateBlockWinner(winningId);
-            //socket.emit('askClientResponse');
         })
 
+        //cilnet number has changed, checks map for changes and updates
         socket.on('numberSwitch', (msg)  => {
-
             var newMap = new Map(JSON.parse(msg));
             mapCompare(newMap);
-            //addClient(container,msg.id,msg.currNum);
         });
 
+        //adds client to window and dictionary
         socket.on('addClient', (msg) => {
             console.log('adding to screen');
             clientDict.set(msg.id,msg.obj);
             addClient(msg.id,msg.obj);
         });
 
+        //registers admin panel in game and checks if game has been won
         socket.on('registered', (msg) => {
             console.log("ADMIN IS REGISTERED");
             resetGrid();
             removeBlocks();
-            range = msg.par[0];
-            document.getElementById('range').innerHTML = "Range: " + range;
-            shareSize = msg.par[1];
-            document.getElementById('shareSize').innerHTML = "Share size: " + shareSize;
-            winner = msg.par[2];
-            document.getElementById('winNum').innerHTML = "Winning Number: " + winner;
+            //updateParams(msg);
             var newMap = new Map(JSON.parse(msg.map));
             clientDict = newMap;
             for(let [key,value] of clientDict){
@@ -270,8 +303,10 @@
                 isGameOver = true;
                 updateBlockWinner(msg.winner);
             }
+            socket.emit('getParams');
         });
 
+        //removes client from panel and dictionary
         socket.on('removeClient', (msg) => {
             console.log('Client disconnected, removing from game');
             clientDict.delete(msg);

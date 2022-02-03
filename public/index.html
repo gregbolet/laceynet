@@ -22,11 +22,11 @@
         </li>
         
       </ul>
-      <a class="navbar-brand mx-auto" href="#" id="playername">Player: </a>
+      <!--<a class="navbar-brand mx-auto" href="#" id="playername">Player: </a>-->
       <p class="navbar-text ml-auto pb-0" id="server-time"></p>
     </nav>
 
-<!--<div class="clientName"> This is the title</div> -->
+<div class="clientName" id="playername"> Player:... </div>
 
     <div class="container col-md-12 align-middle">
 
@@ -53,6 +53,12 @@
     var restartBtn = $( "#restartButton" );
     let isGameOver = false;
     let playername = "";
+
+    let imageDict = {"Ben Franklin": "images/benfrank-removebg-preview.png", 
+    "Ada Lovelace": "images/adalovelace.jpg", 
+    "Muhammad Ali":"images/ali-removebg-preview.png", "Harriet Tubman": "images/harriettubman.png", 
+    "Frank Sinatra": "images/franksinatra.jfif", "Grace Hopper": "images/gracehopper.png"
+  , "Louis Armstrong": "images/louis.png"};
     
 
     function setContinueMode(){
@@ -228,6 +234,11 @@
           nC = false;
         });
 
+    socket.on('updateWinningNumber', (msg) => {
+      winningNum = msg;
+      console.log('the new wining number is ' + winningNum);
+    })
+
     socket.on('getClientNumber', (msg) => {
         //get the number
         console.log(socket);
@@ -240,6 +251,13 @@
     socket.on('getMyInfo', (msg) => {
       playername = msg.name;
       document.getElementById('playername').innerHTML = "Player: " + playername;
+      var img = document.createElement("img");
+      img.className ="picture";
+      if(Object.keys(imageDict).includes(msg.name)){
+        img.setAttribute("src",imageDict[msg.name]);
+        document.getElementById('playername').appendChild(img);
+      }
+     
       //document.getElementById('mainbutton').style.backgroundColor = msg.color;
 
     })

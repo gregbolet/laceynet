@@ -10,23 +10,29 @@
 .mainbuttonstyle {
   font-size:400% !important; 
   width:100%; 
-  height:50%; 
+  height:75%; /*50*/
   top:25%;
   background-color: green;
+  z-index: 0;
+  /*position: relative;*/
+  /*padding-bottom: 500px;*/
+ 
 }
 
 .clientName {
-  font-size: 200%;
+  font-size: 400%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-top: 50px;
-  margin:10px;
-  position: relative
+  /*padding-top: 50px;*/
+  /*margin:10px;*/
+  /*position: relative;*/
+  z-index: 1;
+  /*display: flex;*/
 }
 
 #redXOverlay, #greenCheckOverlay{
-  position: absolute;
+  /*position: absolute;*/
   top: 0;
   left: 0;
   width:100%;
@@ -35,11 +41,13 @@
   /* opacity: 0.5; */
   display: none;
   /* pointer-events: none; */
+  position: absolute;
+  z-index: 2;
 }
 
 .overlayimg{
-  width: 75%;
-  height: 75%;
+  width: 100%; /*100*/
+  height: 100%; /*100*/
   margin: 0;
   position: absolute;
   top: 50%;
@@ -50,7 +58,7 @@
 
 .container{
   width:100%;
-  height:100%;
+  height:75%; /*100*/
   display: flex;
   align-items: center;
 
@@ -58,4 +66,11 @@
 
 body {
   overflow: hidden;
+  background-color: transparent;
+}
+
+.picture{
+  width: 100px;
+  height: 100px;
+  align-items: right;  
 }
