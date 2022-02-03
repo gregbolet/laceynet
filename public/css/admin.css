@@ -43,10 +43,12 @@
 
 .block{
     flex: 0 0 calc(25% - 1em);
-    /*min-height: 50px;
-    min-width: 25px;*/
-    height: 120px;
-    width: 250px;
+    min-height: 50px;
+    min-width: 25px;
+    max-width: 200px;
+    max-height: 100px;
+    /*height: 120px;
+    width: 250px;*/
     margin: 0.25em 0.5em;
     font-size: 100%;
     text-align: center;
