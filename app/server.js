@@ -28,7 +28,7 @@ const io = socketIO(server);
 // state for arduinos, only changed by the
 // button on the admin panel. Will say "ready"
 // when the game is ready for the arduinos
-var arduinoGameState = 'preparing';
+var arduinoGameState = 'waiting';
 
 app.use(
   express.urlencoded({

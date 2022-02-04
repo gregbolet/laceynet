@@ -41,6 +41,8 @@
                         <input type="text" placeholder="Range,Share Size..." id="myInput">
                         <button class="btn btn-warning" id="paramButton" >Set Game Params </button>
                         <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#" id="arduinostatus"></a>
+                        <div class="dropdown-divider"></div>
                         <button class="btn btn-info" id="startArduinoButton">Start Arduino </button>
         
                     </div>
@@ -232,6 +234,21 @@
             document.getElementById('winNum').innerHTML = "Winning Number: " + winNum;
         }
 
+        function updateArduinoStatus(status) {
+            if(status === "waiting"){
+                console.log("changing status to READY");
+                arduinoGameState = "ready";
+                ardBtn.html(`Arduino Running`); 
+                socket.emit('updateArdStatus', arduinoGameState);
+            }else {
+                console.log("changing status to WAITING");
+                arduinoGameState = "waiting";
+                ardBtn.html(`Arduino Waiting`); 
+                socket.emit('updateArdStatus', arduinoGameState);
+            }
+            document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
+        }
+
          // URL defaults to window.location
         let socket = io('/admin.html');
         let el;
@@ -262,25 +279,30 @@
         });
 
         ardBtn.click(function() {
-            if(arduinoGameState === "preparing"){
+            if(arduinoGameState === "waiting"){
                 console.log("changing status to READY");
                 arduinoGameState = "ready";
                 ardBtn.html(`Arduino Running`); 
                 socket.emit('updateArdStatus', arduinoGameState);
             }else {
-                console.log("changing status to PREPARING");
-                arduinoGameState = "preparing";
+                console.log("changing status to WAITING");
+                arduinoGameState = "waiting";
                 ardBtn.html(`Arduino Waiting`); 
-                //ardBtn.innerHTML = "Arduino Waiting";
                 socket.emit('updateArdStatus', arduinoGameState);
             }
+            document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
         });
 
         // Handle the case of restarting the game
         socket.on('restartGame', (msg) => {
             isGameOver = false;
+            console.log("RESTART GAME - changing status to WAITING");
+            arduinoGameState = "waiting";
+            document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
+            socket.emit('updateArdStatus', arduinoGameState);
+            ardBtn.html(`Arduino Waiting`); 
             console.log("Restarting the admin");
-            //figure out why they dont pulse on restart every time
+            //figure out why they dont pulse on restart every time -- something with the updateClient being called?
             resetGrid();
             removeBlocks();
             for(let [key,value] of clientDict){
@@ -308,9 +330,8 @@
             winningId = msg;
             isGameOver = true;
             updateBlockWinner(winningId);
-            arduinoGameState = "preparing";
+            arduinoGameState = "waiting";
             socket.emit('updateArdStatus', arduinoGameState);
-            //socket.emit('askClientResponse');
         })
 
         //cilnet number has changed, checks map for changes and updates
@@ -335,10 +356,12 @@
             console.log('REGISTER');
             arduinoGameState = msg.ardStatus; //set up arduino status
             console.log("Arduino status: " + arduinoGameState);
-            range = msg.par[0];
-            document.getElementById('range').innerHTML = "Range: " + range;
-            shareSize = msg.par[1];
-            document.getElementById('shareSize').innerHTML = "Share size: " + shareSize;
+            document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
+            updateParams(msg.par);
+            // range = msg.par[0];
+            // document.getElementById('range').innerHTML = "Range: " + range;
+            // shareSize = msg.par[1];
+            // document.getElementById('shareSize').innerHTML = "Share size: " + shareSize;
             var newMap = new Map(JSON.parse(msg.map));
             clientDict = newMap;
             for(let [key,value] of clientDict){
