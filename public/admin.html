@@ -95,6 +95,7 @@
         }
  
         function removeBlocks() {
+            document.querySelectorAll(".animate").forEach((e) => e.remove(e));
             document.querySelectorAll(".block").forEach((e) => e.remove(e));
         }
         
@@ -154,17 +155,23 @@
             var clientNum = client.lastElementChild;
             clientNum.innerHTML = parseInt(obj.num);
             console.log("animating " + obj.name);
+
+            client.style.zIndex = 100;
+;
             client.classList.add("animate");
+            
             setTimeout(function() {
                 client.classList.remove("animate");
             }, 2500); // 500 is the same time as the CSS animation
             void client.offsetWidth;
+            client.style.zIndex = 0;
 
             let box = client;
             let width = box.clientWidth;
             let height = box.clientHeight;
             console.log("THIS IS THE WIDTH " + width);
             console.log("THIS IS THE HEIGHT " + height);
+            
         }
 
         /*Removes client from admin panel*/
@@ -175,12 +182,14 @@
 
         /*Updates div to proper colors based on winner*/
         function updateBlockWinner(id) {
+            var winningClient;
             if(isGameOver){
                 console.log(clientDict);
                 for(let [key,value] of clientDict){
-                    if(key == id){
-                        var client = document.getElementById(id);
-                        client.style.background = "#2ECC71";
+                    if(key === id){
+                        winningClient = document.getElementById(id);
+                        winningClient.style.background = "#2ECC71";
+                        winningClient.classList.add('winnerAnimate');
                     }
                     else {
                         var client = document.getElementById(key);
@@ -191,7 +200,10 @@
                 //showWinnerOverlay(id);
             }
             
+            
         }
+
+
 
         /*dont think this is used anymore*/
         function setRangeAndShareSize(){
@@ -249,6 +261,12 @@
         socket.on('restartGame', (msg) => {
             isGameOver = false;
             console.log("Restarting the admin");
+            //figure out why they dont pulse on restart every time
+            resetGrid();
+            removeBlocks();
+            for(let [key,value] of clientDict){
+                addClient(key,value);
+            }
             resetDivColors();
             winningId = "";
             socket.emit('getParams');
