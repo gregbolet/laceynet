@@ -238,12 +238,12 @@
             if(status === "waiting"){
                 console.log("changing status to READY");
                 arduinoGameState = "ready";
-                ardBtn.html(`Arduino Running`); 
+                ardBtn.html(`Stop Arduino`); 
                 socket.emit('updateArdStatus', arduinoGameState);
             }else {
                 console.log("changing status to WAITING");
                 arduinoGameState = "waiting";
-                ardBtn.html(`Arduino Waiting`); 
+                ardBtn.html(`Start Arduino`); 
                 socket.emit('updateArdStatus', arduinoGameState);
             }
             document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
@@ -282,12 +282,12 @@
             if(arduinoGameState === "waiting"){
                 console.log("changing status to READY");
                 arduinoGameState = "ready";
-                ardBtn.html(`Arduino Running`); 
+                ardBtn.html(`Stop Arduino`); 
                 socket.emit('updateArdStatus', arduinoGameState);
             }else {
                 console.log("changing status to WAITING");
                 arduinoGameState = "waiting";
-                ardBtn.html(`Arduino Waiting`); 
+                ardBtn.html(`Start Arduino`); 
                 socket.emit('updateArdStatus', arduinoGameState);
             }
             document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
@@ -300,7 +300,7 @@
             arduinoGameState = "waiting";
             document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
             socket.emit('updateArdStatus', arduinoGameState);
-            ardBtn.html(`Arduino Waiting`); 
+            ardBtn.html(`Start Arduino`); 
             console.log("Restarting the admin");
             //figure out why they dont pulse on restart every time -- something with the updateClient being called?
             resetGrid();
