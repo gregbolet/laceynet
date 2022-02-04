@@ -11,6 +11,7 @@ const { param } = require('express/lib/request');
 const PORT = process.env.PORT || 5000;
 const app = express();
 
+
 // Serve all the files from the /public folder
 // Given public/index.html it will be served from myaddress.com/index.html
 app.use(express.static('public'))  
@@ -22,6 +23,42 @@ const server = app.listen(PORT, function () {
 // socketIO will serve the websockets and handle reverse
 // compatibility and protocol fallback
 const io = socketIO(server);
+
+// the global variable indicating the game 
+// state for arduinos, only changed by the
+// button on the admin panel. Will say "ready"
+// when the game is ready for the arduinos
+var arduinoGameState = 'preparing';
+
+app.use(
+  express.urlencoded({
+    extended: true
+  })
+)
+
+app.use(express.json())
+
+app.set('/ardiono', io);
+
+app.get('/arduino', (req,res)=>{
+  res.send(arduinoGameState);
+})
+
+app.post('/arduino', (req, res)=>{
+  console.info(req.body); // the field named IP
+  var newSeq = generateTappingSequence();
+  res.send(newSeq);
+})
+
+function generateTappingSequence(){
+  var arr = "";
+  while(arr.length < 3){
+      var r = Math.floor(Math.random() * 3) + 1;
+      if(arr.indexOf(r) === -1) arr+=r;
+  }
+  console.log(arr);
+  return arr;
+}
 
 // Now let's setup a new GameManager instance
 let GameMan = new GameManager(10, 4);
@@ -103,6 +140,11 @@ adminIo.on('connection', (socket) => {
   });
 
   //resets game with new parameters
+  socket.on('updateArdStatus', (msg) => { //updating arduino status
+    arduinoGameState = msg;
+    console.log("The arduino status has changed to " + arduinoGameState);
+  })
+
   socket.on('setNewGameParams', (msg) =>{
     console.log('Changing the game parameters');
     GameMan.resetGameParameters(msg);
@@ -126,8 +168,8 @@ adminIo.on('connection', (socket) => {
 
   //initial registration
   let transitString = JSON.stringify(Array.from(clientDict));
-  //let params = GameMan.getParams();
-  socket.emit('registered',{gameStatus: gameOver, winner: winningClient, map: transitString}); //when admin is added, pass client dictionary and populate screen
+  let params = GameMan.getParams();
+  socket.emit('registered',{map: transitString, par: params, ardStatus: arduinoGameState}); //when admin is added, pass client dictionary and populate screen
 
 });
 
