@@ -62,7 +62,7 @@
 }
 
 .animate {
-  animation: pulse 2s infinite;
+  animation: pulse 1.5s infinite;
 }
 
 .winnerAnimate {
@@ -83,7 +83,7 @@
 	}
 
 	70% {
-		transform: scale(1.25);
+		transform: scale(1.15);
 		box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
 	}
 

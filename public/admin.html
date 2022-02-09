@@ -80,6 +80,8 @@
         var clientDict = new Map();
         let range = 1;
         let shareSize = 1;
+        let arduinoGameState = "";
+        
 
         const fadeDuration = 200;
         const fadeWait = 500;
@@ -94,7 +96,6 @@
         }
 
 
-        let arduinoGameState = "";
         
         function resetGrid(){
             document.querySelectorAll(".item").forEach((e) => e.parentNode.removeChild(e));
@@ -127,44 +128,40 @@
         /*Adds new client div to the admin panel*/
         function addClient(id, obj){
 
-            let myC = obj;
+             let myC = obj;
+             //create name div
              var clientName = document.createElement("div");
              clientName.innerHTML = myC.name;
              clientName.setAttribute('id', "client_name");
              clientName.className = "client_name";
-
+            //create num div
              var clientNum = document.createElement("div");
              clientNum.innerHTML = parseInt(myC.num);
              clientNum.setAttribute('id', "num");
-
-            //  var img = document.createElement("img");
-            //  img.className ="picture";
-            //  img.setAttribute("src","images/benfrank.png");
-             
-
+            //create div to hold everything
              var block = document.createElement("div");
              block.appendChild(clientName);
              block.appendChild(clientNum);
-             //clientNum.appendChild(img);
-             block.setAttribute('id', id);
-             block.className = "block ";
+             block.setAttribute('id', id); //set id of div to be the client id
+             block.className = "block";
 
-             //let colorNum = Math.floor(Math.random() * 5);
-             block.style.background = obj.color;
+            //set div color
+             block.style.background = myC.color;
 
-             container.append(block);             
+             container.append(block); //add to panel   
         }
 
         /*Updates client div in admin panel*/
         function updateClient(id,obj){
+            //get client div from container
             var client = document.getElementById(id);
             var clientNum = client.lastElementChild;
-            clientNum.innerHTML = parseInt(obj.num);
+            clientNum.innerHTML = parseInt(obj.num); //update its current value
             console.log("animating " + obj.name);
 
-            client.style.zIndex = 100;
+            client.style.zIndex = 100; //send to the front
 ;
-            client.classList.add("animate");
+            client.classList.add("animate"); //add animation
             
             setTimeout(function() {
                 client.classList.remove("animate");
@@ -190,7 +187,7 @@
         function updateBlockWinner(id) {
             var winningClient;
             if(isGameOver){
-                console.log(clientDict);
+                //console.log(clientDict);
                 for(let [key,value] of clientDict){
                     if(key === id){
                         winningClient = document.getElementById(id);
@@ -200,11 +197,14 @@
                     else {
                         var client = document.getElementById(key);
                         client.style.background = "#E74C3C";
+                        client.classList.remove('animate');
                     }
                 }
                 //console.log('time to display winner');
                 //showWinnerOverlay(id);
             }
+
+            winningClient.classList.remove("winnerAnimate");
             
             
         }
@@ -219,7 +219,6 @@
         /*Resets divvs back to original colors*/
         function resetDivColors(){
             for(let [key,value] of clientDict){
-                //console.log("this is my color " + value.color);
                 document.getElementById(key).style.backgroundColor = value.color;
             }
         }
@@ -302,12 +301,12 @@
             socket.emit('updateArdStatus', arduinoGameState);
             ardBtn.html(`Start Arduino`); 
             console.log("Restarting the admin");
-            //figure out why they dont pulse on restart every time -- something with the updateClient being called?
-            resetGrid();
-            removeBlocks();
-            for(let [key,value] of clientDict){
-                addClient(key,value);
-            }
+
+            // resetGrid();
+            // removeBlocks();
+            // for(let [key,value] of clientDict){
+            //     addClient(key,value);
+            // }
             resetDivColors();
             winningId = "";
             socket.emit('getParams');
@@ -350,30 +349,28 @@
         //registers admin panel in game and checks if game has been won
         socket.on('registered', (msg) => {
             console.log("ADMIN IS REGISTERED");
+            //reset panel
             resetGrid();
             removeBlocks();
-            //updateParams(msg);
-            console.log('REGISTER');
-            arduinoGameState = msg.ardStatus; //set up arduino status
+             //set up arduino status
+            arduinoGameState = msg.ardStatus;
             console.log("Arduino status: " + arduinoGameState);
             document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
+            //udpate current parameters
             updateParams(msg.par);
-            // range = msg.par[0];
-            // document.getElementById('range').innerHTML = "Range: " + range;
-            // shareSize = msg.par[1];
-            // document.getElementById('shareSize').innerHTML = "Share size: " + shareSize;
+
+            //set up client map
             var newMap = new Map(JSON.parse(msg.map));
-            clientDict = newMap;
+            clientDict = newMap; //unncessary
             for(let [key,value] of clientDict){
-                addClient(key,value);
+                addClient(key,value); //add each client to the board
             }
 
-            if(msg.gameStatus){
-                console.log(" WOOP WOOP");
+            if(msg.gameStatus){ //if the game is over, put in proper format
                 isGameOver = true;
                 updateBlockWinner(msg.winner);
             }
-            socket.emit('getParams');
+            socket.emit('getParams'); //is this needed??
         });
 
         //removes client from panel and dictionary

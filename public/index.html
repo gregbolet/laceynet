@@ -68,6 +68,7 @@
                 button.removeClass( "btn-success" )
                 button.addClass( "btn-primary" );
               }
+              console.log("Continue mode is called " + new Date().toTimeString());
         }
 
     function setRestartMode(){
@@ -85,8 +86,9 @@
                 button.removeClass( "btn-primary" )
                 button.removeClass( "btn-success" )
                 button.addClass( "btn-danger" )
-
+                //button.html('Winner found! Waiting for restart...');
                 isGameOver = true;
+                console.log("IS the game over? "  + isGameOver + new Date().toTimeString());
               }
         }
 
@@ -103,12 +105,15 @@
     const fadeWait = 500;
 
     function showOverlayRedX(callback){
+      console.log("red overlay is being called");
          $("#redXOverlay").fadeIn(fadeDuration).delay(fadeWait).fadeOut(fadeDuration, callback); 
     }
 
     function showOverlayGreenCheck(callback){
          $("#greenCheckOverlay").fadeIn(fadeDuration).delay(fadeWait).fadeOut(fadeDuration, callback); 
     }
+
+   
 
     // URL defaults to window.location
     let socket = io('/');
@@ -123,13 +128,15 @@
         });
 
     // Setup the logic for when the button is pressed
-    button.click(function(){
+     button.click(function(){
       //console.log("Curr pos is " + currentPos);
           // Do nothing if the game is over
           if(isGameOver){
+            console.log("sorry game over oop");
                 return;
               }
 
+              console.log("howd we get here ??" + new Date().toTimeString());
           // If we click on the winning number, let the server know
           // Otherwise, advance to the next number in the share
           if(currentPos < currentShare.length && winningNum == currentShare[currentPos]){
@@ -145,18 +152,19 @@
                 });
               }  
           else{
-                setContinueMode();
+                //setContinueMode();
                 showOverlayRedX(function(){
-                  currentPos++;
+                  socket.emit('buttonPressed', {currNum: currentShare[currentPos], id:socket.id});  
+                    });
+                setContinueMode();
+                currentPos++;
                   console.log("Curr pos is " + currentPos);
                   console.log("Curr num is " + currentShare[currentPos]);
                   button.html(`${currentShare[currentPos]}`); 
-                  socket.emit('buttonPressed', {currNum: currentShare[currentPos], id:socket.id});  
-                    });
               }
           //console.log("Curr pos is " + currentPos);
           
-        });
+        }); 
 
     socket.on('time', (timeString) => {
           el = document.getElementById('server-time');
@@ -165,8 +173,11 @@
 
     // Handle the message where we are confirmed to have registered
     socket.on('registered', (msg) => {
+
           console.log('Requesitng a new share');
           nC = true;
+          isGameOver = msg.gameStatus;
+          console.log("calling in registered");
           socket.emit('needNewShare',{newClient:nC});
           nC = false;
         });
@@ -175,6 +186,7 @@
     socket.on('newShare', (msg) => {
 
           if(isGameOver){
+              console.log("sorry the game is over");
                 return;
               }
 
@@ -192,19 +204,22 @@
 
     // On share acceptance, request a new share of work
     socket.on('shareAccepted', (msg) => {
+      console.log("calling in shareaccepted");
           socket.emit('needNewShare',{newClient:nC}); 
         });
 
     // On share rejection, request a new share of work
     socket.on('shareRejected', (msg) => {
+      console.log("calling in sharerejected");
           socket.emit('needNewShare',{newClient:nC}); 
         });
 
     // Handle the case where we have a winner 
     socket.on('weGotAWinner', (msg) => {
+          console.log("what is the game status " + isGameOver);
           setLoserMode();
           button.html('Winner found! Waiting for restart...');
-          console.log("im a loser :(");
+          console.log("im a loser :(" + new Date().toTimeString());
         });
 
     // Handle the case where we are told to idle
@@ -215,6 +230,7 @@
 
     // Handle the case where we are told we lost 
     socket.on('youDidNotWin', (msg) => {
+        console.log("calling in youdidnotwin");
           socket.emit('needNewShare',{newClient:nC}); 
         });
 
@@ -230,6 +246,7 @@
           setLoserMode();
           isGameOver = false;
           nC = true;
+          console.log("calling in restart game");
           socket.emit('needNewShare',{newClient: nC});
           nC = false;
         });

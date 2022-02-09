@@ -68,7 +68,7 @@ let gameOver = false;
 
 var arduinoObj = {key: "hello world"};
 
-let winningClient = ""; //id of winningClient
+let winningClient = ""; //id of winningClient //dont think we use this???
 
 const clientNames = ["Abraham Lincoln", "George Washington", "Ben Franklin", "Ada Lovelace", 
 "Martin Luther King Jr.",  "Malcolm X", "Louis Armstrong", "Frank Sinatra", "Henry Ford", 
@@ -132,19 +132,18 @@ adminIo.on('connection', (socket) => {
     console.log(`Restarting game with current workers! - ADMIN`);
     GameMan.restartGameWithCurrentWorkers();
     gameOver = false;
-    //clientDict = new Map();
     winningClient = "";
     // Tell all the players we restarted
     adminIo.emit('restartGame');
     io.emit('restartGame');
   });
 
-  //resets game with new parameters
-  socket.on('updateArdStatus', (msg) => { //updating arduino status
+  //updating arduino status
+  socket.on('updateArdStatus', (msg) => {
     arduinoGameState = msg;
     console.log("The arduino status has changed to " + arduinoGameState);
   })
-
+  //updates game parameters
   socket.on('setNewGameParams', (msg) =>{
     console.log('Changing the game parameters');
     GameMan.resetGameParameters(msg);
@@ -169,9 +168,12 @@ adminIo.on('connection', (socket) => {
   //initial registration
   let transitString = JSON.stringify(Array.from(clientDict));
   let params = GameMan.getParams();
-  socket.emit('registered',{map: transitString, par: params, ardStatus: arduinoGameState}); //when admin is added, pass client dictionary and populate screen
+  socket.emit('registered',{map: transitString, par: params, ardStatus: arduinoGameState}); 
+  //when admin is added, pass client dictionary, current parameters, arduino status and populate screen
 
 });
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 // Handle a new client connection
@@ -218,7 +220,7 @@ clientIo.on('connection', (socket) => {
 
           let currClient = clientDict.get(socket.id);
           currClient.num = myNum;
-          console.info('switching the nums');
+          console.info('switching the nums2');
           let transitString = JSON.stringify(Array.from(clientDict));
           adminIo.emit('numberSwitch',transitString);
         }
@@ -305,13 +307,13 @@ clientIo.on('connection', (socket) => {
 
 
   // Let the client know they are registered
-  socket.emit('registered');
+  socket.emit('registered', {gameStatus: gameOver});
 
   //let admin panel know a client has switched numbers
   socket.on('buttonPressed', (msg) =>{
     
     if(clientDict.has(msg.id)){
-      console.info('switching the nums');
+      console.info('switching the nums1');
       let thisC = clientDict.get(msg.id);
       thisC.num = msg.currNum;
       console.log("ID " + msg.id + " num "+ msg.currNum + " map size " + clientDict.size);
