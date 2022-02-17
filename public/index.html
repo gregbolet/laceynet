@@ -204,19 +204,16 @@
 
     // On share acceptance, request a new share of work
     socket.on('shareAccepted', (msg) => {
-      console.log("calling in shareaccepted");
           socket.emit('needNewShare',{newClient:nC}); 
         });
 
     // On share rejection, request a new share of work
     socket.on('shareRejected', (msg) => {
-      console.log("calling in sharerejected");
           socket.emit('needNewShare',{newClient:nC}); 
         });
 
     // Handle the case where we have a winner 
     socket.on('weGotAWinner', (msg) => {
-          console.log("what is the game status " + isGameOver);
           setLoserMode();
           button.html('Winner found! Waiting for restart...');
           console.log("im a loser :(" + new Date().toTimeString());
@@ -230,7 +227,6 @@
 
     // Handle the case where we are told we lost 
     socket.on('youDidNotWin', (msg) => {
-        console.log("calling in youdidnotwin");
           socket.emit('needNewShare',{newClient:nC}); 
         });
 
@@ -246,7 +242,6 @@
           setLoserMode();
           isGameOver = false;
           nC = true;
-          console.log("calling in restart game");
           socket.emit('needNewShare',{newClient: nC});
           nC = false;
         });
