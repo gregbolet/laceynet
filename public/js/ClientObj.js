@@ -8,9 +8,9 @@ class ClientObj {
     num;
 
     constructor(name, id, color, num){
-      this.name = name;
-      this.id = id;
-      this.color = color;
+      this.name = name; // char name
+      this.id = id; // socket id
+      this.color = color; // stay the same within a single game
       this.num = num;
     }
 

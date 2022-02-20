@@ -87,9 +87,9 @@ let clientDict = new Map(); //map of client ids to client objects
 //Namespaces for client/admin/arduino
 const adminIo = io.of('/admin.html');
 
-const clientIo = io.of('/');
+const clientIo = io.of('/');  // client page
 
-const arduinoIo = io.of('/arduino.html');
+// const arduinoIo = io.of('/arduino.html');
 
 //generates a random color
 function generateColor(){
@@ -113,13 +113,18 @@ function generateName() {
   return clientNames[indextOfItemInMyArray];
 }
 
-//admin client namespace
+//admin client namespace - if connected to admin from client
 adminIo.on('connection', (socket) => {
   console.info(`Admin Client connected [id=${socket.id}]`);
+
+  //initial registration
+  let transitString = JSON.stringify(Array.from(clientDict));
+  let params = GameMan.getParams();
+  socket.emit('registered',{map: transitString, par: params, ardStatus: arduinoGameState});  // emiting to admin
+  //when admin is added, pass client dictionary, current parameters, arduino status and populate screen
  
   socket.on('disconnect', () => {
     console.log('Admin Client disconnected');
-    
   });
 
   socket.on('refreshPress', (msg) => { //kind of useless now?
@@ -165,11 +170,7 @@ adminIo.on('connection', (socket) => {
     socket.emit('updateParams',params);
   })
 
-  //initial registration
-  let transitString = JSON.stringify(Array.from(clientDict));
-  let params = GameMan.getParams();
-  socket.emit('registered',{map: transitString, par: params, ardStatus: arduinoGameState}); 
-  //when admin is added, pass client dictionary, current parameters, arduino status and populate screen
+ 
 
 });
 
@@ -181,13 +182,16 @@ clientIo.on('connection', (socket) => {
   console.info(`Client connected [id=${socket.id}]`);
   // Let's add the player to the game
   GameMan.addWorker(socket);
+
+  // Let the client know they are registered
+  socket.emit('registered', {gameStatus: gameOver});
  
   // Set the socket disconnect event handler
   socket.on('disconnect', () => {
     console.log('Client disconnected');
     GameMan.removeWorker(socket);
     clientDict.delete(socket.id);
-    adminIo.emit('removeClient',socket.id);
+    // adminIo.emit('removeClient',socket.id);
   });
 
   // Setup the new share request handler
@@ -214,10 +218,9 @@ clientIo.on('connection', (socket) => {
             let newColor = generateColor();
             var newC = new ClientObj(newName,socket.id,newColor,myNum);
             clientDict.set(socket.id,newC);
-            adminIo.emit('addClient',{id:socket.id, obj: newC});
-            socket.emit('getMyInfo', {color: newColor, name: newName});
+            adminIo.emit('addClient',{id:socket.id, obj: newC}); // emits to all admin namespace holder
+            socket.emit('getMyInfo', {color: newColor, name: newName}); // emit to the client that sent request
         }else { //when exisiting client wants new share 
-
           let currClient = clientDict.get(socket.id);
           currClient.num = myNum;
           console.info('switching the nums2');
@@ -304,10 +307,6 @@ clientIo.on('connection', (socket) => {
     io.emit('restartGame');
     adminIo.emit('restartGame');
   });
-
-
-  // Let the client know they are registered
-  socket.emit('registered', {gameStatus: gameOver});
 
   //let admin panel know a client has switched numbers
   socket.on('buttonPressed', (msg) =>{
