@@ -52,7 +52,7 @@ app.post('/arduino', (req, res)=>{
 })
 
 app.get('/measure', (req,res)=>{
-  console.info(req);
+  console.info(req.headers);
   var mac = req.headers['MEASURE'];
   // find the corresponding measurement from table?
   let text = '{ "a":11.1 , "B":22.2,  "c":33.3, "D":44.4, "e":55.5, "F":66.6}';
