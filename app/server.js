@@ -39,6 +39,7 @@ app.use(
 app.use(express.json())
 
 app.set('/ardiono', io);
+app.set('/measure', io);
 
 app.get('/arduino', (req,res)=>{
   res.send(arduinoGameState);
@@ -48,6 +49,15 @@ app.post('/arduino', (req, res)=>{
   console.info(req.body); // the field named IP
   var newSeq = generateTappingSequence();
   res.send(newSeq);
+})
+
+app.get('/measure', (req,res)=>{
+  console.info(req);
+  var mac = req.headers['MEASURE'];
+  // find the corresponding measurement from table?
+  let text = '{ "a":11.1 , "B":22.2,  "c":33.3, "D":44.4, "e":55.5, "F":66.6}';
+  const jsonObj = JSON.parse(text);
+  res.send(jsonObj);
 })
 
 function generateTappingSequence(){
