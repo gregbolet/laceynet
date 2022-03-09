@@ -58,7 +58,7 @@ app.post('/arduino', (req, res)=>{
 		double L_max, double l, double h); */
 app.get('/measure', (req,res)=>{
   console.info(req.headers);
-  var mac = req.headers['MEASURE'];
+  var mac = req.headers['measure'];
   // find the corresponding measurement from table?
   const jsonObj = JSON.parse(measurements);
   console.info(jsonObj[mac]);
