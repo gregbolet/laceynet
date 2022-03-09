@@ -59,8 +59,6 @@ app.post('/arduino', (req, res)=>{
 app.get('/measure', (req,res)=>{
   console.info(req.headers);
   var mac = req.headers['measure'];
-  // find the corresponding measurement from table?
-  // const jsonObj = JSON.parse(measurements);
   console.info(measurements[mac]);
   res.send(measurements[mac]);
 })
