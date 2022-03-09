@@ -60,9 +60,9 @@ app.get('/measure', (req,res)=>{
   console.info(req.headers);
   var mac = req.headers['measure'];
   // find the corresponding measurement from table?
-  const jsonObj = JSON.parse(measurements);
-  console.info(jsonObj[mac]);
-  res.send(jsonObj[mac]);
+  // const jsonObj = JSON.parse(measurements);
+  console.info(measurements[mac]);
+  res.send(measurements[mac]);
 })
 
 function generateTappingSequence(){
