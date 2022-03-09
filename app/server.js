@@ -7,6 +7,7 @@ const ClientObj = require('../public/js/ClientObj.js');
 const { param } = require('express/lib/request');
 //import ClientObj from '../public/js/ClientObj.js';
 //const { parse } = require('ws/lib/extension');
+const measurements = require('./measurements.json');
 
 const PORT = process.env.PORT || 5000;
 const app = express();
@@ -51,14 +52,17 @@ app.post('/arduino', (req, res)=>{
   res.send(newSeq);
 })
 
+/* Kinematic(double SB, double WB, double UB,
+		double sP, double wP, double uP, 
+		double OX, double OY, double L_min, 
+		double L_max, double l, double h); */
 app.get('/measure', (req,res)=>{
   console.info(req.headers);
   var mac = req.headers['MEASURE'];
   // find the corresponding measurement from table?
-  let text = '{ \"a\":11.1 , \"B\":22.2,  \"c\":33.3, \"D\":44.4, \"e\":55.5, \"F\":66.6}';
-  const jsonObj = JSON.parse(text);
-  console.info(jsonObj);
-  res.send(jsonObj);
+  const jsonObj = JSON.parse(measurements);
+  console.info(jsonObj[mac]);
+  res.send(jsonObj[mac]);
 })
 
 function generateTappingSequence(){
