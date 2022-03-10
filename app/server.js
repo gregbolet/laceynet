@@ -7,8 +7,9 @@ const ClientObj = require('../public/js/ClientObj.js');
 const { param } = require('express/lib/request');
 //import ClientObj from '../public/js/ClientObj.js';
 //const { parse } = require('ws/lib/extension');
+const measurements = require('./measurements.json');
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000; 
 const app = express();
 
 
@@ -39,6 +40,7 @@ app.use(
 app.use(express.json())
 
 app.set('/ardiono', io);
+app.set('/measure', io);
 
 app.get('/arduino', (req,res)=>{
   res.send(arduinoGameState);
@@ -50,6 +52,17 @@ app.post('/arduino', (req, res)=>{
   res.send(newSeq);
 })
 
+/* Kinematic(double SB, double WB, double UB,
+		double sP, double wP, double uP, 
+		double OX, double OY, double L_min, 
+		double L_max, double l, double h); */
+app.get('/measure', (req,res)=>{
+  console.info(req.headers);
+  var mac = req.headers['measure'];
+  console.info(measurements[mac]);
+  res.send(measurements[mac]);
+})
+
 function generateTappingSequence(){
   var arr = "";
   while(arr.length < 3){
@@ -59,6 +72,8 @@ function generateTappingSequence(){
   console.log(arr);
   return arr;
 }
+
+//---------------------- Arduino ends ---------------------------
 
 // Now let's setup a new GameManager instance
 let GameMan = new GameManager(10, 4);
