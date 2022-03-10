@@ -3,7 +3,7 @@
         <!-- Load Bootstrap/CSS/Popper/Jquery/Socket.io -->
         <link rel="stylesheet" href="/css/gamestyle.css"> </link>
         <link rel="stylesheet" href="/css/bootstrap.min.css"> </link>
-        <link rel="stylesheet" href="/css/admin.css"> </link>
+        <link rel="stylesheet" href="/css/display.css"> </link>
         <script src="/js/jquery-3.6.0.min.js"></script>
         <script src="/js/popper.min.js" ></script>
         <script src="/js/bootstrap.min.js" ></script>
@@ -106,7 +106,7 @@
             document.querySelectorAll(".block").forEach((e) => e.remove(e));
         }
         
-        /*Compares admin and server dictionary to see if there are changes in the numbers*/
+        /*Compares display and server dictionary to see if there are changes in the numbers*/
         function mapCompare(dict){
 
             for(let [key,value] of dict){
@@ -125,7 +125,7 @@
             }
         }
 
-        /*Adds new client div to the admin panel*/
+        /*Adds new client div to the display panel*/
         function addClient(id, obj){
 
              let myC = obj;
@@ -151,7 +151,7 @@
              container.append(block); //add to panel   
         }
 
-        /*Updates client div in admin panel*/
+        /*Updates client div in display panel*/
         function updateClient(id,obj){
             //get client div from container
             var client = document.getElementById(id);
@@ -177,7 +177,7 @@
             
         }
 
-        /*Removes client from admin panel*/
+        /*Removes client from display panel*/
         function removeClient(id){
             var client = document.getElementById(id);
             client.remove();
@@ -249,7 +249,7 @@
         }
 
          // URL defaults to window.location
-        let socket = io('/admin.html');
+        let socket = io('/display.html');
         let el;
         let currentShare = [];
         let currentPos = -1;
@@ -300,7 +300,7 @@
             document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
             socket.emit('updateArdStatus', arduinoGameState);
             ardBtn.html(`Start Arduino`); 
-            console.log("Restarting the admin");
+            console.log("Restarting the display");
 
             /* resetGrid();
             removeBlocks();
@@ -324,7 +324,7 @@
 
 
         socket.on('weGotAWinner', (msg) => {
-            console.log('We have a winner - admin');
+            console.log('We have a winner - display');
             console.log("winner: ", msg);
             winningId = msg;
             isGameOver = true;
@@ -346,9 +346,9 @@
             addClient(msg.id,msg.obj);
         });
 
-        //registers admin panel in game and checks if game has been won
+        //registers display panel in game and checks if game has been won
         socket.on('registered', (msg) => {
-            console.log("ADMIN IS REGISTERED");
+            console.log("DISP IS REGISTERED");
             //reset panel
             resetGrid();
             removeBlocks();

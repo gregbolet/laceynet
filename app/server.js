@@ -27,7 +27,7 @@ const io = socketIO(server);
 
 // the global variable indicating the game 
 // state for arduinos, only changed by the
-// button on the admin panel. Will say "ready"
+// button on the display panel. Will say "ready"
 // when the game is ready for the arduinos
 var arduinoGameState = 'waiting';
 
@@ -99,8 +99,8 @@ let clientDict = new Map(); //map of client ids to client objects
 
 
 
-//Namespaces for client/admin/arduino
-const adminIo = io.of('/admin.html');
+//Namespaces for client/display/arduino
+const displayIo = io.of('/display.html');
 
 const clientIo = io.of('/');  // client page
 
@@ -128,33 +128,33 @@ function generateName() {
   return clientNames[indextOfItemInMyArray];
 }
 
-//admin client namespace - if connected to admin from client
-adminIo.on('connection', (socket) => {
-  console.info(`Admin Client connected [id=${socket.id}]`);
+//display client namespace - if connected to display from client
+displayIo.on('connection', (socket) => {
+  console.info(`display Client connected [id=${socket.id}]`);
 
   //initial registration
   let transitString = JSON.stringify(Array.from(clientDict));
   let params = GameMan.getParams();
-  socket.emit('registered',{map: transitString, par: params, ardStatus: arduinoGameState});  // emiting to admin
-  //when admin is added, pass client dictionary, current parameters, arduino status and populate screen
+  socket.emit('registered',{map: transitString, par: params, ardStatus: arduinoGameState});  // emiting to display
+  //when display is added, pass client dictionary, current parameters, arduino status and populate screen
  
   socket.on('disconnect', () => {
-    console.log('Admin Client disconnected');
+    console.log('display Client disconnected');
   });
 
   socket.on('refreshPress', (msg) => { //kind of useless now?
     let transitString = JSON.stringify(Array.from(clientDict));
-    adminIo.emit('numberSwitch',transitString);
+    displayIo.emit('numberSwitch',transitString);
   });
 
   // Handle a request to restart the game
   socket.on('restartGame', (msg) => {
-    console.log(`Restarting game with current workers! - ADMIN`);
+    console.log(`Restarting game with current workers! - display`);
     GameMan.restartGameWithCurrentWorkers();
     gameOver = false;
     winningClient = "";
     // Tell all the players we restarted
-    adminIo.emit('restartGame');
+    displayIo.emit('restartGame');
     io.emit('restartGame');
   });
 
@@ -167,17 +167,17 @@ adminIo.on('connection', (socket) => {
   socket.on('setNewGameParams', (msg) =>{
     console.log('Changing the game parameters');
     GameMan.resetGameParameters(msg);
-    console.info(`Restarting game with current workers! - ADMIN`);
+    console.info(`Restarting game with current workers! - display`);
     GameMan.restartGameWithCurrentWorkers();
     gameOver = false;
     winningClient = "";
     // Tell all the players we restarted
     io.emit('restartGame');
-    adminIo.emit('restartGame');
+    displayIo.emit('restartGame');
 
     GameMan.updateWinningNum(msg[2]);
     io.emit('updateWinningNumber',msg[2]);
-    //adminIo.emit('updateWinningNumber');
+    //displayIo.emit('updateWinningNumber');
   });
 
   socket.on('getParams', (msg) => {
@@ -206,7 +206,7 @@ clientIo.on('connection', (socket) => {
     console.log('Client disconnected');
     GameMan.removeWorker(socket);
     clientDict.delete(socket.id);
-    // adminIo.emit('removeClient',socket.id);
+    displayIo.emit('removeClient',socket.id);
   });
 
   // Setup the new share request handler
@@ -233,14 +233,14 @@ clientIo.on('connection', (socket) => {
             let newColor = generateColor();
             var newC = new ClientObj(newName,socket.id,newColor,myNum);
             clientDict.set(socket.id,newC);
-            adminIo.emit('addClient',{id:socket.id, obj: newC}); // emits to all admin namespace holder
+            displayIo.emit('addClient',{id:socket.id, obj: newC}); // emits to all display namespace holder
             socket.emit('getMyInfo', {color: newColor, name: newName}); // emit to the client that sent request
         }else { //when exisiting client wants new share 
           let currClient = clientDict.get(socket.id);
           currClient.num = myNum;
           console.info('switching the nums2');
           let transitString = JSON.stringify(Array.from(clientDict));
-          adminIo.emit('numberSwitch',transitString);
+          displayIo.emit('numberSwitch',transitString);
         }
       }
 
@@ -296,8 +296,8 @@ clientIo.on('connection', (socket) => {
       // Emit to everyone EXCEPT this worker that won
       socket.broadcast.emit('weGotAWinner');
 
-      //emit to admin that we have a winner and which worker it is
-      adminIo.emit('weGotAWinner', id);
+      //emit to display that we have a winner and which worker it is
+      displayIo.emit('weGotAWinner', id);
 
       // Let the worker know that it did in fact win
       socket.emit('youAreTheWinner');
@@ -320,10 +320,10 @@ clientIo.on('connection', (socket) => {
     winningClient = "";
     // Tell all the players we restarted
     io.emit('restartGame');
-    adminIo.emit('restartGame');
+    displayIo.emit('restartGame');
   });
 
-  //let admin panel know a client has switched numbers
+  //let display panel know a client has switched numbers
   socket.on('buttonPressed', (msg) =>{
     
     if(clientDict.has(msg.id)){
@@ -333,7 +333,7 @@ clientIo.on('connection', (socket) => {
       console.log("ID " + msg.id + " num "+ msg.currNum + " map size " + clientDict.size);
 
       let transitString = JSON.stringify(Array.from(clientDict));
-      adminIo.emit('numberSwitch',transitString);
+      displayIo.emit('numberSwitch',transitString);
 
     }else {
       console.log('something went wrong - server - buttonPressed')
@@ -344,24 +344,24 @@ clientIo.on('connection', (socket) => {
 
 });
 
-arduinoIo.on('connection', (socket) => {
-  socket.emit("registered", arduinoObj);
-});
+// arduinoIo.on('connection', (socket) => {
+//   socket.emit("registered", arduinoObj);
+// });
 
 // Update the page time every second
 setInterval(() => {
   clientIo.emit('time', new Date().toTimeString());
 }, 1000);
 
-// Update the page time every second for admin
+// Update the page time every second for display
 setInterval(() => {
-  adminIo.emit('time', new Date().toTimeString());
+  displayIo.emit('time', new Date().toTimeString());
 }, 1000);
 
-// Refresh display/admin every 30 seconds
+// Refresh display/display every 30 seconds
 setInterval(() => {
   console.info('calling client response');
-  adminIo.emit('requestRefresh', new Date().toTimeString());
+  displayIo.emit('requestRefresh', new Date().toTimeString());
 }, 1000000);
 
 
@@ -375,13 +375,13 @@ setInterval(() => {
 //   numberDict[msg[0]] = msg[1];
 //   if (Object.keys(numberDict).length == (GameMan.getClientSize())) { //dictionary is full 
 //     console.info('going to dict');
-//     adminIo.emit('getClientDict', numberDict); //send dictionary to admin
+//     displayIo.emit('getClientDict', numberDict); //send dictionary to display
 //   }
 // });
 
 
 // socket.on('askClientResponse', (msg) => {
-//   console.info("ask client response - admin");
+//   console.info("ask client response - display");
 //   numberDict = {}; //need to clear dict each time this is called
 //   clientIo.emit('getClientNumber');
 // });

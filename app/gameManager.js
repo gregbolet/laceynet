@@ -286,7 +286,7 @@ module.exports = class GameManager{
     var count = 1;
     this.#clients.forEach((clientData, client) => {
       if(count >= this.#clients.size){
-        clientinfo += JSON.stringify("Admin: "  + client.id, null, 2)
+        clientinfo += JSON.stringify("Display: "  + client.id, null, 2)
       }else {
         clientinfo += JSON.stringify("Client " + count + ": " + client.id, null, 2)
       }
