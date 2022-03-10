@@ -9,7 +9,7 @@ const { param } = require('express/lib/request');
 //const { parse } = require('ws/lib/extension');
 const measurements = require('./measurements.json');
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000; 
 const app = express();
 
 
@@ -72,6 +72,8 @@ function generateTappingSequence(){
   console.log(arr);
   return arr;
 }
+
+//---------------------- Arduino ends ---------------------------
 
 // Now let's setup a new GameManager instance
 let GameMan = new GameManager(10, 4);
