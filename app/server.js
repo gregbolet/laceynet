@@ -40,38 +40,33 @@ app.use(
 app.use(express.json())
 
 app.set('/ardiono', io);
-app.set('/measure', io);
+// app.set('/measure', io);
 
-app.get('/arduino', (req,res)=>{
-  res.send(arduinoGameState);
-})
+// app.get('/arduino', (req,res)=>{
+//   res.send(arduinoGameState);
+// })
 
-app.post('/arduino', (req, res)=>{
-  console.info(req.body); // the field named IP
-  var newSeq = generateTappingSequence();
-  res.send(newSeq);
-})
+// app.post('/arduino', (req, res)=>{
+//   console.info(req.body); // the field named IP
+//   var newSeq = generateTappingSequence();
+//   res.send(newSeq);
+// })
 
 /* Kinematic(double SB, double WB, double UB,
 		double sP, double wP, double uP, 
 		double OX, double OY, double L_min, 
 		double L_max, double l, double h); */
-app.get('/measure', (req,res)=>{
+app.get('/arduino', (req,res)=>{
   console.info(req.headers);
-  var mac = req.headers['measure'];
-  console.info(measurements[mac]);
-  res.send(measurements[mac]);
-})
-
-function generateTappingSequence(){
-  var arr = "";
-  while(arr.length < 3){
-      var r = Math.floor(Math.random() * 3) + 1;
-      if(arr.indexOf(r) === -1) arr+=r;
+  var data = {};
+  if (req.headers.hasOwnProperty('measure')){
+    var mac = req.headers['measure'];
+    console.info(measurements[mac]);
+    data['measurement'] = measurements[mac];
   }
-  console.log(arr);
-  return arr;
-}
+  data['gameState'] = arduinoGameState;
+  res.send(data);
+})
 
 //---------------------- Arduino ends ---------------------------
 
