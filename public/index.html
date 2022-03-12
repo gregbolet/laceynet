@@ -112,14 +112,6 @@
       $("#greenCheckOverlay").fadeIn(fadeDuration).delay(fadeWait).fadeOut(fadeDuration, callback); 
     }
 
-   
-    // URL defaults to window.location
-    let socket = io('/');
-    let el;
-    let currentShare = [];
-    let currentPos = -1;
-    let winningNum = -1;
-    let nC = false;
 
     // quit button - close window, disconnect client, update display
     restartBtn.click(function(){
@@ -163,19 +155,24 @@
 
     }); 
 
-    socket.on('time', (timeString) => {
-      el = document.getElementById('server-time');
-      el.innerHTML = 'Server time: ' + timeString;
-    });
+
+    // ------------------------ sockets --------------------------
+    // URL defaults to window.location
+    var socket = io('/');
+    var el;
+    var currentShare = [];
+    var currentPos = -1;
+    var winningNum = -1;
+    var isNewClient = false;
+
 
     // Handle the message where we are confirmed to have registered
     socket.on('registered', (msg) => {
-      console.log('Requesitng a new share');
-      nC = true;
+      isNewClient = true;
       isGameOver = msg.gameStatus;
-      console.log("calling in registered");
-      socket.emit('needNewShare',{newClient:nC});
-      nC = false;
+      console.log('Requesitng a new share');
+      socket.emit('needNewShare',{newClient: isNewClient});
+      isNewClient = false;
     });
 
     // Handle incoming message for the requested share
@@ -194,17 +191,16 @@
       // Set the button text to the first element
       button.html(`${currentShare[currentPos]}`);   
       setContinueMode();
-
     });
 
     // On share acceptance, request a new share of work
     socket.on('shareAccepted', (msg) => {
-      socket.emit('needNewShare',{newClient:nC}); 
+      socket.emit('needNewShare',{newClient:isNewClient}); 
     });
 
     // On share rejection, request a new share of work
     socket.on('shareRejected', (msg) => {
-      socket.emit('needNewShare',{newClient:nC}); 
+      socket.emit('needNewShare',{newClient:isNewClient}); 
     });
 
     // Handle the case where we have a winner 
@@ -222,7 +218,7 @@
 
     // Handle the case where we are told we lost 
     socket.on('youDidNotWin', (msg) => {
-      socket.emit('needNewShare',{newClient:nC}); 
+      socket.emit('needNewShare',{newClient:isNewClient}); 
     });
 
     // Handle the case where we ARE the winner 
@@ -236,9 +232,9 @@
     socket.on('restartGame', (msg) => {
       setLoserMode();
       isGameOver = false;
-      nC = true;
-      socket.emit('needNewShare',{newClient: nC});
-      nC = false;
+      isNewClient = true;
+      socket.emit('needNewShare',{newClient: isNewClient});
+      isNewClient = false;
     });
 
     socket.on('updateWinningNumber', (msg) => {
@@ -266,7 +262,13 @@
       }
      
       //document.getElementById('mainbutton').style.backgroundColor = msg.color;
-    })
+    });
+
+
+    socket.on('time', (timeString) => {
+      el = document.getElementById('server-time');
+      el.innerHTML = 'Server time: ' + timeString;
+    });
     
   </script>
 

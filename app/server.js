@@ -1,29 +1,26 @@
 const express = require('express');
-//const WebSocket = require('ws');
 const socketIO = require('socket.io');
-//const { Client } = require('socket.io/dist/client');
 const GameManager = require('./gameManager.js');
 const ClientObj = require('../public/js/ClientObj.js');
 const { param } = require('express/lib/request');
-//import ClientObj from '../public/js/ClientObj.js';
-//const { parse } = require('ws/lib/extension');
 const measurements = require('./measurements.json');
 
 const PORT = process.env.PORT || 5000; 
 const app = express();
+const server = app.listen(PORT, function () {
+  console.log(`Game Server UI listening on port ${PORT}!`)
+});
+// socketIO will serve the websockets and handle reverse
+// compatibility and protocol fallback
+const io = socketIO(server);
 
 
 // Serve all the files from the /public folder
 // Given public/index.html it will be served from myaddress.com/index.html
 app.use(express.static('public'))  
+app.use(express.urlencoded({extended: true}))
+app.use(express.json())
 
-const server = app.listen(PORT, function () {
-  console.log(`Game Server UI listening on port ${PORT}!`)
-});
-
-// socketIO will serve the websockets and handle reverse
-// compatibility and protocol fallback
-const io = socketIO(server);
 
 // the global variable indicating the game 
 // state for arduinos, only changed by the
@@ -31,20 +28,9 @@ const io = socketIO(server);
 // when the game is ready for the arduinos
 var arduinoGameState = 'waiting';
 
-app.use(
-  express.urlencoded({
-    extended: true
-  })
-)
 
-app.use(express.json())
 
 app.set('/ardiono', io);
-
-/* Kinematic(double SB, double WB, double UB,
-		double sP, double wP, double uP, 
-		double OX, double OY, double L_min, 
-		double L_max, double l, double h); */
 app.get('/arduino', (req,res)=>{
   console.info(req.headers);
   var data = {};
@@ -60,10 +46,10 @@ app.get('/arduino', (req,res)=>{
 //---------------------- Arduino ends ---------------------------
 
 // Now let's setup a new GameManager instance
-let GameMan = new GameManager(10, 4);
+var GameMan = new GameManager(10, 4);
 
 // Keep track of whether we need to restart the game
-let gameOver = false;
+var gameOver = false;
 
 var arduinoObj = {key: "hello world"};
 
@@ -82,10 +68,9 @@ const clientColors =  ['#FE9',"#AFA","#FA7", '#9AF','#FFEFD5','#C2F0D1',"#FFB6C1
 let clientDict = new Map(); //map of client ids to client objects
 
 
-
-//Namespaces for client/display/arduino
+// define namespaces 
 const displayIo = io.of('/display.html');
-
+const adminIo = io.of('/admin.html');
 const clientIo = io.of('/');  // client page
 
 
@@ -113,43 +98,16 @@ function generateName() {
 
 // socket.emit('registered',{map: transitString, par: params, ardStatus: arduinoGameState}); // i need arduino to admin
 
+
 // ------------------------- display namespace -----------------------------
-displayIo.on('connection', (socket) => {
-  console.info(`display Client connected [id=${socket.id}]`);
-
-  //initial registration
-  // let clientMapping = Object.fromEntries(clientDict);
-  let params = GameMan.getParams();
-  socket.emit('displayRegistered', {map: clientDict, parameters: params, gameStatus: gameOver, winner: winningClient});  // emiting to display
- 
-  // Handle a request to restart the game
-  socket.on('restartGame', () => {
-    console.log(`Restarting game with current workers! - display`);
-    GameMan.restartGameWithCurrentWorkers();
-    gameOver = false;
-    winningClient = "";
-    let params = GameMan.getParams();
-    // Tell all the players we restarted
-    displayIo.emit('displayRestartGame', {gameStatus: gameOver, parameters: params});
-    io.emit('restartGame');
-  });
-
-
-  socket.on('disconnect', () => { // the point?
-    console.log('display Client disconnected');
-  });
-
-  socket.on('refreshPress', (msg) => { //kind of useless now?
-    let transitString = JSON.stringify(Array.from(clientDict));
-    displayIo.emit('numberSwitch',transitString);
-  });
+adminIo.on('connection', (socket) => {
 
 
   //updating arduino status
   socket.on('updateArdStatus', (msg) => {
     arduinoGameState = msg;
     console.log("The arduino status has changed to " + arduinoGameState);
-  })
+  });
 
   //updates game parameters
   socket.on('setNewGameParams', (msg) =>{
@@ -164,43 +122,83 @@ displayIo.on('connection', (socket) => {
     displayIo.emit('displayRestartGame', {gameStatus: gameOver, parameters: params});
 
     GameMan.updateWinningNum(msg[2]);
-    io.emit('updateWinningNumber',msg[2]);
-    //displayIo.emit('updateWinningNumber');
+    io.emit('updateWinningNumber', msg[2]);
+    displayIo.emit('displayUpdateParams');
   });
 
   socket.on('getParams', () => {
     const stats = GameMan.getParams();
-    socket.emit('receiveParams', stats);
+    socket.emit('displayUpdateParams', stats);
   });
 
- 
+  // socket.on('refreshPress', (msg) => { //kind of useless now?
+  //   let transitString = JSON.stringify(Array.from(clientDict));
+  //   displayIo.emit('displaynumberSwitch',{id: socket.id, newClient: currClient});
+  // });
+
+  socket.on('disconnect', () => {
+    console.log('admin Client disconnected');
+  });
 
 });
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-// Handle a new client connection
+// ------------------------- display namespace -----------------------------
+displayIo.on('connection', (socket) => {
+  console.info(`display Client connected [id=${socket.id}]`);
+
+  //initial registration
+  let clientMapping = Object.fromEntries(clientDict);
+  let params = GameMan.getParams();
+  socket.emit('displayRegistered', {map: clientMapping, parameters: params, gameStatus: gameOver, winner: winningClient});
+ 
+  // Handle a request to restart the game
+  socket.on('restartGame', () => {
+    console.log(`Restarting game with current workers! - display`);
+    GameMan.restartGameWithCurrentWorkers();
+    gameOver = false;
+    winningClient = "";
+    let newParams = GameMan.getParams();
+    // Tell all the players we restarted
+    displayIo.emit('displayRestartGame', {gameStatus: gameOver, parameters: newParams});
+    io.emit('restartGame');
+  });
+
+  socket.on('disconnect', () => {
+    console.log('display Client disconnected');
+  });
+
+});
+
+
+// ------------------------- client namespace -----------------------------
+function handleNewClient(socket){
+  console.info('ADDING NEW CLIENT OBJ TO CLIENT DICT');
+  let newName = generateName();
+  let newColor = generateColor();
+
+  const newClient = new ClientObj(newName, socket.id, newColor, myNum);
+  clientDict.set(socket.id, newClient); //add to overall dict
+
+  let newMapping = Object.fromEntries(clientDict);
+  displayIo.emit('displayNewClient', {map: newMapping, id: socket.id}); // send the updated new Mapping
+  socket.emit('getMyInfo', {color: newColor, name: newName}); // emit to the client that sent request
+}
+
+
 clientIo.on('connection', (socket) => {
   console.info(`Client connected [id=${socket.id}]`);
-  // Let's add the player to the game
+
   GameMan.addWorker(socket);
 
   // Let the client know they are registered
   socket.emit('registered', {gameStatus: gameOver});
- 
-  // Set the socket disconnect event handler
-  socket.on('disconnect', () => {
-    console.log('Client disconnected');
-    GameMan.removeWorker(socket);
-    clientDict.delete(socket.id);
-    let newMapping = Object.fromEntries(clientDict);
-    displayIo.emit('removeClient', {map: newMapping, id: socket.id});
-  });
+
 
   // Setup the new share request handler
   socket.on('needNewShare', () => {
-    if (!gameOver) {
+    if (!gameOver) { // game is still ON
       console.info(`Client needs new share [id=${socket.id}]`);
 
       // Get the next share for it to work on
@@ -211,26 +209,20 @@ clientIo.on('connection', (socket) => {
         console.info(`No shares left to hand out`);
         socket.emit('idle');
       }
-      else {
+      else { // new share available
         console.info(`Sending new share ${shareObj.share}`);
         socket.emit('newShare', shareObj);
         let myNum = shareObj.share[0];
 
         if(!(clientDict.has(socket.id))){ //occurs when there is a new client
-            console.info('ADDING NEW CLIENT OBJ TO CLIENT DICT');
-            let newName = generateName();
-            let newColor = generateColor();
-            const newClient = new ClientObj(newName,socket.id,newColor,myNum);
-            clientDict.set(socket.id, newClient);
-            let newMapping = Object.fromEntries(clientDict);
-            displayIo.emit('displayNewClient', {map: newMapping, id: socket.id}); // send the updated new Mapping
-            socket.emit('getMyInfo', {color: newColor, name: newName}); // emit to the client that sent request
-        }else { //when exisiting client wants new share 
+          handleNewClient(socket);
+        }
+        else { //when exisiting client wants new share 
           let currClient = clientDict.get(socket.id);
           currClient.num = myNum;
           // console.info('switching the nums2');
           // let transitString = JSON.stringify(Array.from(clientDict));
-          displayIo.emit('numberSwitch', {id: socket.id, newClient: currClient});
+          displayIo.emit('displaynumberSwitch', {id: socket.id, newClient: currClient});
         }
       }
 
@@ -324,14 +316,21 @@ clientIo.on('connection', (socket) => {
       console.log("ID " + msg.id + " num "+ msg.currNum + " map size " + clientDict.size);
 
       // let transitString = JSON.stringify(Array.from(clientDict));
-      displayIo.emit('numberSwitch', {id: msg.id, newClient: thisC});
+      displayIo.emit('displaynumberSwitch', {id: msg.id, newClient: thisC});
 
     }else {
       console.log('something went wrong - server - buttonPressed')
     }
   });
 
-
+  // Set the socket disconnect event handler
+  socket.on('disconnect', () => {
+    console.log('Client disconnected');
+    GameMan.removeWorker(socket);
+    clientDict.delete(socket.id);
+    let newMapping = Object.fromEntries(clientDict);
+    displayIo.emit('displayremoveClient', {map: newMapping, id: socket.id});
+  });
 
 });
 
@@ -344,7 +343,7 @@ clientIo.on('connection', (socket) => {
 
 
 
-
+// ------------------------- extra functionality -----------------------------
 
 // Update the page time every second
 setInterval(() => {

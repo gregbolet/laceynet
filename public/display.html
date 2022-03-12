@@ -247,24 +247,23 @@
 
 
         //cilnet number has changed, checks map for changes and updates
-        socket.on('numberSwitch', (msg)  => {
-            if (!clientDict.has(msg.id)){
+        socket.on('displaynumberSwitch', (msg)  => {
+            if (!clientDict.has(msg.id)){ // id not in client dict
                 console.log('Houston we have a problem');
+                return;
             }
-            else{
-                updateClient(msg.id, msg.newClient);
-            }
+            updateClient(msg.id, msg.newClient);
         });
 
 
         // update the paramters upon receive
-        socket.on('receiveParams', (msg) => {
+        socket.on('displayUpdateParams', (msg) => {
             updateParams(msg);
         });
 
 
         //removes client from panel and dictionary
-        socket.on('removeClient', (msg) => {
+        socket.on('displayremoveClient', (msg) => {
             console.log('Client disconnected, removing from game');
             clientDict = new Map(Object.entries(msg.map));
             removeClient(msg.id);
