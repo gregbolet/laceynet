@@ -99,7 +99,7 @@ function generateName() {
 // socket.emit('registered',{map: transitString, par: params, ardStatus: arduinoGameState}); // i need arduino to admin
 
 
-// ------------------------- display namespace -----------------------------
+// ------------------------- admin namespace -----------------------------
 adminIo.on('connection', (socket) => {
 
 
@@ -173,7 +173,7 @@ displayIo.on('connection', (socket) => {
 
 
 // ------------------------- client namespace -----------------------------
-function handleNewClient(socket){
+function handleNewClient(socket, myNum){
   console.info('ADDING NEW CLIENT OBJ TO CLIENT DICT');
   let newName = generateName();
   let newColor = generateColor();
@@ -183,7 +183,8 @@ function handleNewClient(socket){
 
   let newMapping = Object.fromEntries(clientDict);
   displayIo.emit('displayNewClient', {map: newMapping, id: socket.id}); // send the updated new Mapping
-  socket.emit('getMyInfo', {color: newColor, name: newName}); // emit to the client that sent request
+  socket.emit('registered', {gameStatus: gameOver, color: newColor, name: newName});
+  // socket.emit('getMyInfo', {color: newColor, name: newName}); // emit to the client that sent request
 }
 
 
@@ -193,9 +194,23 @@ clientIo.on('connection', (socket) => {
   GameMan.addWorker(socket);
 
   // Let the client know they are registered
-  socket.emit('registered', {gameStatus: gameOver});
+  if (!gameOver){
+    let shareObj = GameMan.getNewShareObjForWorker(socket); // get share
 
+    // If there are no shares to hand out, tell the worker to idle
+    if (shareObj == null) {
+      console.info(`No shares left to hand out`);
+      socket.emit('idle');
+    }
+    else{ // new share available
+      console.info(`Sending new share ${shareObj.share}`);
+      socket.emit('newShare', shareObj);
 
+      let myNum = shareObj.share[0];
+      handleNewClient(socket, myNum);
+    }
+  }
+  
   // Setup the new share request handler
   socket.on('needNewShare', () => {
     if (!gameOver) { // game is still ON
@@ -208,25 +223,17 @@ clientIo.on('connection', (socket) => {
       if (shareObj == null) {
         console.info(`No shares left to hand out`);
         socket.emit('idle');
+        return;
       }
-      else { // new share available
-        console.info(`Sending new share ${shareObj.share}`);
-        socket.emit('newShare', shareObj);
-        let myNum = shareObj.share[0];
+      // new share available
+      console.info(`Sending new share ${shareObj.share}`);
+      socket.emit('newShare', shareObj);
+      let myNum = shareObj.share[0];
 
-        if(!(clientDict.has(socket.id))){ //occurs when there is a new client
-          handleNewClient(socket);
-        }
-        else { //when exisiting client wants new share 
-          let currClient = clientDict.get(socket.id);
-          currClient.num = myNum;
-          // console.info('switching the nums2');
-          // let transitString = JSON.stringify(Array.from(clientDict));
-          displayIo.emit('displaynumberSwitch', {id: socket.id, newClient: currClient});
-        }
-      }
-
-      
+      //when exisiting client wants new share 
+      let currClient = clientDict.get(socket.id);
+      currClient.num = myNum;
+      displayIo.emit('displayNumberSwitch', {id: socket.id, newClient: currClient});
     }
   });
 
@@ -299,8 +306,8 @@ clientIo.on('connection', (socket) => {
     console.log(`Restarting game with current workers! - CLIENT`);
     GameMan.restartGameWithCurrentWorkers();
     gameOver = false;
-    //clientDict = new Map();
     winningClient = "";
+
     // Tell all the players we restarted
     io.emit('restartGame');
     displayIo.emit('displayRestartGame', {gameStatus: gameOver});
@@ -316,7 +323,7 @@ clientIo.on('connection', (socket) => {
       console.log("ID " + msg.id + " num "+ msg.currNum + " map size " + clientDict.size);
 
       // let transitString = JSON.stringify(Array.from(clientDict));
-      displayIo.emit('displaynumberSwitch', {id: msg.id, newClient: thisC});
+      displayIo.emit('displayNumberSwitch', {id: msg.id, newClient: thisC});
 
     }else {
       console.log('something went wrong - server - buttonPressed')

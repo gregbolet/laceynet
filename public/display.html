@@ -247,7 +247,7 @@
 
 
         //cilnet number has changed, checks map for changes and updates
-        socket.on('displaynumberSwitch', (msg)  => {
+        socket.on('displayNumberSwitch', (msg)  => {
             if (!clientDict.has(msg.id)){ // id not in client dict
                 console.log('Houston we have a problem');
                 return;

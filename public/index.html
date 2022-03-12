@@ -22,11 +22,11 @@
         </li>
         
       </ul>
-      <!--<a class="navbar-brand mx-auto" href="#" id="playername">Player: </a>-->
+      <!--<a class="navbar-brand mx-auto" href="#" id="playerName">Player: </a>-->
       <p class="navbar-text ml-auto pb-0" id="server-time"></p>
     </nav>
 
-<div class="clientName" id="playername"> Player:... </div>
+<div class="clientName" id="playerName"> Player:... </div>
 
     <div class="container col-md-12 align-middle">
 
@@ -47,10 +47,8 @@
   <script>
     // Use JQuery to grab our button object
     var button = $( "#mainbutton" );
-    var restartBtn = $( "#quitButton" );
-    let isGameOver = false;
-    let playername = "";
-    let imageDict = {
+    var quitBtn = $( "#quitButton" );
+    var imageDict = {
       "Ben Franklin": "images/benfrank-removebg-preview.png", 
       "Ada Lovelace": "images/adalovelace.jpg", 
       "Muhammad Ali":"images/ali-removebg-preview.png", 
@@ -114,8 +112,7 @@
 
 
     // quit button - close window, disconnect client, update display
-    restartBtn.click(function(){
-      // socket.emit('restartGame', {share:currentShare});
+    quitBtn.click(function(){
       window.close('','_parent',''); // close window
       socket.emit('disconnect');
     });
@@ -142,7 +139,6 @@
         });
       }  
       else{
-        //setContinueMode();
         showOverlayRedX(function(){
           socket.emit('buttonPressed', {currNum: currentShare[currentPos], id:socket.id});  
         });
@@ -159,20 +155,24 @@
     // ------------------------ sockets --------------------------
     // URL defaults to window.location
     var socket = io('/');
-    var el;
     var currentShare = [];
     var currentPos = -1;
     var winningNum = -1;
-    var isNewClient = false;
+    var isGameOver = false;
+    var playerName = "";
 
 
     // Handle the message where we are confirmed to have registered
     socket.on('registered', (msg) => {
-      isNewClient = true;
       isGameOver = msg.gameStatus;
-      console.log('Requesitng a new share');
-      socket.emit('needNewShare',{newClient: isNewClient});
-      isNewClient = false;
+      playerName = msg.name;
+      document.getElementById('playerName').innerHTML = "Player: " + playerName;
+      var img = document.createElement("img");
+      img.className ="picture";
+      if (Object.keys(imageDict).includes(msg.name)){
+        img.setAttribute("src",imageDict[msg.name]);
+        document.getElementById('playerName').appendChild(img);
+      }
     });
 
     // Handle incoming message for the requested share
@@ -195,12 +195,12 @@
 
     // On share acceptance, request a new share of work
     socket.on('shareAccepted', (msg) => {
-      socket.emit('needNewShare',{newClient:isNewClient}); 
+      socket.emit('needNewShare'); 
     });
 
     // On share rejection, request a new share of work
     socket.on('shareRejected', (msg) => {
-      socket.emit('needNewShare',{newClient:isNewClient}); 
+      socket.emit('needNewShare'); 
     });
 
     // Handle the case where we have a winner 
@@ -210,15 +210,9 @@
       console.log("im a loser :(" + new Date().toTimeString());
     });
 
-    // Handle the case where we are told to idle
-    socket.on('idle', (msg) => {
-      setLoserMode();
-      isGameOver = true;
-    });
-
     // Handle the case where we are told we lost 
     socket.on('youDidNotWin', (msg) => {
-      socket.emit('needNewShare',{newClient:isNewClient}); 
+      socket.emit('needNewShare'); 
     });
 
     // Handle the case where we ARE the winner 
@@ -232,9 +226,7 @@
     socket.on('restartGame', (msg) => {
       setLoserMode();
       isGameOver = false;
-      isNewClient = true;
-      socket.emit('needNewShare',{newClient: isNewClient});
-      isNewClient = false;
+      socket.emit('needNewShare');
     });
 
     socket.on('updateWinningNumber', (msg) => {
@@ -242,31 +234,14 @@
       console.log('the new wining number is ' + winningNum);
     })
 
-    socket.on('getClientNumber', (msg) => {
-      //get the number
-      console.log(socket);
-      let mynum = currentShare[currentPos];
-      let myid = socket.id; //socket.id; //trying to figure out how to change to ip address ??
-      console.log("give me the number");
-      socket.emit('returnClientNumber', [myid,mynum]);
+    // Handle the case where we are told to idle
+    socket.on('idle', (msg) => {
+      setLoserMode();
+      isGameOver = true;
     });
-
-    socket.on('getMyInfo', (msg) => {
-      playername = msg.name;
-      document.getElementById('playername').innerHTML = "Player: " + playername;
-      var img = document.createElement("img");
-      img.className ="picture";
-      if(Object.keys(imageDict).includes(msg.name)){
-        img.setAttribute("src",imageDict[msg.name]);
-        document.getElementById('playername').appendChild(img);
-      }
-     
-      //document.getElementById('mainbutton').style.backgroundColor = msg.color;
-    });
-
 
     socket.on('time', (timeString) => {
-      el = document.getElementById('server-time');
+      let el = document.getElementById('server-time');
       el.innerHTML = 'Server time: ' + timeString;
     });
     
