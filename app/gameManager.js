@@ -79,7 +79,7 @@ module.exports = class GameManager{
     // shipped with each share for quick verification of 
     // having found a winner
     
-      this.#winningNum = Math.floor(Math.random()*this.#maxNums) + 1;
+    this.#winningNum = Math.floor(Math.random()*this.#maxNums) + 1;
     
 
     

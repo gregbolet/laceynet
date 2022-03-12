@@ -40,17 +40,6 @@ app.use(
 app.use(express.json())
 
 app.set('/ardiono', io);
-// app.set('/measure', io);
-
-// app.get('/arduino', (req,res)=>{
-//   res.send(arduinoGameState);
-// })
-
-// app.post('/arduino', (req, res)=>{
-//   console.info(req.body); // the field named IP
-//   var newSeq = generateTappingSequence();
-//   res.send(newSeq);
-// })
 
 /* Kinematic(double SB, double WB, double UB,
 		double sP, double wP, double uP, 
@@ -78,7 +67,7 @@ let gameOver = false;
 
 var arduinoObj = {key: "hello world"};
 
-let winningClient = ""; //id of winningClient //dont think we use this???
+var winningClient = ""; //id of winningClient //dont think we use this???
 
 const clientNames = ["Abraham Lincoln", "George Washington", "Ben Franklin", "Ada Lovelace", 
 "Martin Luther King Jr.",  "Malcolm X", "Louis Armstrong", "Frank Sinatra", "Henry Ford", 
@@ -99,7 +88,6 @@ const displayIo = io.of('/display.html');
 
 const clientIo = io.of('/');  // client page
 
-// const arduinoIo = io.of('/arduino.html');
 
 //generates a random color
 function generateColor(){
@@ -123,17 +111,31 @@ function generateName() {
   return clientNames[indextOfItemInMyArray];
 }
 
-//display client namespace - if connected to display from client
+// socket.emit('registered',{map: transitString, par: params, ardStatus: arduinoGameState}); // i need arduino to admin
+
+// ------------------------- display namespace -----------------------------
 displayIo.on('connection', (socket) => {
   console.info(`display Client connected [id=${socket.id}]`);
 
   //initial registration
-  let transitString = JSON.stringify(Array.from(clientDict));
+  // let clientMapping = Object.fromEntries(clientDict);
   let params = GameMan.getParams();
-  socket.emit('registered',{map: transitString, par: params, ardStatus: arduinoGameState});  // emiting to display
-  //when display is added, pass client dictionary, current parameters, arduino status and populate screen
+  socket.emit('displayRegistered', {map: clientDict, parameters: params, gameStatus: gameOver, winner: winningClient});  // emiting to display
  
-  socket.on('disconnect', () => {
+  // Handle a request to restart the game
+  socket.on('restartGame', () => {
+    console.log(`Restarting game with current workers! - display`);
+    GameMan.restartGameWithCurrentWorkers();
+    gameOver = false;
+    winningClient = "";
+    let params = GameMan.getParams();
+    // Tell all the players we restarted
+    displayIo.emit('displayRestartGame', {gameStatus: gameOver, parameters: params});
+    io.emit('restartGame');
+  });
+
+
+  socket.on('disconnect', () => { // the point?
     console.log('display Client disconnected');
   });
 
@@ -142,22 +144,13 @@ displayIo.on('connection', (socket) => {
     displayIo.emit('numberSwitch',transitString);
   });
 
-  // Handle a request to restart the game
-  socket.on('restartGame', (msg) => {
-    console.log(`Restarting game with current workers! - display`);
-    GameMan.restartGameWithCurrentWorkers();
-    gameOver = false;
-    winningClient = "";
-    // Tell all the players we restarted
-    displayIo.emit('restartGame');
-    io.emit('restartGame');
-  });
 
   //updating arduino status
   socket.on('updateArdStatus', (msg) => {
     arduinoGameState = msg;
     console.log("The arduino status has changed to " + arduinoGameState);
   })
+
   //updates game parameters
   socket.on('setNewGameParams', (msg) =>{
     console.log('Changing the game parameters');
@@ -168,17 +161,17 @@ displayIo.on('connection', (socket) => {
     winningClient = "";
     // Tell all the players we restarted
     io.emit('restartGame');
-    displayIo.emit('restartGame');
+    displayIo.emit('displayRestartGame', {gameStatus: gameOver, parameters: params});
 
     GameMan.updateWinningNum(msg[2]);
     io.emit('updateWinningNumber',msg[2]);
     //displayIo.emit('updateWinningNumber');
   });
 
-  socket.on('getParams', (msg) => {
-    let params = GameMan.getParams();
-    socket.emit('updateParams',params);
-  })
+  socket.on('getParams', () => {
+    const stats = GameMan.getParams();
+    socket.emit('receiveParams', stats);
+  });
 
  
 
@@ -201,11 +194,12 @@ clientIo.on('connection', (socket) => {
     console.log('Client disconnected');
     GameMan.removeWorker(socket);
     clientDict.delete(socket.id);
-    displayIo.emit('removeClient',socket.id);
+    let newMapping = Object.fromEntries(clientDict);
+    displayIo.emit('removeClient', {map: newMapping, id: socket.id});
   });
 
   // Setup the new share request handler
-  socket.on('needNewShare', (msg) => {
+  socket.on('needNewShare', () => {
     if (!gameOver) {
       console.info(`Client needs new share [id=${socket.id}]`);
 
@@ -226,16 +220,17 @@ clientIo.on('connection', (socket) => {
             console.info('ADDING NEW CLIENT OBJ TO CLIENT DICT');
             let newName = generateName();
             let newColor = generateColor();
-            var newC = new ClientObj(newName,socket.id,newColor,myNum);
-            clientDict.set(socket.id,newC);
-            displayIo.emit('addClient',{id:socket.id, obj: newC}); // emits to all display namespace holder
+            const newClient = new ClientObj(newName,socket.id,newColor,myNum);
+            clientDict.set(socket.id, newClient);
+            let newMapping = Object.fromEntries(clientDict);
+            displayIo.emit('displayNewClient', {map: newMapping, id: socket.id}); // send the updated new Mapping
             socket.emit('getMyInfo', {color: newColor, name: newName}); // emit to the client that sent request
         }else { //when exisiting client wants new share 
           let currClient = clientDict.get(socket.id);
           currClient.num = myNum;
-          console.info('switching the nums2');
-          let transitString = JSON.stringify(Array.from(clientDict));
-          displayIo.emit('numberSwitch',transitString);
+          // console.info('switching the nums2');
+          // let transitString = JSON.stringify(Array.from(clientDict));
+          displayIo.emit('numberSwitch', {id: socket.id, newClient: currClient});
         }
       }
 
@@ -292,7 +287,7 @@ clientIo.on('connection', (socket) => {
       socket.broadcast.emit('weGotAWinner');
 
       //emit to display that we have a winner and which worker it is
-      displayIo.emit('weGotAWinner', id);
+      displayIo.emit('displayGotAWinner', id);
 
       // Let the worker know that it did in fact win
       socket.emit('youAreTheWinner');
@@ -306,8 +301,9 @@ clientIo.on('connection', (socket) => {
     }
   });
 
+
   // Handle a request to restart the game
-  socket.on('restartGame', (msg) => {
+  socket.on('restartGame', () => {
     console.log(`Restarting game with current workers! - CLIENT`);
     GameMan.restartGameWithCurrentWorkers();
     gameOver = false;
@@ -315,7 +311,7 @@ clientIo.on('connection', (socket) => {
     winningClient = "";
     // Tell all the players we restarted
     io.emit('restartGame');
-    displayIo.emit('restartGame');
+    displayIo.emit('displayRestartGame', {gameStatus: gameOver});
   });
 
   //let display panel know a client has switched numbers
@@ -327,8 +323,8 @@ clientIo.on('connection', (socket) => {
       thisC.num = msg.currNum;
       console.log("ID " + msg.id + " num "+ msg.currNum + " map size " + clientDict.size);
 
-      let transitString = JSON.stringify(Array.from(clientDict));
-      displayIo.emit('numberSwitch',transitString);
+      // let transitString = JSON.stringify(Array.from(clientDict));
+      displayIo.emit('numberSwitch', {id: msg.id, newClient: thisC});
 
     }else {
       console.log('something went wrong - server - buttonPressed')
@@ -339,9 +335,16 @@ clientIo.on('connection', (socket) => {
 
 });
 
-// arduinoIo.on('connection', (socket) => {
-//   socket.emit("registered", arduinoObj);
-// });
+
+
+
+
+
+
+
+
+
+
 
 // Update the page time every second
 setInterval(() => {
@@ -358,25 +361,3 @@ setInterval(() => {
   console.info('calling client response');
   displayIo.emit('requestRefresh', new Date().toTimeString());
 }, 1000000);
-
-
-//old code below
-
-
-// socket.on('returnClientNumber', (msg) => {
-//   //populate dictionary
-//   //console.info("heres the number");
-//   //console.info(msg[0] + " " + msg[1]);
-//   numberDict[msg[0]] = msg[1];
-//   if (Object.keys(numberDict).length == (GameMan.getClientSize())) { //dictionary is full 
-//     console.info('going to dict');
-//     displayIo.emit('getClientDict', numberDict); //send dictionary to display
-//   }
-// });
-
-
-// socket.on('askClientResponse', (msg) => {
-//   console.info("ask client response - display");
-//   numberDict = {}; //need to clear dict each time this is called
-//   clientIo.emit('getClientNumber');
-// });
