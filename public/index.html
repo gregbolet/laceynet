@@ -60,6 +60,9 @@
 
     const fadeDuration = 200;
     const fadeWait = 500;
+    var gameEnded = true;
+    console.log("disabled main button");
+    document.getElementById('mainbutton').disabled = true; // disable main btn
     
     function setContinueMode(){
       if(!isGameOver){
@@ -86,6 +89,7 @@
         button.removeClass( "btn-primary" )
         button.removeClass( "btn-success" )
         button.addClass( "btn-danger" )
+        gameEnded = true;
         //button.html('Winner found! Waiting for restart...');
         isGameOver = true;
         console.log("IS the game over? "  + isGameOver + new Date().toTimeString());
@@ -117,7 +121,7 @@
       socket.emit('disconnect');
     });
 
-    // Setup the logic for when the button is pressed
+
     button.click(function(){
       // Do nothing if the game is over
       if(isGameOver){
@@ -161,6 +165,12 @@
     var isGameOver = false;
     var playerName = "";
 
+
+    socket.on('clientStartGame', (msg) => {
+      document.getElementById('mainbutton').disabled = false; // enable main btn
+      gameEnded = msg;
+      // button.prop('disabled', false); // enable main btn
+    });
 
     // Handle the message where we are confirmed to have registered
     socket.on('registered', (msg) => {

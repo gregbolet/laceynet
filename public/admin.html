@@ -17,46 +17,12 @@
     </head>
 
     <body>
-        <nav class="navbar navbar-expand-lg sticky-top navbar-light bg-light">
-            <ul class="navbar-nav ml-0">
-                
-              <li class="nav-item">
-                <div class="dropdown show">
-                    <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      Game Menu
-                    </a>
-                  
-                    <!-- <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                        <button class="btn btn-primary" id="restartButton">Restart Game</button>
-                        <div class="dropdown-divider"></div>
-                        <button class="btn btn-info" id="refreshButton">Refresh Game </button>
-                        <div class="dropdown-divider"></div>
-                        <a class="btn btn-danger" href="index.html">Back To Game</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Current Game Params:</a>
-                        <a class="dropdown-item" href="#" id="range"></a>
-                        <a class="dropdown-item" href="#" id="shareSize"></a>
-                        <a class="dropdown-item" href="#" id="winNum"></a>
-                        <div class="dropdown-divider"></div>
-                        <input type="text" placeholder="Range,Share Size..." id="myInput">
-                        <button class="btn btn-warning" id="paramButton" >Set Game Params </button>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#" id="arduinostatus"></a>
-                        <div class="dropdown-divider"></div>
-                        <button class="btn btn-info" id="startArduinoButton">Start Arduino </button>
-        
-                    </div> -->
-                </div>
-            </ul>
-            <a class="navbar-brand" href="#">Guessing Game!</a>
-
-            <p class="navbar-text ml-auto pb-0" id="server-time"></p>
-          </nav>
-
-          <div id="panel" class="container-fluid">
-              
-          </div>
-          
+        <button class="btn btn-info" id="startButton">Start Game</button>
+        <p class="text ml-auto pb-0" id="playingstatus">Game Status: not started</p>
+        <button class="btn btn-info" id="startArduinoButton">Start Arduino</button>
+        <p class="text ml-auto pb-0" id="arduinostatus">Arduino Status: waiting</p>
+        <button class="btn btn-info" id="startWaitingRoomButton">Start Waiting Room</button>
+        <button class="btn btn-info" id="restartButton">Restart Game</button>
     </body>
 
    
@@ -67,179 +33,22 @@
         //link for rese https://stackoverflow.com/questions/61155301/how-to-remove-divs-inside-a-grid
         //https://stackoverflow.com/questions/64859592/how-can-i-make-div-content-appear-with-animation-when-clicking-a-button-that-inj
         
-
-        var restartBtn = $( "#restartButton" );
-        var refreshBtn = $( "#refreshButton" );
-        var paramBtn = $( "#paramButton" );
+        var startBtn = $( "#startButton" );
         var ardBtn = $( "#startArduinoButton" );
-        const COLORS = ['#FE9','#9AF','#F9A',"#AFA","#FA7"];
-        const container = $('#panel');
-        const tmpl = $('#client_temp').html(); //not used?
-        let winningId = "";
-        isGameOver = false;
-        var clientDict = new Map();
-        let range = 1;
-        let shareSize = 1;
-        let arduinoGameState = "";
+        var waitingRoomBtn = $( "#startWaitingRoomButton" );
+        var restartBtn = $( "#restartButton" );
+        var gameEnded = true; //by default game is not started
+        var arduinoGameState = "";
+        var playingStatus = "";
         
-
-        const fadeDuration = 200;
-        const fadeWait = 500;
-
-        function showWinnerOverlay(id, callback){
-            var winner = document.getElementById("winnerDiv");
-            var winnerName = clientDict.get(id).name;
-            var winnerNum = clientDict.get(id).num;
-            winner.innerHTML = "Congrats! Our winner " + winnerName + "guessed the number " + winnerNum;
-            winner.style.background = "#2ECC71";
-            $("#winnerDiv").fadeIn(fadeDuration).delay(fadeWait).fadeOut(fadeDuration, callback); 
-        }
-
-
-        
-        function resetGrid(){
-            document.querySelectorAll(".item").forEach((e) => e.parentNode.removeChild(e));
-        }
- 
-        function removeBlocks() {
-            document.querySelectorAll(".animate").forEach((e) => e.remove(e));
-            document.querySelectorAll(".block").forEach((e) => e.remove(e));
-        }
-        
-        /*Compares display and server dictionary to see if there are changes in the numbers*/
-        function mapCompare(dict){
-
-            for(let [key,value] of dict){
-                if(!(clientDict.has(key))){
-                    console.log('Houston we have a problem');
-                }
-                else if(value.num != clientDict.get(key).num){
-                    console.log('Was ' + clientDict.get(key).num + "  now " + value.num);
-                    clientDict.set(key,value);
-                    console.log("heres the key")
-                    console.log(key);
-                    updateClient(key,value);
-                }else {
-                    //console.log('key ' + key + ' for value ' + value +' has not been changed');
-                }
-            }
-        }
-
-        /*Adds new client div to the display panel*/
-        function addClient(id, obj){
-
-             let myC = obj;
-             //create name div
-             var clientName = document.createElement("div");
-             clientName.innerHTML = myC.name;
-             clientName.setAttribute('id', "client_name");
-             clientName.className = "client_name";
-            //create num div
-             var clientNum = document.createElement("div");
-             clientNum.innerHTML = parseInt(myC.num);
-             clientNum.setAttribute('id', "num");
-            //create div to hold everything
-             var block = document.createElement("div");
-             block.appendChild(clientName);
-             block.appendChild(clientNum);
-             block.setAttribute('id', id); //set id of div to be the client id
-             block.className = "block";
-
-            //set div color
-             block.style.background = myC.color;
-
-             container.append(block); //add to panel   
-        }
-
-        /*Updates client div in display panel*/
-        function updateClient(id,obj){
-            //get client div from container
-            var client = document.getElementById(id);
-            var clientNum = client.lastElementChild;
-            clientNum.innerHTML = parseInt(obj.num); //update its current value
-            console.log("animating " + obj.name);
-
-            client.style.zIndex = 100; //send to the front
-;
-            client.classList.add("animate"); //add animation
-            
-            setTimeout(function() {
-                client.classList.remove("animate");
-            }, 2500); // 500 is the same time as the CSS animation
-            void client.offsetWidth;
-            client.style.zIndex = 0;
-
-            let box = client;
-            let width = box.clientWidth;
-            let height = box.clientHeight;
-            console.log("THIS IS THE WIDTH " + width);
-            console.log("THIS IS THE HEIGHT " + height);
-            
-        }
-
-        /*Removes client from display panel*/
-        function removeClient(id){
-            var client = document.getElementById(id);
-            client.remove();
-        }
-
-        /*Updates div to proper colors based on winner*/
-        function updateBlockWinner(id) {
-            var winningClient;
-            if(isGameOver){
-                //console.log(clientDict);
-                for(let [key,value] of clientDict){
-                    if(key === id){
-                        winningClient = document.getElementById(id);
-                        winningClient.style.background = "#2ECC71";
-                        winningClient.classList.add('winnerAnimate');
-                    }
-                    else {
-                        var client = document.getElementById(key);
-                        client.style.background = "#E74C3C";
-                        client.classList.remove('animate');
-                    }
-                }
-                //console.log('time to display winner');
-                //showWinnerOverlay(id);
-            }
-
-            winningClient.classList.remove("winnerAnimate");
-            
-            
-        }
-
-
-
-        /*dont think this is used anymore*/
-        function setRangeAndShareSize(){
-            var inputVal = document.getElementById("myInput").value;
-        }
-
-        /*Resets divvs back to original colors*/
-        function resetDivColors(){
-            for(let [key,value] of clientDict){
-                document.getElementById(key).style.backgroundColor = value.color;
-            }
-        }
-
-        /*Updates game parameters */
-        function updateParams(params){
-            range = params[0];
-            document.getElementById('range').innerHTML = "Range: " + range;
-            shareSize = params[1];
-            document.getElementById('shareSize').innerHTML = "Share size: " + shareSize;
-            winNum = params[2];
-            document.getElementById('winNum').innerHTML = "Winning Number: " + winNum;
-        }
-
         function updateArduinoStatus(status) {
             if(status === "waiting"){
                 console.log("changing status to READY");
                 arduinoGameState = "ready";
                 ardBtn.html(`Stop Arduino`); 
                 socket.emit('updateArdStatus', arduinoGameState);
-            }else {
+            }
+            else {
                 console.log("changing status to WAITING");
                 arduinoGameState = "waiting";
                 ardBtn.html(`Start Arduino`); 
@@ -248,49 +57,39 @@
             document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
         }
 
-         // URL defaults to window.location
-        let socket = io('/display.html');
-        let el;
-        let currentShare = [];
-        let currentPos = -1;
-        let winningNum = -1;
-
         restartBtn.click(function(){ 
             socket.emit('restartGame');
         });
 
-        refreshBtn.click(function(){
-            console.log("refresh button was clicked")
-            socket.emit('refreshPress');
-        });
-
-        paramBtn.click(function() {
-             // Selecting the input element and get its value 
-            var inputVal = document.getElementById("myInput").value;
-            var params = inputVal.split(",");
-            if(params.length == 3){
-                console.log(typeof params)
-                console.log(typeof params[0]);
-                updateParams(params);
-                socket.emit('setNewGameParams', params);
+        startBtn.click(function(){
+            if (gameEnded){ // game has already ended 
+                console.log("starting the game now!!");
+                socket.emit('startGame', gameEnded);
+                playingStatus = 'playing';
+                document.getElementById('playingstatus').innerHTML = "Game Status: " + playingStatus;
+                gameEnded = false;
+                startBtn.prop('disabled', true);
             }
-
-        });
+        })
 
         ardBtn.click(function() {
-            if(arduinoGameState === "waiting"){
-                console.log("changing status to READY");
-                arduinoGameState = "ready";
-                ardBtn.html(`Stop Arduino`); 
-                socket.emit('updateArdStatus', arduinoGameState);
-            }else {
-                console.log("changing status to WAITING");
-                arduinoGameState = "waiting";
-                ardBtn.html(`Start Arduino`); 
-                socket.emit('updateArdStatus', arduinoGameState);
-            }
-            document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
+            updateArduinoStatus(arduinoGameState);
         });
+
+
+
+        // ------------------------ sockets --------------------------
+        // URL defaults to window.location
+        let socket = io('/admin.html');
+
+        socket.on('gameEnded', () => {
+            gameEnded = true;
+            // document.getElementById("startButton").disabled = false; //reenable start button
+            startBtn.prop('disabled', false);
+            playingStatus = 'not started';
+            document.getElementById('playingstatus').innerHTML = "Game Status: " + playingStatus;
+        });
+
 
         // Handle the case of restarting the game
         socket.on('restartGame', (msg) => {
@@ -301,12 +100,6 @@
             socket.emit('updateArdStatus', arduinoGameState);
             ardBtn.html(`Start Arduino`); 
             console.log("Restarting the display");
-
-            /* resetGrid();
-            removeBlocks();
-            for(let [key,value] of clientDict){
-                addClient(key,value);
-            } */
             resetDivColors();
             winningId = "";
             socket.emit('getParams');
@@ -317,140 +110,12 @@
         })
 
 
-        socket.on('time', (timeString) => {
-                el = document.getElementById('server-time');
-                el.innerHTML = 'Server time: ' + timeString;
-            });
 
-
-        socket.on('weGotAWinner', (msg) => {
-            console.log('We have a winner - display');
-            console.log("winner: ", msg);
-            winningId = msg;
-            isGameOver = true;
-            updateBlockWinner(winningId);
-            arduinoGameState = "waiting";
-            socket.emit('updateArdStatus', arduinoGameState);
-        })
-
-        //cilnet number has changed, checks map for changes and updates
-        socket.on('numberSwitch', (msg)  => {
-            var newMap = new Map(JSON.parse(msg));
-            mapCompare(newMap);
-        });
-
-        //adds client to window and dictionary
-        socket.on('addClient', (msg) => {
-            console.log('adding to screen');
-            clientDict.set(msg.id,msg.obj);
-            addClient(msg.id,msg.obj);
-        });
-
-        //registers display panel in game and checks if game has been won
-        socket.on('registered', (msg) => {
-            console.log("DISP IS REGISTERED");
-            //reset panel
-            resetGrid();
-            removeBlocks();
-             //set up arduino status
-            arduinoGameState = msg.ardStatus;
-            console.log("Arduino status: " + arduinoGameState);
-            document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
-            //udpate current parameters
-            updateParams(msg.par);
-
-            //set up client map
-            var newMap = new Map(JSON.parse(msg.map));
-            clientDict = newMap; //unncessary
-            for(let [key,value] of clientDict){
-                addClient(key,value); //add each client to the board
-            }
-
-            if(msg.gameStatus){ //if the game is over, put in proper format
-                isGameOver = true;
-                updateBlockWinner(msg.winner);
-            }
-            socket.emit('getParams'); //is this needed??
-        });
-
-        //removes client from panel and dictionary
-        socket.on('removeClient', (msg) => {
-            console.log('Client disconnected, removing from game');
-            clientDict.delete(msg);
-            removeClient(msg);
-        });
+        // not used can add if wanted
+        // socket.on('time', (timeString) => {
+        //     let el = document.getElementById('server-time');
+        //     el.innerHTML = 'Server time: ' + timeString;
+        // });
+    
     </script>
 </html>
-
-   
-<!-- //adds current clients to display page
-function addItem(container, template, clientlist) { //adds all client ids to grid EXCEPT admin
-    resetGrid();
-    //console.info("adding items");
-    var count = 1;
-    for(let id in clientlist){
-        let color = COLORS[_.random(COLORS.length - 1)];
-        let client_num = count;
-        let client_name = "Client " + count.toString() +": ";
-        let num = clientlist[id];
-        container.append(Mustache.render(template, { color, client_name, num }));
-        count++;
-    }
-} -->
-<!-- 
-//resets container for display
-function resetGrid(){
-    //console.info("resetting grid");
-    document.querySelectorAll(".item").forEach((e) => e.parentNode.removeChild(e));
-} -->
-
-
-<!-- //adds current clients to display page - displays winner on screen
-function addItemWinner(container, template, clientlist, winningID) { //adds all client ids to grid 
-    resetGrid();
-    console.info("adding items -- winner");
-    var count = 1;
-    let color = "";
-    for(let id in clientlist){
-        if(id.normalize()===winningID.normalize()){
-            color = "#2ECC71";
-        } else {
-            color = "#E74C3C";
-        }
-        let client_num = count;
-        let client_name = "Client " + id.toString() +": ";
-        let num = clientlist[id];
-        container.append(Mustache.render(template, { color, client_name, num }));
-        count++;
-    }
-} -->
-<!-- 
-socket.on('getClientDict', (msg) => {
-    //console.log('heres the dict')
-    //console.log(JSON.stringify(msg));
-    var sortedDict = sortObjectByKeys(msg);
-    if(isGameOver){
-        addItemWinner(container,tmpl,sortedDict,winningId);
-    }
-    else {
-        addItem(container,tmpl,sortedDict);
-    }
-}); -->
-
-<!-- <template id="client_temp">
-    <div class ="item" style="background:  {{color}}">
-      <div id=client_name>{{client_name}}</div>
-      <div id=num>{{num}}</div>
-   </div>
-</template> -->
-
-<!-- //sort map by keys //dont think i need this anymore
-function sortObjectByKeys(o) {
-    return Object.keys(o).sort().reduce((r, k) => (r[k] = o[k], r), {});
-} -->
-
-<!-- socket.on('requestRefresh', (msg) => {
-    // console.log('Requesting admin panel refresh');
-     //socket.emit('askClientResponse');
-     
-   }); -->

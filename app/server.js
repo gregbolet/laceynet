@@ -102,6 +102,9 @@ function generateName() {
 // ------------------------- admin namespace -----------------------------
 adminIo.on('connection', (socket) => {
 
+  socket.on('startGame', (msg) => {
+    io.emit('clientStartGame', msg);
+  });
 
   //updating arduino status
   socket.on('updateArdStatus', (msg) => {
@@ -184,7 +187,6 @@ function handleNewClient(socket, myNum){
   let newMapping = Object.fromEntries(clientDict);
   displayIo.emit('displayNewClient', {map: newMapping, id: socket.id}); // send the updated new Mapping
   socket.emit('registered', {gameStatus: gameOver, color: newColor, name: newName});
-  // socket.emit('getMyInfo', {color: newColor, name: newName}); // emit to the client that sent request
 }
 
 
@@ -257,7 +259,6 @@ clientIo.on('connection', (socket) => {
 
   // This handles shares that claim to be winners
   socket.on('iAmAWinner', (msg) => {
-
     if (gameOver) {
       return;
     }
@@ -293,13 +294,13 @@ clientIo.on('connection', (socket) => {
 
       // Set the game state to over
       gameOver = true;
+      adminIo.emit('gameEnded');
     }
     else {
       // Just in case the share is actually a losing share
       socket.emit('youDidNotWin');
     }
   });
-
 
   // Handle a request to restart the game
   socket.on('restartGame', () => {
@@ -315,17 +316,13 @@ clientIo.on('connection', (socket) => {
 
   //let display panel know a client has switched numbers
   socket.on('buttonPressed', (msg) =>{
-    
     if(clientDict.has(msg.id)){
-      console.info('switching the nums1');
       let thisC = clientDict.get(msg.id);
       thisC.num = msg.currNum;
-      console.log("ID " + msg.id + " num "+ msg.currNum + " map size " + clientDict.size);
-
-      // let transitString = JSON.stringify(Array.from(clientDict));
+      // console.log("ID " + msg.id + " num "+ msg.currNum + " map size " + clientDict.size);
       displayIo.emit('displayNumberSwitch', {id: msg.id, newClient: thisC});
-
-    }else {
+    }
+    else {
       console.log('something went wrong - server - buttonPressed')
     }
   });
