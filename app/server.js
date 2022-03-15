@@ -50,6 +50,8 @@ var GameMan = new GameManager(10, 4);
 
 // Keep track of whether we need to restart the game
 var gameOver = false;
+//Keep track if the game has started
+var isGameStarted = false;
 
 var arduinoObj = {key: "hello world"};
 
@@ -102,7 +104,10 @@ function generateName() {
 // ------------------------- admin namespace -----------------------------
 adminIo.on('connection', (socket) => {
 
+  socket.emit('registered', {gameStarted:isGameStarted, arduinoStatus: arduinoGameState});
+
   socket.on('startGame', (msg) => {
+    isGameStarted = true;
     io.emit('clientStartGame', msg);
   });
 
@@ -115,6 +120,7 @@ adminIo.on('connection', (socket) => {
   //updates game parameters
   socket.on('setNewGameParams', (msg) =>{
     console.log('Changing the game parameters');
+    console.log(msg)
     GameMan.resetGameParameters(msg);
     console.info(`Restarting game with current workers! - display`);
     GameMan.restartGameWithCurrentWorkers();
@@ -122,17 +128,27 @@ adminIo.on('connection', (socket) => {
     winningClient = "";
     // Tell all the players we restarted
     io.emit('restartGame');
-    displayIo.emit('displayRestartGame', {gameStatus: gameOver, parameters: params});
+    displayIo.emit('displayRestartGame', {gameStatus: gameOver, parameters: msg});
 
     GameMan.updateWinningNum(msg[2]);
     io.emit('updateWinningNumber', msg[2]);
-    displayIo.emit('displayUpdateParams');
+    displayIo.emit('displayUpdateParams', msg);
   });
 
   socket.on('getParams', () => {
     const stats = GameMan.getParams();
     socket.emit('displayUpdateParams', stats);
   });
+
+  socket.on('restartGame', (msg) => {
+    console.log(`Restarting game with current workers! - ADMIN`);
+    GameMan.restartGameWithCurrentWorkers();
+    gameOver = false;
+    winningClient = "";
+    // Tell all the players we restarted
+    adminIo.emit('restartGame');
+    io.emit('restartGame');
+  })
 
   // socket.on('refreshPress', (msg) => { //kind of useless now?
   //   let transitString = JSON.stringify(Array.from(clientDict));
@@ -186,7 +202,7 @@ function handleNewClient(socket, myNum){
 
   let newMapping = Object.fromEntries(clientDict);
   displayIo.emit('displayNewClient', {map: newMapping, id: socket.id}); // send the updated new Mapping
-  socket.emit('registered', {gameStatus: gameOver, color: newColor, name: newName});
+  socket.emit('registered', {start:isGameStarted, gameStatus: gameOver, color: newColor, name: newName});
 }
 
 

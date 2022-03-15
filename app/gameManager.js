@@ -274,6 +274,7 @@ module.exports = class GameManager{
   updateWinningNum(newWin){
     //console.log("THE NEW WINNING NUMBER IS " + newWin);
     this.#winningNum = parseInt(newWin);
+    console.log("The new winning number is " + this.#winningNum);
   }
 
   getParams() {

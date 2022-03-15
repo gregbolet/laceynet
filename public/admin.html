@@ -23,6 +23,8 @@
         <p class="text ml-auto pb-0" id="arduinostatus">Arduino Status: waiting</p>
         <button class="btn btn-info" id="startWaitingRoomButton">Start Waiting Room</button>
         <button class="btn btn-info" id="restartButton">Restart Game</button>
+        <input type="text" placeholder="Range,Share Size..." id="myInput">
+        <button class="btn btn-warning" id="paramButton" >Set Game Params </button>
     </body>
 
    
@@ -37,6 +39,7 @@
         var ardBtn = $( "#startArduinoButton" );
         var waitingRoomBtn = $( "#startWaitingRoomButton" );
         var restartBtn = $( "#restartButton" );
+        var paramBtn = $('#paramButton');
         var gameEnded = true; //by default game is not started
         var arduinoGameState = "";
         var playingStatus = "";
@@ -57,6 +60,8 @@
             document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
         }
 
+        
+
         restartBtn.click(function(){ 
             socket.emit('restartGame');
         });
@@ -75,6 +80,16 @@
         ardBtn.click(function() {
             updateArduinoStatus(arduinoGameState);
         });
+
+        paramBtn.click(function() {
+            var inputVal = document.getElementById("myInput").value;
+            var params = inputVal.split(",");
+            if(params.length == 3) {
+                console.log(params);
+                socket.emit('setNewGameParams',params);
+            }
+        })
+
 
 
 
@@ -107,7 +122,25 @@
 
         socket.on('updateParams', (msg) => {
             updateParams(msg);
-        })
+        });
+
+        socket.on('registered', (msg) => {
+            //finish this   
+            if(msg.gameStarted){
+                startBtn.prop('disabled', true);
+                document.getElementById('playingstatus').innerHTML = "Game Status: playing";
+                console.log('i am being registered')
+            }
+
+            arduinoGameState = msg.arduinoStatus;
+            document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
+            if(arduinoGameState === 'ready'){
+                ardBtn.html(`Stop Arduino`); 
+            }else {
+                ardBtn.html(`Start Arduino`); 
+            }
+
+        });
 
 
 

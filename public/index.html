@@ -63,7 +63,8 @@
     var gameEnded = true;
     console.log("disabled main button");
     document.getElementById('mainbutton').disabled = true; // disable main btn
-    
+    //false when io is sent
+
     function setContinueMode(){
       if(!isGameOver){
         button.removeClass( "btn-danger" )
@@ -183,6 +184,11 @@
         img.setAttribute("src",imageDict[msg.name]);
         document.getElementById('playerName').appendChild(img);
       }
+      if(msg.start){
+        document.getElementById('mainbutton').disabled = false;
+      }
+      
+      
     });
 
     // Handle incoming message for the requested share

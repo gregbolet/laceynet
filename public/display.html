@@ -164,6 +164,8 @@
 
         // Updates game parameters
         function updateParams(params){
+            console.log("calling function");
+            console.log(params);
             range = params[0];
             document.getElementById('range').innerHTML = "Range: " + range;
             shareSize = params[1];
@@ -273,6 +275,8 @@
             let elem = document.getElementById('server-time');
             elem.innerHTML = 'Server time: ' + timeString;
         });
+
+       
 
 
     </script>
