@@ -101,7 +101,7 @@ function generateName() {
   return clientNames[indextOfItemInMyArray];
 }
 
-function getSVG(name){
+function getImage(name){
   if(Object.keys(People.Icons).includes(name)){
     return People.Icons[name];
   }
@@ -117,7 +117,16 @@ adminIo.on('connection', (socket) => {
 
   socket.on('startGame', (msg) => {
     isGameStarted = true;
+    //clientIo.emit('restartGame');
     io.emit('clientStartGame', msg);
+    console.log(`Restarting game with current workers! - ADMIN`);
+    GameMan.restartGameWithCurrentWorkers();
+    gameOver = false;
+    winningClient = "";
+    // Tell all the players we restarted
+    //adminIo.emit('restartGame');
+    io.emit('restartGame');
+    
   });
 
   //updating arduino status
@@ -205,7 +214,7 @@ function handleNewClient(socket, myNum){
   console.info('ADDING NEW CLIENT OBJ TO CLIENT DICT');
   let newName = generateName();
   let newColor = generateColor();
-  let newImg = getSVG(newName);
+  let newImg = getImage(newName);
   const newClient = new ClientObj(newName, socket.id, newColor, myNum,newImg);
   clientDict.set(socket.id, newClient); //add to overall dict
 
@@ -319,6 +328,7 @@ clientIo.on('connection', (socket) => {
 
       // Set the game state to over
       gameOver = true;
+      isGameStarted = false;
       adminIo.emit('gameEnded');
     }
     else {
