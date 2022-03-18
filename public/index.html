@@ -29,7 +29,7 @@
       <p class="navbar-text ml-auto pb-0" id="server-time"></p>
     </nav>
 
-<div class="clientName" id="playerName"> Player:... </div>
+<div class="clientName" id="playerName"> Waiting for Player:... </div>
 
 
     <div class="container col-md-12 align-middle">
@@ -179,6 +179,7 @@
     socket.on('clientStartGame', (msg) => {
       document.getElementById('mainbutton').disabled = false; // enable main btn
       gameEnded = false;
+
       // button.prop('disabled', false); // enable main btn
     });
 
@@ -186,7 +187,8 @@
     socket.on('registered', (msg) => {
       isGameOver = msg.gameStatus;
       playerName = msg.name;
-      document.getElementById('playerName').innerHTML = "Player: " + playerName;
+      
+      document.getElementById('playerName').innerHTML = playerName; //"Player: " +
       var img = document.createElement("img");
       img.className ="picture";
      // console.log(Icons);
@@ -251,6 +253,7 @@
 
     // Handle the case of restarting the game
     socket.on('restartGame', (msg) => {
+      console.log('restart is being called');
       setLoserMode();
       isGameOver = false;
       socket.emit('needNewShare');

@@ -21,6 +21,7 @@
         <p class="text ml-auto pb-0" id="playingstatus">Game Status: not started</p>
         <button class="btn btn-info" id="startArduinoButton">Start Arduino</button>
         <p class="text ml-auto pb-0" id="arduinostatus">Arduino Status: waiting</p>
+        <button class="btn btn-danger" id="emerButton">Emergency STOP</button>
         <button class="btn btn-info" id="startWaitingRoomButton">Start Waiting Room</button>
         <button class="btn btn-info" id="restartButton">Restart Game</button>
         <input type="text" placeholder="Range,Share Size..." id="myInput">
@@ -40,6 +41,8 @@
         var waitingRoomBtn = $( "#startWaitingRoomButton" );
         var restartBtn = $( "#restartButton" );
         var paramBtn = $('#paramButton');
+        var emerBtn = $('#emerButton');
+        var isGameOver = true;
         var gameEnded = true; //by default game is not started
         var arduinoGameState = "";
         var playingStatus = "";
@@ -67,14 +70,18 @@
         });
 
         startBtn.click(function(){
-            if (gameEnded){ // game has already ended 
+            if (isGameOver){ // game has already ended 
                 console.log("starting the game now!!");
-                socket.emit('startGame', gameEnded);
+                socket.emit('startGame', isGameOver);
                 playingStatus = 'playing';
                 document.getElementById('playingstatus').innerHTML = "Game Status: " + playingStatus;
-                gameEnded = false;
+                isGameOver = false;
                 startBtn.prop('disabled', true);
             }
+        });
+
+        emerBtn.click(function(){
+            socket.emit('updateArdStatus',"STOP");
         })
 
         ardBtn.click(function() {
@@ -98,7 +105,7 @@
         let socket = io('/admin.html');
 
         socket.on('gameEnded', () => {
-            gameEnded = true;
+            isGameOver = true;
             // document.getElementById("startButton").disabled = false; //reenable start button
             startBtn.prop('disabled', false);
             playingStatus = 'not started';
@@ -127,6 +134,7 @@
         socket.on('registered', (msg) => {
             //finish this   
             if(msg.gameStarted){
+                isGameOver=false;
                 startBtn.prop('disabled', true);
                 document.getElementById('playingstatus').innerHTML = "Game Status: playing";
                 console.log('i am being registered')
