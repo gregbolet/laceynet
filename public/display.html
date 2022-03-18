@@ -95,26 +95,35 @@
             //create img
             var img = document.createElement("img");
             img.className ="picture";
-             // console.log(Icons);
-                //  if (Object.keys(Icons).includes(msg.name)){
             console.log(myC.img);
             img.setAttribute("src",myC.img);
            console.log(img);
+
+           var nameHeader = document.createElement("div");
+           nameHeader.setAttribute('id',"nameHead");
+           nameHeader.appendChild(clientName);
 
             //create num div
             var clientNum = document.createElement("div");
             clientNum.innerHTML = parseInt(myC.num);
             clientNum.setAttribute('id', "num");
+
+            var numHeader = document.createElement("div");
+            numHeader.setAttribute('id',"numHead");
+            numHeader.appendChild(clientNum);
+            numHeader.style.background = myC.color;
             //create div to hold everything
             var block = document.createElement("div");
-            block.appendChild(clientName);
-            block.appendChild(clientNum);
+            block.appendChild(nameHeader);
+            block.appendChild(numHeader);
+            //block.appendChild(clientName);
+            //block.appendChild(clientNum);
             block.setAttribute('id', id); //set id of div to be the client id
             block.className = "block";
             clientName.appendChild(img);
 
             //set div color
-            block.style.background = myC.color;
+            //block.style.background = myC.color;
 
             container.append(block); //add to panel   
         }
@@ -123,11 +132,12 @@
         function updateClient(id,obj){
             //get client div from container
             var client = document.getElementById(id);
-            var clientNum = client.lastElementChild;
+            var numHeader = client.querySelector('#numHead');
+            var clientNum = numHeader.querySelector('#num');
             clientNum.innerHTML = parseInt(obj.num); //update its current value
             console.log("animating " + obj.name);
 
-            client.style.zIndex = 100; //send to the front
+            client.style.zIndex = 1000; //send to the front
             client.classList.add("animate"); //add animation
             
             setTimeout(function() {
