@@ -7,9 +7,12 @@
     <script src="/js/popper.min.js" ></script>
     <script src="/js/bootstrap.min.js" ></script>
     <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/images.js"></script>
 
     <title>Guessing Game!</title>
   </head>
+
+  
 
   <body>
 
@@ -28,6 +31,7 @@
 
 <div class="clientName" id="playerName"> Player:... </div>
 
+
     <div class="container col-md-12 align-middle">
 
       <div id="redXOverlay"> 
@@ -44,8 +48,13 @@
 
   </body>
 
+  
+
   <script>
     // Use JQuery to grab our button object
+
+    //import People from './js/images.js'
+
     var button = $( "#mainbutton" );
     var quitBtn = $( "#quitButton" );
     var imageDict = {
@@ -169,7 +178,7 @@
 
     socket.on('clientStartGame', (msg) => {
       document.getElementById('mainbutton').disabled = false; // enable main btn
-      gameEnded = msg;
+      gameEnded = false;
       // button.prop('disabled', false); // enable main btn
     });
 
@@ -180,10 +189,12 @@
       document.getElementById('playerName').innerHTML = "Player: " + playerName;
       var img = document.createElement("img");
       img.className ="picture";
-      if (Object.keys(imageDict).includes(msg.name)){
-        img.setAttribute("src",imageDict[msg.name]);
+     // console.log(Icons);
+    //  if (Object.keys(Icons).includes(msg.name)){
+      console.log(msg.img);
+        img.setAttribute("src",msg.img);
         document.getElementById('playerName').appendChild(img);
-      }
+     // }
       if(msg.start){
         document.getElementById('mainbutton').disabled = false;
       }

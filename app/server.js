@@ -3,6 +3,8 @@ const socketIO = require('socket.io');
 const GameManager = require('./gameManager.js');
 const ClientObj = require('../public/js/ClientObj.js');
 const { param } = require('express/lib/request');
+const People = require('../public/js/images.js');
+
 const measurements = require('./measurements.json');
 
 const PORT = process.env.PORT || 5000; 
@@ -57,9 +59,10 @@ var arduinoObj = {key: "hello world"};
 
 var winningClient = ""; //id of winningClient //dont think we use this???
 
-const clientNames = ["Abraham Lincoln", "George Washington", "Ben Franklin", "Ada Lovelace", 
-"Martin Luther King Jr.",  "Malcolm X", "Louis Armstrong", "Frank Sinatra", "Henry Ford", 
-"Sacagawea", "Steve Jobs", "Muhammad Ali", "Harriet Tubman", "Grace Hopper"];
+const clientNames = People.names;
+// ["Abraham Lincoln", "George Washington", "Ben Franklin", "Ada Lovelace", 
+// "Martin Luther King Jr.",  "Malcolm X", "Louis Armstrong", "Frank Sinatra", "Henry Ford", 
+// "Sacagawea", "Steve Jobs", "Muhammad Ali", "Harriet Tubman", "Grace Hopper"];
 
 const chosenClients = [];
 
@@ -96,6 +99,12 @@ function generateName() {
   var indextOfItemInMyArray = chosenClients[randomValueIndex];
   chosenClients.splice(randomValueIndex,1);
   return clientNames[indextOfItemInMyArray];
+}
+
+function getSVG(name){
+  if(Object.keys(People.Icons).includes(name)){
+    return People.Icons[name];
+  }
 }
 
 // socket.emit('registered',{map: transitString, par: params, ardStatus: arduinoGameState}); // i need arduino to admin
@@ -196,13 +205,13 @@ function handleNewClient(socket, myNum){
   console.info('ADDING NEW CLIENT OBJ TO CLIENT DICT');
   let newName = generateName();
   let newColor = generateColor();
-
-  const newClient = new ClientObj(newName, socket.id, newColor, myNum);
+  let newImg = getSVG(newName);
+  const newClient = new ClientObj(newName, socket.id, newColor, myNum,newImg);
   clientDict.set(socket.id, newClient); //add to overall dict
 
   let newMapping = Object.fromEntries(clientDict);
   displayIo.emit('displayNewClient', {map: newMapping, id: socket.id}); // send the updated new Mapping
-  socket.emit('registered', {start:isGameStarted, gameStatus: gameOver, color: newColor, name: newName});
+  socket.emit('registered', {start:isGameStarted, gameStatus: gameOver, color: newColor, name: newName, img: newImg});
 }
 
 

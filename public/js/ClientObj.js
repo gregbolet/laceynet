@@ -6,12 +6,14 @@ class ClientObj {
     id;
     color;
     num;
+    img;
 
-    constructor(name, id, color, num){
+    constructor(name, id, color, num, img){
       this.name = name; // char name
       this.id = id; // socket id
       this.color = color; // stay the same within a single game
       this.num = num;
+      this.img = img;
     }
 
     // getName() {

@@ -72,6 +72,7 @@
         var clientDict = new Map();
         var range = -1;
         var shareSize = -1;
+        var imageDict = new Map();
         
 
         function resetGrid(){
@@ -91,6 +92,15 @@
             clientName.innerHTML = myC.name;
             clientName.setAttribute('id', "client_name");
             clientName.className = "client_name";
+            //create img
+            var img = document.createElement("img");
+            img.className ="picture";
+             // console.log(Icons);
+                //  if (Object.keys(Icons).includes(msg.name)){
+            console.log(myC.img);
+            img.setAttribute("src",myC.img);
+           console.log(img);
+
             //create num div
             var clientNum = document.createElement("div");
             clientNum.innerHTML = parseInt(myC.num);
@@ -101,6 +111,7 @@
             block.appendChild(clientNum);
             block.setAttribute('id', id); //set id of div to be the client id
             block.className = "block";
+            clientName.appendChild(img);
 
             //set div color
             block.style.background = myC.color;
