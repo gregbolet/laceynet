@@ -172,13 +172,15 @@
             if(isGameOver){
                 for(let [key,value] of clientDict){
                     if(key === id){
-                        winningClient = document.getElementById(id);
-                        winningClient.style.background = "#2ECC71";
+                        winningClient = document.getElementById(id);                       
+                        var numHeader = winningClient.querySelector('#numHead');
+                        numHeader.style.background = "#2ECC71";
                         winningClient.classList.add('winnerAnimate');
                     }
                     else {
                         var client = document.getElementById(key);
-                        client.style.background = "#E74C3C";
+                        var numHeader = client.querySelector('#numHead');
+                        numHeader.style.background = "#E74C3C";
                         client.classList.remove('animate');
                     }
                 }
