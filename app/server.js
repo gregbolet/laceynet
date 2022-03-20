@@ -15,7 +15,7 @@ const server = app.listen(PORT, function () {
 // socketIO will serve the websockets and handle reverse
 // compatibility and protocol fallback
 const io = socketIO(server);
-const speed_list = generateSpeed(10, 501, 10);
+const speed_list = generateSpeed(10, 301, 10);
 
 
 // Serve all the files from the /public folder
