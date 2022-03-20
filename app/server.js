@@ -15,6 +15,7 @@ const server = app.listen(PORT, function () {
 // socketIO will serve the websockets and handle reverse
 // compatibility and protocol fallback
 const io = socketIO(server);
+const speed_list = generateSpeed(10, 501, 10);
 
 
 // Serve all the files from the /public folder
@@ -30,7 +31,14 @@ app.use(express.json())
 // when the game is ready for the arduinos
 var arduinoGameState = 'waiting';
 
-
+function generateSpeed(start, end, len){
+  const slist = [];
+  for (var i = 0; i < len; i++) {
+    let one = Math.floor(Math.random() * (start, end)) + start;
+    slist.push(one);
+  }
+  return slist;
+}
 
 app.set('/ardiono', io);
 app.get('/arduino', (req,res)=>{
