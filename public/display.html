@@ -213,6 +213,8 @@
             //reset div color upon restart
             for (let [key,value] of clientDict){
                 document.getElementById(key).style.backgroundColor = value.color;
+                //var client = document.getElementById(key);
+                var numHeader = document.getElementById(key).querySelector('#numHead').style.removeProperty("background-color");
             }
             winningId = "";
             updateParams(newParams);
