@@ -52,13 +52,13 @@
                 console.log("changing status to READY");
                 arduinoGameState = "ready";
                 ardBtn.html(`Stop Arduino`); 
-                socket.emit('updateArdStatus', arduinoGameState);
+               // socket.emit('updateArdStatus', arduinoGameState);
             }
             else {
                 console.log("changing status to WAITING");
                 arduinoGameState = "waiting";
                 ardBtn.html(`Start Arduino`); 
-                socket.emit('updateArdStatus', arduinoGameState);
+                //socket.emit('updateArdStatus', arduinoGameState);
             }
             document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
         }
@@ -86,6 +86,7 @@
 
         ardBtn.click(function() {
             updateArduinoStatus(arduinoGameState);
+            socket.emit('updateArdStatus',arduinoGameState);
         });
 
         paramBtn.click(function() {
@@ -110,7 +111,23 @@
             startBtn.prop('disabled', false);
             playingStatus = 'not started';
             document.getElementById('playingstatus').innerHTML = "Game Status: " + playingStatus;
+            if(arduinoGameState === 'ready'){
+                arduinoGameState = "waiting";
+                document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
+                socket.emit('updateArdStatus', arduinoGameState);
+                ardBtn.html(`Start Arduino`); 
+            }
         });
+
+        socket.on('checkArdStatus', (msg) => {
+     
+                updateArduinoStatus(msg);
+           
+        });
+
+        socket.on('checkStartStatus', (msg) => {
+            
+        })
 
 
         // Handle the case of restarting the game
@@ -149,14 +166,6 @@
             }
 
         });
-
-
-
-        // not used can add if wanted
-        // socket.on('time', (timeString) => {
-        //     let el = document.getElementById('server-time');
-        //     el.innerHTML = 'Server time: ' + timeString;
-        // });
-    
+   
     </script>
 </html>

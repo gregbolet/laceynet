@@ -132,13 +132,14 @@ adminIo.on('connection', (socket) => {
     gameOver = false;
     winningClient = "";
     // Tell all the players we restarted
-    //adminIo.emit('restartGame');
+    adminIo.emit('restartGame');
     io.emit('restartGame');
     
   });
 
   //updating arduino status
   socket.on('updateArdStatus', (msg) => {
+    socket.broadcast.emit('checkArdStatus', arduinoGameState);
     arduinoGameState = msg;
     console.log("The arduino status has changed to " + arduinoGameState);
   });
@@ -233,7 +234,7 @@ function handleNewClient(socket, myNum){
 
 
 clientIo.on('connection', (socket) => {
-  console.info(`Client connected [id=${socket.id}]`);
+  console.info(`Client connected [id=${socket.id}]`); //MOVE CLIENT CONNECTION TOT HE BOTTOM
 
   GameMan.addWorker(socket);
 
