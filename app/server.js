@@ -48,6 +48,7 @@ app.get('/arduino', (req,res)=>{
     var mac = req.headers['measure'];
     console.info(measurements[mac]);
     data['measurement'] = measurements[mac];
+    data['speed'] = speed_list[measurements[mac][index]];
   }
   data['gameState'] = arduinoGameState;
   res.send(data);
