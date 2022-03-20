@@ -37,6 +37,7 @@ function generateSpeed(start, end, len){
     let one = Math.floor(Math.random() * (start, end)) + start;
     slist.push(one);
   }
+  console.log("the new speed list: " + slist);
   return slist;
 }
 
