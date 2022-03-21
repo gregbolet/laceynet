@@ -57,19 +57,10 @@
 
     var button = $( "#mainbutton" );
     var quitBtn = $( "#quitButton" );
-    var imageDict = {
-      "Ben Franklin": "images/benfrank-removebg-preview.png", 
-      "Ada Lovelace": "images/adalovelace.jpg", 
-      "Muhammad Ali":"images/ali-removebg-preview.png", 
-      "Harriet Tubman": "images/harriettubman.png", 
-      "Frank Sinatra": "images/franksinatra.jfif", 
-      "Grace Hopper": "images/gracehopper.png",
-      "Louis Armstrong": "images/louis.png"
-    };
-
+    var isGameOver = false;
     const fadeDuration = 200;
     const fadeWait = 500;
-    var gameEnded = true;
+    //var gameEnded = true;
     console.log("disabled main button");
     document.getElementById('mainbutton').disabled = true; // disable main btn
     //false when io is sent
@@ -84,12 +75,22 @@
       console.log("Continue mode is called " + new Date().toTimeString());
     }
 
+    function setWaitingMode(){
+      if(isGameOver){
+        button.removeClass( "btn-danger" )
+        button.removeClass( "btn-warning" );
+        button.removeClass( "btn-success" )
+        button.addClass( "btn-primary" );
+        button.html('Waiting for restart signal...');
+      }
+    }
+
     function setRestartMode(){
       if(!isGameOver){
-        button.removeClass( "btn-danger" )
-        button.removeClass( "btn-primary" )
-        button.removeClass( "btn-success" )
-        button.addClass( "btn-warning" )
+        button.removeClass( "btn-danger" );
+        button.removeClass( "btn-primary" );
+        button.removeClass( "btn-success" );
+        button.addClass( "btn-warning" );
       }
     }
 
@@ -99,7 +100,7 @@
         button.removeClass( "btn-primary" )
         button.removeClass( "btn-success" )
         button.addClass( "btn-danger" )
-        gameEnded = true;
+        //gameEnded = true;
         //button.html('Winner found! Waiting for restart...');
         isGameOver = true;
         console.log("IS the game over? "  + isGameOver + new Date().toTimeString());
@@ -172,20 +173,19 @@
     var currentShare = [];
     var currentPos = -1;
     var winningNum = -1;
-    var isGameOver = false;
     var playerName = "";
 
 
-    socket.on('clientStartGame', (msg) => {
-      document.getElementById('mainbutton').disabled = false; // enable main btn
-      gameEnded = false;
+    // socket.on('clientStartGame', (msg) => {
+    //   document.getElementById('mainbutton').disabled = false; // enable main btn
+    //   gameEnded = false;
 
-      // button.prop('disabled', false); // enable main btn
-    });
+    //   // button.prop('disabled', false); // enable main btn
+    // });
 
     // Handle the message where we are confirmed to have registered
     socket.on('registered', (msg) => {
-      isGameOver = msg.gameStatus;
+      isGameOver = msg.isGameOver;
       playerName = msg.name;
       
       document.getElementById('playerName').innerHTML = playerName; //"Player: " +
@@ -197,8 +197,12 @@
         img.setAttribute("src",msg.img);
         document.getElementById('playerName').appendChild(img);
      // }
-      if(msg.start){
+      if(!isGameOver){
+        setContinueMode();
         document.getElementById('mainbutton').disabled = false;
+      }else {
+         setWaitingMode();
+         document.getElementById('mainbutton').disabled = true;;
       }
       
       
@@ -253,6 +257,8 @@
 
     // Handle the case of restarting the game
     socket.on('restartGame', (msg) => {
+      document.getElementById('mainbutton').disabled = false; // enable main btn
+      //gameEnded = false;
       console.log('restart is being called');
       setLoserMode();
       isGameOver = false;

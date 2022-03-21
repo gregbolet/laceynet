@@ -100,6 +100,7 @@
             //create img
             var img = document.createElement("img");
             img.className ="picture";
+            console.log(typeof myC.num);
             console.log(myC.img);
             img.setAttribute("src",myC.img);
             console.log(img);
@@ -108,9 +109,15 @@
            nameHeader.setAttribute('id',"nameHead");
            nameHeader.appendChild(clientName);
 
-            //create num div
+            //create num 
+            
             var clientNum = document.createElement("div");
-            clientNum.innerHTML = parseInt(myC.num);
+            if(myC.num == -1){
+                clientNum.innerHTML = "?";
+            }else {
+                clientNum.innerHTML = parseInt(myC.num);
+            }
+            
             clientNum.setAttribute('id', "num");
 
             var numHeader = document.createElement("div");
@@ -139,7 +146,9 @@
             var client = document.getElementById(id);
             var numHeader = client.querySelector('#numHead');
             var clientNum = numHeader.querySelector('#num');
-            clientNum.innerHTML = parseInt(obj.num); //update its current value
+            clientNum.innerHTML = parseInt(obj.num);
+           
+            //clientNum.innerHTML = parseInt(obj.num); //update its current value
             console.log("animating " + obj.name);
 
             client.style.zIndex = 1000; //send to the front
@@ -154,8 +163,6 @@
             let box = client;
             let width = box.clientWidth;
             let height = box.clientHeight;
-            console.log("THIS IS THE WIDTH " + width);
-            console.log("THIS IS THE HEIGHT " + height);
             
         }
 
@@ -212,9 +219,8 @@
         function handleRestart(newStatus, newParams){
             //reset div color upon restart
             for (let [key,value] of clientDict){
-                document.getElementById(key).style.backgroundColor = value.color;
-                //var client = document.getElementById(key);
-                var numHeader = document.getElementById(key).querySelector('#numHead').style.removeProperty("background-color");
+                document.getElementById(key).client.querySelector('#numHead').style.backgroundColor = value.color;
+                //document.getElementById(key).querySelector('#nameHead').style.removeProperty("background-color");
             }
             winningId = "";
             updateParams(newParams);
@@ -227,9 +233,10 @@
             resetGrid();
             removeBlocks();
             updateParams(startMsg.parameters); //for display parameters
-
+            console.log('were starting')
             //set up client map
             clientDict = new Map(Object.entries(startMsg.map)); // cast back to map
+            console.log(clientDict);
             for(const [key,value] of clientDict.entries()){
                 addClientToPanel(key,value); //add each client to the board
             }
@@ -247,20 +254,32 @@
         socket.on('displayRegistered', (msg) => {
             // HERE msg = {map: clientMapping, parameters: params, gameStatus: gameOver, winner: winningClient}
             console.log("registered display panel...");
+            
             handleGameStart(msg);
 
-            if(msg.gameStatus){ //if the game is over, put in proper format
-                handleGameEnd(msg.winner);
+            if(msg.isGameOver){ //if the game is over, put in proper format
+                //handleGameEnd(msg.winner);
             }
         });
+
+        socket.on('displayStartGame', (msg) => {
+            console.log('starting the game...');
+            //console.log(msg.)
+            isGameOver = msg.isGameOver;
+            if(!isGameOver){
+                handleGameStart(msg);
+            }
+            
+        })
 
 
         // Handle the case of restarting the game
         socket.on('displayRestartGame', (msg) => {
             console.log("Restarting the display");
-            handleRestart(msg.gameStatus, msg.pamameters);
+            console.log("params - ", msg.parameters);
+           // handleGameStart()
+            handleRestart(msg.isGameOver, msg.parameters);
         });
-
 
         socket.on('displayGotAWinner', (winner) => {
             console.log('got a winner -- display');
@@ -280,9 +299,12 @@
         //cilnet number has changed, checks map for changes and updates
         socket.on('displayNumberSwitch', (msg)  => {
             if (!clientDict.has(msg.id)){ // id not in client dict
-                console.log('Houston we have a problem');
+                clientDict.set(msg.id, msg.newClient);
+                addClientToPanel(msg.id, msg.newClient);
+               // console.log()
                 return;
             }
+            console.log(' i should be switching the numbers');
             updateClient(msg.id, msg.newClient);
         });
 
@@ -291,7 +313,6 @@
         socket.on('displayUpdateParams', (msg) => {
             updateParams(msg);
         });
-
 
         //removes client from panel and dictionary
         socket.on('displayremoveClient', (msg) => {

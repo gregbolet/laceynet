@@ -19,6 +19,7 @@ module.exports = class GameManager{
   #inProgressShares;
   #repeatSharesIdx;
   #completedShares;
+  #isGameOver;
 
   #generateShares(){
 
@@ -99,6 +100,7 @@ module.exports = class GameManager{
     this.#maxNums = maxNums;
     this.#shareSize = shareSize;
     this.#clients = new Map();
+    this.#isGameOver = true;
 
     this.#generateShares();
 
@@ -310,6 +312,20 @@ module.exports = class GameManager{
   getClientSize() {
     return this.#clients.size;
   }
+
+  getIsGameOver(){
+    return this.#isGameOver;
+  }
+
+  startGame() {
+    this.#isGameOver = false;
+  }
+
+  endGame() {
+    this.#isGameOver = true;
+  }
+
+
 
 }
 

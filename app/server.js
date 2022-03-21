@@ -113,19 +113,27 @@ function getImage(name){
 // ------------------------- admin namespace -----------------------------
 adminIo.on('connection', (socket) => {
 
-  socket.emit('registered', {gameStarted:isGameStarted, arduinoStatus: arduinoGameState});
+  socket.emit('registered', {isGameOver:GameMan.getIsGameOver(), arduinoStatus: arduinoGameState});
 
   socket.on('startGame', (msg) => {
-    isGameStarted = true;
+    GameMan.startGame();
+    console.log('THE GAME IS STARTED - ', GameMan.getIsGameOver());
+    //isGameStarted = true;
     //clientIo.emit('restartGame');
-    io.emit('clientStartGame', msg);
+    //io.emit('clientStartGame', msg);
     console.log(`Restarting game with current workers! - ADMIN`);
     GameMan.restartGameWithCurrentWorkers();
-    gameOver = false;
+   // gameOver = false;
     winningClient = "";
     // Tell all the players we restarted
     adminIo.emit('restartGame');
     io.emit('restartGame');
+    let params = GameMan.getParams();
+    console.log('HERE ARE THE PARAMETERS - ', params);
+    let clientMapping = Object.fromEntries(clientDict);
+    console.log('starting the game');
+    displayIo.emit('displayStartGame', {map: clientMapping, parameters: params, isGameOver: GameMan.getIsGameOver(), winner: winningClient});
+   
     
   });
 
@@ -143,11 +151,12 @@ adminIo.on('connection', (socket) => {
     GameMan.resetGameParameters(msg);
     console.info(`Restarting game with current workers! - display`);
     GameMan.restartGameWithCurrentWorkers();
-    gameOver = false;
+    //gameOver = false;
+    GameMan.startGame();
     winningClient = "";
     // Tell all the players we restarted
     io.emit('restartGame');
-    displayIo.emit('displayRestartGame', {gameStatus: gameOver, parameters: msg});
+   displayIo.emit('displayRestartGame', {isGameOver: GameMan.getIsGameOver(), parameters: msg});
 
     GameMan.updateWinningNum(msg[2]);
     io.emit('updateWinningNumber', msg[2]);
@@ -156,14 +165,15 @@ adminIo.on('connection', (socket) => {
 
   socket.on('getParams', () => {
     const stats = GameMan.getParams();
-    socket.emit('displayUpdateParams', stats);
+    socket.emit('displayUpdateParams', stats);//change to display io
   });
 
   socket.on('restartGame', (msg) => {
     console.log(`Restarting game with current workers! - ADMIN`);
     GameMan.restartGameWithCurrentWorkers();
-    gameOver = false;
+    //gameOver = false;
     winningClient = "";
+    GameMan.startGame();
     // Tell all the players we restarted
     adminIo.emit('restartGame');
     io.emit('restartGame');
@@ -189,19 +199,9 @@ displayIo.on('connection', (socket) => {
   //initial registration
   let clientMapping = Object.fromEntries(clientDict);
   let params = GameMan.getParams();
-  socket.emit('displayRegistered', {map: clientMapping, parameters: params, gameStatus: gameOver, winner: winningClient});
+  socket.emit('displayRegistered', {map: clientMapping, parameters: params, isGameOver: GameMan.getIsGameOver(), winner: winningClient});
  
-  // Handle a request to restart the game
-  socket.on('restartGame', () => {
-    console.log(`Restarting game with current workers! - display`);
-    GameMan.restartGameWithCurrentWorkers();
-    gameOver = false;
-    winningClient = "";
-    let newParams = GameMan.getParams();
-    // Tell all the players we restarted
-    displayIo.emit('displayRestartGame', {gameStatus: gameOver, parameters: newParams});
-    io.emit('restartGame');
-  });
+
 
   socket.on('disconnect', () => {
     console.log('display Client disconnected');
@@ -221,7 +221,7 @@ function handleNewClient(socket, myNum){
 
   let newMapping = Object.fromEntries(clientDict);
   displayIo.emit('displayNewClient', {map: newMapping, id: socket.id}); // send the updated new Mapping
-  socket.emit('registered', {start:isGameStarted, gameStatus: gameOver, color: newColor, name: newName, img: newImg});
+  socket.emit('registered', {isGameOver: GameMan.getIsGameOver(), color: newColor, name: newName, img: newImg});
 }
 
 
@@ -231,7 +231,7 @@ clientIo.on('connection', (socket) => {
   GameMan.addWorker(socket);
 
   // Let the client know they are registered
-  if (!gameOver){
+  if (!GameMan.getIsGameOver()){ //playing
     let shareObj = GameMan.getNewShareObjForWorker(socket); // get share
 
     // If there are no shares to hand out, tell the worker to idle
@@ -247,10 +247,13 @@ clientIo.on('connection', (socket) => {
       handleNewClient(socket, myNum);
     }
   }
+  else { //doesnt get a share client //not playing
+    handleNewClient(socket,-1);
+  }
   
   // Setup the new share request handler
   socket.on('needNewShare', () => {
-    if (!gameOver) { // game is still ON
+    if (!GameMan.getIsGameOver()) { // game is still ON
       console.info(`Client needs new share [id=${socket.id}]`);
 
       // Get the next share for it to work on
@@ -270,6 +273,7 @@ clientIo.on('connection', (socket) => {
       //when exisiting client wants new share 
       let currClient = clientDict.get(socket.id);
       currClient.num = myNum;
+      console.log('GOT MY NEW NUMBER WOOHOO - ',currClient.num);
       displayIo.emit('displayNumberSwitch', {id: socket.id, newClient: currClient});
     }
   });
@@ -294,7 +298,7 @@ clientIo.on('connection', (socket) => {
 
   // This handles shares that claim to be winners
   socket.on('iAmAWinner', (msg) => {
-    if (gameOver) {
+    if (GameMan.getIsGameOver()) {
       return;
     }
 
@@ -328,8 +332,9 @@ clientIo.on('connection', (socket) => {
       socket.emit('youAreTheWinner');
 
       // Set the game state to over
-      gameOver = true;
-      isGameStarted = false;
+     // gameOver = true;
+      //isGameStarted = false;
+      GameMan.endGame();
       adminIo.emit('gameEnded');
     }
     else {
@@ -338,17 +343,7 @@ clientIo.on('connection', (socket) => {
     }
   });
 
-  // Handle a request to restart the game
-  socket.on('restartGame', () => {
-    console.log(`Restarting game with current workers! - CLIENT`);
-    GameMan.restartGameWithCurrentWorkers();
-    gameOver = false;
-    winningClient = "";
 
-    // Tell all the players we restarted
-    io.emit('restartGame');
-    displayIo.emit('displayRestartGame', {gameStatus: gameOver});
-  });
 
   //let display panel know a client has switched numbers
   socket.on('buttonPressed', (msg) =>{
