@@ -59,7 +59,7 @@
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h4 class="modal-title">"Thanks for playing!</h4>
+              <h4 class="modal-title">Thanks for playing!</h4>
               <button type="button" class ="close" data-dismiss="modal">&times;</button>
               
             </div>
@@ -68,7 +68,8 @@
                 </p>
               </div>
               <div class="modal-footer">
-                <button id="surveyButton" class="btn btn-default" type="button" data-dismiss="modal"> Yes!</button>
+                <button id="surveyButton" class="btn btn-primary" type="button" data-dismiss="modal"> Yes</button>
+                <button id="closeButton" class="btn closeButton" type="button" data-dismiss="modal">No</button>
               </div>
           </div>
 
@@ -89,6 +90,7 @@
     var button = $( "#mainbutton" );
     var quitBtn = $( "#quitButton" );
     var surveyBtn = $("#surveyButton");
+    var closeBtn = $("#closeButton");
     var isGameOver = false;
     const fadeDuration = 200;
     const fadeWait = 500;
@@ -162,6 +164,12 @@
     quitBtn.click(function(){
       window.close('','_parent',''); // close window
       socket.emit('disconnect');
+    });
+
+    closeBtn.click(function() {
+      $(document).ready(function(){
+        $("#myModal").modal('hide');
+      });
     });
 
 
@@ -240,6 +248,10 @@
          setWaitingMode();
          document.getElementById('mainbutton').disabled = true;;
       }
+
+      $(document).ready(function(){
+        $("#myModal").modal('hide');
+      });
       
       
     });
@@ -297,6 +309,9 @@
     socket.on('restartGame', (msg) => {
       document.getElementById('mainbutton').disabled = false; // enable main btn
       //gameEnded = false;
+      // $(document).ready(function(){
+      //   $("#myModal").close();
+      // });
       console.log('restart is being called');
       setLoserMode();
       isGameOver = false;

@@ -17,7 +17,8 @@
     </head>
 
     <body>
-        <nav class="navbar navbar-expand-lg sticky-top navbar-light bg-light">
+        <nav class="navbar navbar-expand-lg 
+        navbar-dark bg-dark">
             <!-- <ul class="navbar-nav ml-0"> -->
                 
               <!-- <li class="nav-item"> -->
@@ -52,6 +53,13 @@
 
             <p class="navbar-text ml-auto pb-0" id="server-time"></p>
         </nav>
+
+        <!--Second navbar-->
+    <nav class="navbar navbar-expand-lg 
+    navbar-dark bg-dark">
+    <p class="navbar-text ml-auto pb-0" id="ledger">Winners: </p>
+    
+    </nav>
         <!-- <nav class="navbar navbar-expand-lg  navbar-light bg-light">
             <p class="navbar-text ml-auto pb-0" id="range"></p>
             <p class="navbar-text ml-auto pb-0" id="shareSize"></p>
@@ -78,6 +86,7 @@
         var range = -1;
         var shareSize = -1;
         var imageDict = new Map();
+        var winners= [];
         
 
         function resetGrid(){
@@ -174,12 +183,12 @@
         }
 
         // update block when winner found
-        function updateWinnerBlock(id) {
+        function updateWinnerBlock(msg) {
             var winningClient;
             if(isGameOver){
                 for(let [key,value] of clientDict){
-                    if(key === id){
-                        winningClient = document.getElementById(id);                       
+                    if(key === msg.id){
+                        winningClient = document.getElementById(msg.id);                       
                         var numHeader = winningClient.querySelector('#numHead');
                         numHeader.style.background = "#2ECC71";
                         winningClient.classList.add('winnerAnimate');
@@ -191,6 +200,8 @@
                         client.classList.remove('animate');
                     }
                 }
+                winners.push(msg.winNum);
+                document.getElementById('ledger').innerHTML = "Winners: [" + winners.join() + "]";
             }
 
             winningClient.classList.remove("winnerAnimate");
@@ -240,6 +251,13 @@
             for(const [key,value] of clientDict.entries()){
                 addClientToPanel(key,value); //add each client to the board
             }
+            winners = startMsg.ledger;
+            console.log(winners);
+            console.log(startMsg.ledger);
+           // if(winners.length > 0){
+                document.getElementById('ledger').innerHTML = "Winners: [" + winners.join() + "]";
+           // }
+            
         }
 
         // ------------------------ sockets --------------------------
@@ -279,6 +297,8 @@
             console.log("params - ", msg.parameters);
            // handleGameStart()
             handleRestart(msg.isGameOver, msg.parameters);
+            winners = msg.ledger;
+            document.getElementById('ledger').innerHTML = "Winners: [" + winners.join() + "]";
         });
 
         socket.on('displayGotAWinner', (winner) => {

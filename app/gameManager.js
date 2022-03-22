@@ -20,6 +20,7 @@ module.exports = class GameManager{
   #repeatSharesIdx;
   #completedShares;
   #isGameOver;
+  #ledger;
 
   #generateShares(){
 
@@ -101,6 +102,7 @@ module.exports = class GameManager{
     this.#shareSize = shareSize;
     this.#clients = new Map();
     this.#isGameOver = true;
+    this.#ledger = [];
 
     this.#generateShares();
 
@@ -277,6 +279,23 @@ module.exports = class GameManager{
     //console.log("THE NEW WINNING NUMBER IS " + newWin);
     this.#winningNum = parseInt(newWin);
     console.log("The new winning number is " + this.#winningNum);
+  }
+
+  getWinningNum(){
+    return this.#winningNum;
+  }
+
+  getLedger(){
+    return this.#ledger
+  }
+
+  setLedger(num){
+    this.#ledger.push(num);
+  }
+
+  updateLedger(num){
+    this.#ledger.push(num);
+    return this.#ledger;
   }
 
   getParams() {

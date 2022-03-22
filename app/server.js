@@ -72,6 +72,7 @@ const clientColors =  ['#FE9',"#AFA","#FA7", '#9AF','#FFEFD5','#C2F0D1',"#FFB6C1
 
 let clientDict = new Map(); //map of client ids to client objects
 
+let winningLedger = [];
 
 // define namespaces 
 const displayIo = io.of('/display.html');
@@ -118,12 +119,8 @@ adminIo.on('connection', (socket) => {
   socket.on('startGame', (msg) => {
     GameMan.startGame();
     console.log('THE GAME IS STARTED - ', GameMan.getIsGameOver());
-    //isGameStarted = true;
-    //clientIo.emit('restartGame');
-    //io.emit('clientStartGame', msg);
     console.log(`Restarting game with current workers! - ADMIN`);
     GameMan.restartGameWithCurrentWorkers();
-   // gameOver = false;
     winningClient = "";
     // Tell all the players we restarted
     adminIo.emit('restartGame');
@@ -131,8 +128,10 @@ adminIo.on('connection', (socket) => {
     let params = GameMan.getParams();
     console.log('HERE ARE THE PARAMETERS - ', params);
     let clientMapping = Object.fromEntries(clientDict);
-    console.log('starting the game');
-    displayIo.emit('displayStartGame', {map: clientMapping, parameters: params, isGameOver: GameMan.getIsGameOver(), winner: winningClient});
+    let winLedger = GameMan.getLedger();
+    //console.log('starting the game');
+    //console.log(winningLedger);
+    displayIo.emit('displayStartGame', {map: clientMapping, parameters: params, isGameOver: GameMan.getIsGameOver(), winner: winningClient, ledger: winLedger});
    
     
   });
@@ -154,9 +153,10 @@ adminIo.on('connection', (socket) => {
     //gameOver = false;
     GameMan.startGame();
     winningClient = "";
+    let winLedger = GameMan.getLedger();
     // Tell all the players we restarted
     io.emit('restartGame');
-   displayIo.emit('displayRestartGame', {isGameOver: GameMan.getIsGameOver(), parameters: msg});
+   displayIo.emit('displayRestartGame', {isGameOver: GameMan.getIsGameOver(), parameters: msg, ledger:winLedger});
 
     GameMan.updateWinningNum(msg[2]);
     io.emit('updateWinningNumber', msg[2]);
@@ -199,7 +199,8 @@ displayIo.on('connection', (socket) => {
   //initial registration
   let clientMapping = Object.fromEntries(clientDict);
   let params = GameMan.getParams();
-  socket.emit('displayRegistered', {map: clientMapping, parameters: params, isGameOver: GameMan.getIsGameOver(), winner: winningClient});
+  let winLedger = GameMan.getLedger();
+  socket.emit('displayRegistered', {map: clientMapping, parameters: params, isGameOver: GameMan.getIsGameOver(), winner: winningClient, ledger: winLedger});
  
 
 
@@ -326,7 +327,11 @@ clientIo.on('connection', (socket) => {
       socket.broadcast.emit('weGotAWinner');
 
       //emit to display that we have a winner and which worker it is
-      displayIo.emit('displayGotAWinner', id);
+      let currWinningNum = GameMan.getWinningNum();
+
+      GameMan.updateLedger(currWinningNum);
+
+      displayIo.emit('displayGotAWinner', {id: id, winNum: currWinningNum});
 
       // Let the worker know that it did in fact win
       socket.emit('youAreTheWinner');
