@@ -336,6 +336,7 @@ clientIo.on('connection', (socket) => {
       //isGameStarted = false;
       GameMan.endGame();
       adminIo.emit('gameEnded');
+      clientIo.emit('sendSurvey');
     }
     else {
       // Just in case the share is actually a losing share
