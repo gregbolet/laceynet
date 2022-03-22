@@ -1,5 +1,5 @@
 {
-    "84cca82eb428": {
+    "measurement": {
         "SB":256.34352,
         "WB":74,
         "UB":148,
@@ -11,142 +11,66 @@
         "L_min":0,
         "L_max":350,
         "l":225.325,
-        "h":40,
-        "index":0
+        "h":40
+    },
+    "84cca82eb428": {
+        "index":0,
+        "leftOffset": 0,
+        "rightOffset": 0,
+        "frontOffset": 0
     },
     "84cca82fc998": {
-        "SB":256.34352,
-        "WB":74,
-        "UB":148,
-        "sP":60.62178,
-        "wP":17.5,
-        "uP":35,
-        "OX":0,
-        "OY":0,
-        "L_min":0,
-        "L_max":350,
-        "l":225.325,
-        "h":40,
-        "index":1
+        "index":1,
+        "leftOffset": 0,
+        "rightOffset": 0,
+        "frontOffset": 0
     },
     "84cca82fcb2c": {
-        "SB":256.34352,
-        "WB":74,
-        "UB":148,
-        "sP":60.62178,
-        "wP":17.5,
-        "uP":35,
-        "OX":0,
-        "OY":0,
-        "L_min":0,
-        "L_max":350,
-        "l":225.325,
-        "h":40,
-        "index":2
+        "index":2,
+        "leftOffset": 0,
+        "rightOffset": 10,
+        "frontOffset": 0
     },
     "84cca8300214": {
-        "SB":256.34352,
-        "WB":74,
-        "UB":148,
-        "sP":60.62178,
-        "wP":17.5,
-        "uP":35,
-        "OX":0,
-        "OY":0,
-        "L_min":0,
-        "L_max":350,
-        "l":225.325,
-        "h":40,
-        "index":3
+        "index":3,
+        "leftOffset": 5,
+        "rightOffset": 0,
+        "frontOffset": 5
     },
     "9c9c1fe6a908": {
-        "SB":256.34352,
-        "WB":74,
-        "UB":148,
-        "sP":60.62178,
-        "wP":17.5,
-        "uP":35,
-        "OX":0,
-        "OY":0,
-        "L_min":0,
-        "L_max":350,
-        "l":225.325,
-        "h":40,
-        "index":4
+        "index":4,
+        "leftOffset": 0,
+        "rightOffset": 5,
+        "frontOffset": 0
     },
     "84cca82e1c24": {
-        "SB":256.34352,
-        "WB":74,
-        "UB":148,
-        "sP":60.62178,
-        "wP":17.5,
-        "uP":35,
-        "OX":0,
-        "OY":0,
-        "L_min":0,
-        "L_max":350,
-        "l":225.325,
-        "h":40,
-        "index":5
+        "index":5,
+        "leftOffset": 0,
+        "rightOffset": 0,
+        "frontOffset": 0
     },
     "9c9c1fe18db4": {
-        "SB":256.34352,
-        "WB":74,
-        "UB":148,
-        "sP":60.62178,
-        "wP":17.5,
-        "uP":35,
-        "OX":0,
-        "OY":0,
-        "L_min":0,
-        "L_max":350,
-        "l":225.325,
-        "h":40,
-        "index":6
+        "index":6,
+        "leftOffset": 5,
+        "rightOffset": 5,
+        "frontOffset": 0
     },
     "84cca82fc96c": {
-        "SB":256.34352,
-        "WB":74,
-        "UB":148,
-        "sP":60.62178,
-        "wP":17.5,
-        "uP":35,
-        "OX":0,
-        "OY":0,
-        "L_min":0,
-        "L_max":350,
-        "l":225.325,
-        "h":40,
-        "index":7
+        "index":7,
+        "leftOffset": 0,
+        "rightOffset": 3,
+        "frontOffset": 0
     },
     "9c9c1fc0dd70": {
-        "SB":256.34352,
-        "WB":74,
-        "UB":148,
-        "sP":60.62178,
-        "wP":17.5,
-        "uP":35,
-        "OX":0,
-        "OY":0,
-        "L_min":0,
-        "L_max":350,
-        "l":225.325,
-        "h":40,
-        "index":8
+        "index":8,
+        "leftOffset": 0,
+        "rightOffset": 0,
+        "frontOffset": 0
     },
     "84cca8300424": {
-        "SB":256.34352,
-        "WB":74,
-        "UB":148,
-        "sP":60.62178,
-        "wP":17.5,
-        "uP":35,
-        "OX":0,
-        "OY":0,
-        "L_min":0,
-        "L_max":350,
-        "l":225.325,
-        "h":40,
-        "index":9
+        "index":9,
+        "leftOffset": 0,
+        "rightOffset": 0,
+        "frontOffset": 0
     }
 }
