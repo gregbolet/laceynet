@@ -8,6 +8,9 @@
     <script src="/js/bootstrap.min.js" ></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/images.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" /> -->
 
     <title>Guessing Game!</title>
   </head>
@@ -21,7 +24,7 @@
         <li class="nav-item">
           <!-- <button class="btn btn-primary" id="quitButton">Quit</button> -->
           <button class="btn btn-primary" id="quitButton">Quit</button>
-          <a class="btn btn-warning" href="display.html">Display Panel</a>
+          <!--<a class="btn btn-warning" href="display.html">Display Panel</a>-->
         </li>
         
       </ul>
@@ -44,6 +47,26 @@
         Waiting for restart signal...
       </button>
 
+      <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">Thanks for playing!</h4>
+              <button type="button" class ="close" data-dismiss="modal">&times;</button>
+              
+            </div>
+            <div class="modal-body">
+              <p>Would you like to take a survey to talk about your experience with LACE? Click yes or no below!
+                </p>
+              </div>
+              <div class="modal-footer">
+                <button id="surveyButton" class="btn btn-primary" type="button" data-dismiss="modal"> Yes</button>
+                <button id="closeButton" class="btn closeButton" type="button" data-dismiss="modal">No</button>
+              </div>
+          </div>
+
+      </div>
+
     </div>
 
   </body>
@@ -52,24 +75,18 @@
 
   <script>
     // Use JQuery to grab our button object
+    //https://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_ref_js_modal_js&stacked=h - modal source
 
     //import People from './js/images.js'
 
     var button = $( "#mainbutton" );
     var quitBtn = $( "#quitButton" );
-    var imageDict = {
-      "Ben Franklin": "images/benfrank-removebg-preview.png", 
-      "Ada Lovelace": "images/adalovelace.jpg", 
-      "Muhammad Ali":"images/ali-removebg-preview.png", 
-      "Harriet Tubman": "images/harriettubman.png", 
-      "Frank Sinatra": "images/franksinatra.jfif", 
-      "Grace Hopper": "images/gracehopper.png",
-      "Louis Armstrong": "images/louis.png"
-    };
-
+    var surveyBtn = $("#surveyButton");
+    var closeBtn = $("#closeButton");
+    var isGameOver = false;
     const fadeDuration = 200;
     const fadeWait = 500;
-    var gameEnded = true;
+    //var gameEnded = true;
     console.log("disabled main button");
     document.getElementById('mainbutton').disabled = true; // disable main btn
     //false when io is sent
@@ -84,12 +101,22 @@
       console.log("Continue mode is called " + new Date().toTimeString());
     }
 
+    function setWaitingMode(){
+      if(isGameOver){
+        button.removeClass( "btn-danger" )
+        button.removeClass( "btn-warning" );
+        button.removeClass( "btn-success" )
+        button.addClass( "btn-primary" );
+        button.html('Waiting for restart signal...');
+      }
+    }
+
     function setRestartMode(){
       if(!isGameOver){
-        button.removeClass( "btn-danger" )
-        button.removeClass( "btn-primary" )
-        button.removeClass( "btn-success" )
-        button.addClass( "btn-warning" )
+        button.removeClass( "btn-danger" );
+        button.removeClass( "btn-primary" );
+        button.removeClass( "btn-success" );
+        button.addClass( "btn-warning" );
       }
     }
 
@@ -99,7 +126,7 @@
         button.removeClass( "btn-primary" )
         button.removeClass( "btn-success" )
         button.addClass( "btn-danger" )
-        gameEnded = true;
+        //gameEnded = true;
         //button.html('Winner found! Waiting for restart...');
         isGameOver = true;
         console.log("IS the game over? "  + isGameOver + new Date().toTimeString());
@@ -124,11 +151,21 @@
       $("#greenCheckOverlay").fadeIn(fadeDuration).delay(fadeWait).fadeOut(fadeDuration, callback); 
     }
 
+    function sendConsencus(){
+      
+    }
+
 
     // quit button - close window, disconnect client, update display
     quitBtn.click(function(){
       window.close('','_parent',''); // close window
       socket.emit('disconnect');
+    });
+
+    closeBtn.click(function() {
+      $(document).ready(function(){
+        $("#myModal").modal('hide');
+      });
     });
 
 
@@ -165,6 +202,10 @@
 
     }); 
 
+    surveyBtn.click(function() {
+      location.href = "https://docs.google.com/forms/d/e/1FAIpQLSdr2CI0EBNSr6nPejzUV8o0m06-OmO9-zmhv08tLObg_XA_oQ/viewform?usp=sf_link";
+    });
+
 
     // ------------------------ sockets --------------------------
     // URL defaults to window.location
@@ -172,20 +213,19 @@
     var currentShare = [];
     var currentPos = -1;
     var winningNum = -1;
-    var isGameOver = false;
     var playerName = "";
 
 
-    socket.on('clientStartGame', (msg) => {
-      document.getElementById('mainbutton').disabled = false; // enable main btn
-      gameEnded = false;
+    // socket.on('clientStartGame', (msg) => {
+    //   document.getElementById('mainbutton').disabled = false; // enable main btn
+    //   gameEnded = false;
 
-      // button.prop('disabled', false); // enable main btn
-    });
+    //   // button.prop('disabled', false); // enable main btn
+    // });
 
     // Handle the message where we are confirmed to have registered
     socket.on('registered', (msg) => {
-      isGameOver = msg.gameStatus;
+      isGameOver = msg.isGameOver;
       playerName = msg.name;
       
       document.getElementById('playerName').innerHTML = playerName; //"Player: " +
@@ -197,12 +237,22 @@
         img.setAttribute("src",msg.img);
         document.getElementById('playerName').appendChild(img);
      // }
-      if(msg.start){
+      if(!isGameOver){
+        setContinueMode();
         document.getElementById('mainbutton').disabled = false;
+      }else {
+         setWaitingMode();
+         document.getElementById('mainbutton').disabled = true;;
       }
+
+      $(document).ready(function(){
+        $("#myModal").modal('hide');
+      });
       
       
     });
+
+    
 
     // Handle incoming message for the requested share
     socket.on('newShare', (msg) => {
@@ -253,6 +303,11 @@
 
     // Handle the case of restarting the game
     socket.on('restartGame', (msg) => {
+      document.getElementById('mainbutton').disabled = false; // enable main btn
+      //gameEnded = false;
+      // $(document).ready(function(){
+      //   $("#myModal").close();
+      // });
       console.log('restart is being called');
       setLoserMode();
       isGameOver = false;
@@ -268,6 +323,18 @@
     socket.on('idle', (msg) => {
       setLoserMode();
       isGameOver = true;
+    });
+
+    socket.on('sendSurvey', (msg) => {
+      console.log('time to send the survey');
+   
+      
+      $(document).ready(function(){
+        setTimeout(function(){
+          $('#myModal').modal('show');
+        }, 5000);
+        
+      });
     });
 
     socket.on('time', (timeString) => {

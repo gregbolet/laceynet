@@ -145,7 +145,7 @@
   }
 
   #nameHead{
-
+    
   }
 
   #numHead{
@@ -159,6 +159,11 @@
     font-size:350%;
     text-align: center;
     max-height: 50px;
+  }
+
+  .navbar-text{
+    font-size: 125%;
+    text-align: center;
   }
 
   .picture{
