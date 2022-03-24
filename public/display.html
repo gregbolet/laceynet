@@ -19,38 +19,11 @@
     <body>
         <nav class="navbar navbar-expand-lg 
         navbar-dark bg-dark">
-            <!-- <ul class="navbar-nav ml-0"> -->
-                
-              <!-- <li class="nav-item"> -->
-                <!-- <div class="dropdown show"> -->
-                    <!-- <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> -->
-                        <!-- Game Menu
-                    </a> -->
-                  
-                    <!-- <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                        <button class="btn btn-primary" id="restartButton">Restart Game</button>
-                        <div class="dropdown-divider"></div>
-                        <button class="btn btn-info" id="refreshButton">Refresh Game </button>
-                        <div class="dropdown-divider"></div>
-                        <a class="btn btn-danger" href="index.html">Back To Game</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Current Game Params:</a> -->
+           
             <p class="navbar-text ml-auto pb-0" id="range"></p>
             <p class="navbar-text ml-auto pb-0" id="shareSize"></p>
             <p class="navbar-text ml-auto pb-0" id="winNum"></p>
-                        <!--<div class="dropdown-divider"></div>
-                        <input type="text" placeholder="Range,Share Size..." id="myInput">
-                        <button class="btn btn-warning" id="paramButton" >Set Game Params </button>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#" id="arduinostatus"></a>
-                        <div class="dropdown-divider"></div>
-                        <button class="btn btn-info" id="startArduinoButton">Start Arduino </button>
-        
-                    </div> -->
-                <!-- </div> -->
-            <!-- </ul> -->
-            <!-- <a class="navbar-brand" href="#">Guessing Game!</a> -->
-
+    
             <p class="navbar-text ml-auto pb-0" id="server-time"></p>
         </nav>
 
@@ -60,12 +33,7 @@
     <p class="navbar-text ml-auto pb-0" id="ledger">Winners: </p>
     
     </nav>
-        <!-- <nav class="navbar navbar-expand-lg  navbar-light bg-light">
-            <p class="navbar-text ml-auto pb-0" id="range"></p>
-            <p class="navbar-text ml-auto pb-0" id="shareSize"></p>
-            <p class="navbar-text ml-auto pb-0" id="winNum"></p>
-        </nav> -->
-
+    
         <div id="panel" class="container-fluid"></div>
           
     </body>
@@ -85,15 +53,16 @@
         var clientDict = new Map();
         var range = -1;
         var shareSize = -1;
+        var winNum = -1;
         var imageDict = new Map();
         var winners= [];
         
-
+        // resets the container from all blocks
         function resetGrid(){
             document.querySelectorAll(".item").forEach((e) => e.parentNode.removeChild(e));
         }
  
-
+        //helps reset container from all blocks
         function removeBlocks() {
             document.querySelectorAll(".animate").forEach((e) => e.remove(e));
             document.querySelectorAll(".block").forEach((e) => e.remove(e));
@@ -106,20 +75,17 @@
             clientName.innerHTML = myC.name;
             clientName.setAttribute('id', "client_name");
             clientName.className = "client_name";
-            //create img
+            //create img div
             var img = document.createElement("img");
             img.className ="picture";
-            console.log(typeof myC.num);
-            console.log(myC.img);
             img.setAttribute("src",myC.img);
-            console.log(img);
 
-           var nameHeader = document.createElement("div");
-           nameHeader.setAttribute('id',"nameHead");
-           nameHeader.appendChild(clientName);
+            //create name header
+            var nameHeader = document.createElement("div");
+            nameHeader.setAttribute('id',"nameHead");
+            nameHeader.appendChild(clientName);
 
-            //create num 
-            
+            //create num div         
             var clientNum = document.createElement("div");
             if(myC.num == -1){
                 clientNum.innerHTML = "?";
@@ -129,6 +95,7 @@
             
             clientNum.setAttribute('id', "num");
 
+            //create num header
             var numHeader = document.createElement("div");
             numHeader.setAttribute('id',"numHead");
             numHeader.appendChild(clientNum);
@@ -137,14 +104,10 @@
             var block = document.createElement("div");
             block.appendChild(nameHeader);
             block.appendChild(numHeader);
-            //block.appendChild(clientName);
-            //block.appendChild(clientNum);
+
             block.setAttribute('id', id); //set id of div to be the client id
             block.className = "block";
             clientName.appendChild(img);
-
-            //set div color
-            //block.style.background = myC.color;
 
             container.append(block); //add to panel   
         }
@@ -158,7 +121,7 @@
             clientNum.innerHTML = parseInt(obj.num);
            
             //clientNum.innerHTML = parseInt(obj.num); //update its current value
-            console.log("animating " + obj.name);
+            //console.log("animating " + obj.name);
 
             client.style.zIndex = 1000; //send to the front
             client.classList.add("animate"); //add animation
@@ -182,6 +145,12 @@
             client.remove();
         }
 
+        //update the winner ledger
+        function updateLedger(number){
+            winners.push(number);
+            document.getElementById('ledger').innerHTML = "Winners: [" + winners.join() + "]";
+        }
+
         // update block when winner found
         function updateWinnerBlock(msg) {
             var winningClient;
@@ -200,13 +169,33 @@
                         client.classList.remove('animate');
                     }
                 }
-                winners.push(msg.winNum);
-                document.getElementById('ledger').innerHTML = "Winners: [" + winners.join() + "]";
+                updateLedger(msg.winNum);
             }
-
             winningClient.classList.remove("winnerAnimate");
         }
 
+        //update winner block when panel is registered after a win
+        function updateWinnerBlockEnd(msg){
+            var winningClient;
+            if(isGameOver){
+                for(let [key,value] of clientDict){
+                    if(key === msg){
+                        winningClient = document.getElementById(msg);                       
+                        var numHeader = winningClient.querySelector('#numHead');
+                        numHeader.style.background = "#2ECC71";
+                    }else if(value.num == -1){
+                        var client = document.getElementById(key);
+                        var numHeader = client.querySelector('#numHead');
+                        numHeader.style.background = value.color;
+                    }
+                    else {
+                        var client = document.getElementById(key);
+                        var numHeader = client.querySelector('#numHead');
+                        numHeader.style.background = "#E74C3C";
+                    }
+                }
+            }
+        }
 
         // Updates game parameters
         function updateParams(params){
@@ -220,25 +209,30 @@
             document.getElementById('winNum').innerHTML = "Winning Number: " + winNum;
         }
 
-
+        //Handles panel colors when the game is over
         function handleGameEnd(winner){
             isGameOver = true;
             updateWinnerBlock(winner);
         }
 
+        //update panel when display is registered after game win
+        function updateGameEnd(msg){
+            isGameOver = true;
+            updateWinnerBlockEnd(msg);
+        }
 
+        //Handles pabel colors when the game is restarting
         function handleRestart(newStatus, newParams){
             //reset div color upon restart
             for (let [key,value] of clientDict){
                 document.getElementById(key).client.querySelector('#numHead').style.backgroundColor = value.color;
-                //document.getElementById(key).querySelector('#nameHead').style.removeProperty("background-color");
             }
             winningId = "";
             updateParams(newParams);
             isGameOver = newStatus;
-        }
+        } 
 
-
+        //Updates the display pnael when the game is starting
         function handleGameStart(startMsg){
             //reset panel
             resetGrid();
@@ -254,9 +248,7 @@
             winners = startMsg.ledger;
             console.log(winners);
             console.log(startMsg.ledger);
-           // if(winners.length > 0){
-                document.getElementById('ledger').innerHTML = "Winners: [" + winners.join() + "]";
-           // }
+            document.getElementById('ledger').innerHTML = "Winners: [" + winners.join() + "]";
             
         }
 
@@ -270,16 +262,17 @@
 
         // registers display panel in game and checks if game is finished
         socket.on('displayRegistered', (msg) => {
-            // HERE msg = {map: clientMapping, parameters: params, gameStatus: gameOver, winner: winningClient}
             console.log("registered display panel...");
             
             handleGameStart(msg);
 
             if(msg.isGameOver){ //if the game is over, put in proper format
-                //handleGameEnd(msg.winner);
+                console.log(msg.winner);
+                updateGameEnd(msg.winner);
             }
         });
 
+        //updates panel on game start message
         socket.on('displayStartGame', (msg) => {
             console.log('starting the game...');
             //console.log(msg.)
@@ -287,8 +280,7 @@
             if(!isGameOver){
                 handleGameStart(msg);
             }
-            
-        })
+        });
 
 
         // Handle the case of restarting the game
@@ -324,7 +316,7 @@
                // console.log()
                 return;
             }
-            console.log(' i should be switching the numbers');
+
             updateClient(msg.id, msg.newClient);
         });
 
@@ -341,14 +333,11 @@
             removeClient(msg.id);
         });
     
-
+        //server time for testing
         socket.on('time', (timeString) => {
             let elem = document.getElementById('server-time');
             elem.innerHTML = 'Server time: ' + timeString;
         });
-
-       
-
 
     </script>
 </html>

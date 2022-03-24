@@ -159,6 +159,10 @@
       $("#greenCheckOverlay").fadeIn(fadeDuration).delay(fadeWait).fadeOut(fadeDuration, callback); 
     }
 
+    function sendConsencus(){
+      
+    }
+
 
     // quit button - close window, disconnect client, update display
     quitBtn.click(function(){
@@ -332,8 +336,12 @@
     socket.on('sendSurvey', (msg) => {
       console.log('time to send the survey');
    
+      
       $(document).ready(function(){
-        $("#myModal").modal();
+        setTimeout(function(){
+          $('#myModal').modal('show');
+        }, 5000);
+        
       });
     });
 

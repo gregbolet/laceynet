@@ -72,6 +72,8 @@ const clientColors =  ['#FE9',"#AFA","#FA7", '#9AF','#FFEFD5','#C2F0D1',"#FFB6C1
 
 let clientDict = new Map(); //map of client ids to client objects
 
+let clientList = [];
+
 let winningLedger = [];
 
 // define namespaces 
@@ -102,14 +104,12 @@ function generateName() {
   return clientNames[indextOfItemInMyArray];
 }
 
+//gets image based on given name
 function getImage(name){
   if(Object.keys(People.Icons).includes(name)){
     return People.Icons[name];
   }
 }
-
-// socket.emit('registered',{map: transitString, par: params, ardStatus: arduinoGameState}); // i need arduino to admin
-
 
 // ------------------------- admin namespace -----------------------------
 adminIo.on('connection', (socket) => {
@@ -129,11 +129,7 @@ adminIo.on('connection', (socket) => {
     console.log('HERE ARE THE PARAMETERS - ', params);
     let clientMapping = Object.fromEntries(clientDict);
     let winLedger = GameMan.getLedger();
-    //console.log('starting the game');
-    //console.log(winningLedger);
     displayIo.emit('displayStartGame', {map: clientMapping, parameters: params, isGameOver: GameMan.getIsGameOver(), winner: winningClient, ledger: winLedger});
-   
-    
   });
 
   //updating arduino status
@@ -150,7 +146,6 @@ adminIo.on('connection', (socket) => {
     GameMan.resetGameParameters(msg);
     console.info(`Restarting game with current workers! - display`);
     GameMan.restartGameWithCurrentWorkers();
-    //gameOver = false;
     GameMan.startGame();
     winningClient = "";
     let winLedger = GameMan.getLedger();
@@ -171,18 +166,12 @@ adminIo.on('connection', (socket) => {
   socket.on('restartGame', (msg) => {
     console.log(`Restarting game with current workers! - ADMIN`);
     GameMan.restartGameWithCurrentWorkers();
-    //gameOver = false;
     winningClient = "";
     GameMan.startGame();
     // Tell all the players we restarted
     adminIo.emit('restartGame');
     io.emit('restartGame');
   })
-
-  // socket.on('refreshPress', (msg) => { //kind of useless now?
-  //   let transitString = JSON.stringify(Array.from(clientDict));
-  //   displayIo.emit('displaynumberSwitch',{id: socket.id, newClient: currClient});
-  // });
 
   socket.on('disconnect', () => {
     console.log('admin Client disconnected');
@@ -200,6 +189,7 @@ displayIo.on('connection', (socket) => {
   let clientMapping = Object.fromEntries(clientDict);
   let params = GameMan.getParams();
   let winLedger = GameMan.getLedger();
+  console.log(winningClient);
   socket.emit('displayRegistered', {map: clientMapping, parameters: params, isGameOver: GameMan.getIsGameOver(), winner: winningClient, ledger: winLedger});
  
 
@@ -219,7 +209,6 @@ function handleNewClient(socket, myNum){
   let newImg = getImage(newName);
   const newClient = new ClientObj(newName, socket.id, newColor, myNum,newImg);
   clientDict.set(socket.id, newClient); //add to overall dict
-
   let newMapping = Object.fromEntries(clientDict);
   displayIo.emit('displayNewClient', {map: newMapping, id: socket.id}); // send the updated new Mapping
   socket.emit('registered', {isGameOver: GameMan.getIsGameOver(), color: newColor, name: newName, img: newImg});
@@ -337,8 +326,6 @@ clientIo.on('connection', (socket) => {
       socket.emit('youAreTheWinner');
 
       // Set the game state to over
-     // gameOver = true;
-      //isGameStarted = false;
       GameMan.endGame();
       adminIo.emit('gameEnded');
       clientIo.emit('sendSurvey');
@@ -360,7 +347,7 @@ clientIo.on('connection', (socket) => {
       displayIo.emit('displayNumberSwitch', {id: msg.id, newClient: thisC});
     }
     else {
-      console.log('something went wrong - server - buttonPressed')
+      console.log('something went wrong - server - buttonPressed ' + thisC.name);
     }
   });
 
@@ -369,6 +356,7 @@ clientIo.on('connection', (socket) => {
     console.log('Client disconnected');
     GameMan.removeWorker(socket);
     clientDict.delete(socket.id);
+
     let newMapping = Object.fromEntries(clientDict);
     displayIo.emit('displayremoveClient', {map: newMapping, id: socket.id});
   });
