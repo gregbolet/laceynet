@@ -363,6 +363,8 @@ clientIo.on('connection', (socket) => {
     }
   });
 
+
+
   // Set the socket disconnect event handler
   socket.on('disconnect', () => {
     console.log('Client disconnected');

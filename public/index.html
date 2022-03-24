@@ -47,25 +47,27 @@
         Waiting for restart signal...
       </button>
 
-      <div class="modal fade" id="myModal" role="dialog">
-        <div class="modal-dialog modal-xl">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h4 class="modal-title">Thanks for playing!</h4>
-              <button type="button" class ="close" data-dismiss="modal">&times;</button>
-              
-            </div>
-            <div class="modal-body">
-              <p>Would you like to take a survey to talk about your experience with LACE? Click yes or no below!
-                </p>
-              </div>
-              <div class="modal-footer">
-                <button id="surveyButton" class="btn btn-primary" type="button" data-dismiss="modal"> Yes</button>
-                <button id="closeButton" class="btn closeButton" type="button" data-dismiss="modal">No</button>
-              </div>
-          </div>
+      
 
-      </div>
+    </div>
+
+    <div class="modal fade" id="myModal" role="dialog">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Thanks for playing!</h4>
+            <button type="button" class ="close" data-dismiss="modal">&times;</button>
+            
+          </div>
+          <div class="modal-body">
+            <p>Would you like to take a survey to talk about your experience with LACE? Click yes or no below!
+              </p>
+            </div>
+            <div class="modal-footer">
+              <button id="surveyButton" class="btn btn-success" type="button" data-dismiss="modal"> Yes</button>
+              <button id="closeButton" class="btn btn-danger" type="button" data-dismiss="modal">No</button>
+            </div>
+        </div>
 
     </div>
 
@@ -159,7 +161,8 @@
     // quit button - close window, disconnect client, update display
     quitBtn.click(function(){
       window.close('','_parent',''); // close window
-      socket.emit('disconnect');
+     // window.close();
+     // socket.emit('disconnect');
     });
 
     closeBtn.click(function() {

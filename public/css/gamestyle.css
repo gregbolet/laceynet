@@ -8,7 +8,7 @@
 }
 
 .mainbuttonstyle {
-  font-size:400% !important; 
+  font-size:500% !important; /*used to be 400%*/
   width:100%; 
   height:75%; /*50*/
   top:25%;
@@ -56,10 +56,22 @@
   opacity: 1;
 }
 
-.closeButton {
-  background-color: white; 
+.btn-primary{
+  /*width:50%;*/
+}
+
+.surveyButton {
+  background-color:blue ; 
   color: black; 
-  border: 2px solid black;
+  border: 20px solid black;
+  width:50%;
+}
+
+.closeButton {
+  background-color: #008CBA; 
+  /*color: black;*/ 
+  border: 20px solid black;
+  width:50%;
 }
 
 .closeButton:hover {
@@ -103,4 +115,22 @@ body {
   display: inline-block;
   text-align: left;
   vertical-align: middle;
+  width: 80%;
+  font-size: 100%;
+  height: 50%;
 }
+
+.modal-content {
+ 
+  font-size: 100%;
+ 
+}
+
+.modal-body{
+  font-size: 200%;
+}
+
+.modal-title{
+  font-size: 300%;
+}
+
