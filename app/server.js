@@ -47,7 +47,6 @@ app.get('/arduino', (req,res)=>{
   var data = {};
   if (req.headers.hasOwnProperty('measure')){
     var mac = req.headers['measure'];
-    console.info(measurements[mac]);
     data['measurement'] = measurements["measurement"]; // everyone gets the same
     data['offsets'] = measurements[mac];
     data['speed'] = speed_list[measurements[mac]["index"]];
