@@ -162,10 +162,10 @@ adminIo.on('connection', (socket) => {
     winningClient = "";
     let winLedger = GameMan.getLedger();
     // Tell all the players we restarted
-    adminIo.emit('restartGame');
+    
     io.emit('restartGame');
-   displayIo.emit('displayRestartGame', {isGameOver: GameMan.getIsGameOver(), parameters: msg, ledger:winLedger});
-
+    displayIo.emit('displayRestartGame', {isGameOver: GameMan.getIsGameOver(), parameters: msg, ledger:winLedger});
+    adminIo.emit('restartGame');
     GameMan.updateWinningNum(msg[2]);
     io.emit('updateWinningNumber', msg[2]);
     displayIo.emit('displayUpdateParams', msg);
