@@ -348,6 +348,9 @@ clientIo.on('connection', (socket) => {
 
       // Set the game state to over
       GameMan.endGame();
+
+      arduinoGameState = "waiting";//changing the arduino status bc game over
+
       adminIo.emit('gameEnded');
       clientIo.emit('sendSurvey');
     }
