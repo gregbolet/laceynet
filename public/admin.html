@@ -47,22 +47,7 @@
         var arduinoGameState = "";
         var playingStatus = "";
         
-        function updateArduinoStatus(status) {//need to fix
-            if(status === "waiting"){
-                console.log("changing status to READY");
-                arduinoGameState = "ready";
-                ardBtn.html(`Stop Arduino`); 
-               // socket.emit('updateArdStatus', arduinoGameState);
-            }
-            else {
-                console.log("changing status to WAITING");
-                arduinoGameState = "waiting";
-                ardBtn.html(`Start Arduino`); 
-                //socket.emit('updateArdStatus', arduinoGameState);
-            }
-            document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
-        }
-
+        
         function checkArdStatus(givenStatus){
             if(givenStatus === "ready"){
                 console.log("changing status to READY");
@@ -79,10 +64,6 @@
             }
         }
       
-
-        // restartBtn.click(function(){ 
-        //     socket.emit('restartGame');
-        // });
 
         startBtn.click(function(){
             if (isGameOver){ // game has already ended 
