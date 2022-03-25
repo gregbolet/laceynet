@@ -134,3 +134,11 @@ body {
   font-size: 300%;
 }
 
+#surveyButton {
+  width:auto;
+}
+
+#closeButton{
+  width:auto;
+}
+

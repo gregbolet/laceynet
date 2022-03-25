@@ -333,10 +333,12 @@ clientIo.on('connection', (socket) => {
       if(GameMan.getLedger().length == 0){
         space = "";
       }
+      if (winnerName != ""){
 
-      let winString = space + winnerName + " : " + currWinningNum;
+        let winString = space + winnerName + " : " + currWinningNum;
 
-      GameMan.updateLedger(winString);
+        GameMan.updateLedger(winString);
+      }
 
       displayIo.emit('displayGotAWinner', {id: id, winNum: currWinningNum});
 

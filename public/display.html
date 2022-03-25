@@ -156,9 +156,11 @@
                 space = "";
             }
             console.log(winners);
-            let winString = space + name + " : " + number;
-            winners.push(winString);
-            document.getElementById('ledger').innerHTML = "Winners: [" + winners.join() + "]";
+            if(name != "") {
+                let winString = space + name + " : " + number;
+                winners.push(winString);
+                document.getElementById('ledger').innerHTML = "Winners: [" + winners.join() + "]";
+            }
         }
 
         // update block when winner found
