@@ -328,8 +328,15 @@ clientIo.on('connection', (socket) => {
 
       //emit to display that we have a winner and which worker it is
       let currWinningNum = GameMan.getWinningNum();
+      let winnerName = clientDict.get(socket.id).name;
+      let space = " ";
+      if(GameMan.getLedger().length == 0){
+        space = "";
+      }
 
-      GameMan.updateLedger(currWinningNum);
+      let winString = space + winnerName + " : " + currWinningNum;
+
+      GameMan.updateLedger(winString);
 
       displayIo.emit('displayGotAWinner', {id: id, winNum: currWinningNum});
 

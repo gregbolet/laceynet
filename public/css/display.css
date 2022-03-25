@@ -161,6 +161,10 @@
     max-height: 50px;
   }
 
+  #ledger {
+    text-align: center;
+  }
+
   .navbar-text{
     font-size: 125%;
     text-align: center;

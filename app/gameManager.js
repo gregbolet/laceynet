@@ -294,6 +294,9 @@ module.exports = class GameManager{
   }
 
   updateLedger(num){
+    if(this.#ledger.length >= 7){
+      this.#ledger.shift();
+    }
     this.#ledger.push(num);
     return this.#ledger;
   }

@@ -30,7 +30,7 @@
         <!--Second navbar-->
     <nav class="navbar navbar-expand-lg 
     navbar-dark bg-dark">
-    <p class="navbar-text ml-auto pb-0" id="ledger">Winners: </p>
+    <p class="navbar-text ml-auto pb-0"  id="ledger">Winners: </p>
     
     </nav>
     
@@ -146,18 +146,30 @@
         }
 
         //update the winner ledger
-        function updateLedger(number){
-            winners.push(number);
+        function updateLedger(name, number){
+            if(winners.length >= 7){
+                winners.shift();
+            }
+
+            let space = " ";
+            if(winners.length == 0){
+                space = "";
+            }
+            console.log(winners);
+            let winString = space + name + " : " + number;
+            winners.push(winString);
             document.getElementById('ledger').innerHTML = "Winners: [" + winners.join() + "]";
         }
 
         // update block when winner found
         function updateWinnerBlock(msg) {
             var winningClient;
+            var winningName;
             if(isGameOver){
                 for(let [key,value] of clientDict){
                     if(key === msg.id){
-                        winningClient = document.getElementById(msg.id);                       
+                        winningClient = document.getElementById(msg.id); 
+                        winningName = value.name;                      
                         var numHeader = winningClient.querySelector('#numHead');
                         numHeader.style.background = "#2ECC71";
                         winningClient.classList.add('winnerAnimate');
@@ -169,7 +181,7 @@
                         client.classList.remove('animate');
                     }
                 }
-                updateLedger(msg.winNum);
+                updateLedger(winningName, msg.winNum);
             }
             winningClient.classList.remove("winnerAnimate");
         }
