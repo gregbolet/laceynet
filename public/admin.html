@@ -142,7 +142,7 @@
             console.log("RESTART GAME - changing status to READY");
             arduinoGameState = "ready";
             document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
-            //socket.emit('updateArdStatus', arduinoGameState);
+            socket.emit('updateArdStatus', arduinoGameState);
             ardBtn.html(`Stop Arduino`); 
             winningId = "";
             

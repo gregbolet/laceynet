@@ -79,11 +79,7 @@
             var img = document.createElement("img");
             img.className ="picture";
             img.setAttribute("src",myC.img);
-
-            //create name header
-            var nameHeader = document.createElement("div");
-            nameHeader.setAttribute('id',"nameHead");
-            nameHeader.appendChild(clientName);
+            //clientName.appendChild(img);
 
             //create num div         
             var clientNum = document.createElement("div");
@@ -94,12 +90,19 @@
             }
             
             clientNum.setAttribute('id', "num");
-
+            img.appendChild(clientNum);
             //create num header
             var numHeader = document.createElement("div");
             numHeader.setAttribute('id',"numHead");
             numHeader.appendChild(clientNum);
-            numHeader.style.background = myC.color;
+            clientNum.style.background = myC.color;
+
+            //create name header
+            var nameHeader = document.createElement("div");
+            nameHeader.setAttribute('id',"nameHead");
+            nameHeader.appendChild(clientName);
+
+            
             //create div to hold everything
             var block = document.createElement("div");
             block.appendChild(nameHeader);
@@ -107,7 +110,7 @@
 
             block.setAttribute('id', id); //set id of div to be the client id
             block.className = "block";
-            clientName.appendChild(img);
+            
 
             container.append(block); //add to panel   
         }
