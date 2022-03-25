@@ -28,7 +28,7 @@
     "84cca82fcb2c": {
         "index":2,
         "leftOffset": -5,
-        "rightOffset": 15,
+        "rightOffset": 20,
         "frontOffset": 5
     },
     "84cca8300214": {
@@ -39,9 +39,9 @@
     },
     "9c9c1fe6a908": {
         "index":4,
-        "leftOffset": 0,
-        "rightOffset": 5,
-        "frontOffset": 0
+        "leftOffset": 5,
+        "rightOffset": 10,
+        "frontOffset": 5
     },
     "84cca82e1c24": {
         "index":5,
