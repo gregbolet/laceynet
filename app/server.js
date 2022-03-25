@@ -145,8 +145,9 @@ adminIo.on('connection', (socket) => {
 
   //updating arduino status
   socket.on('updateArdStatus', (msg) => {
-    socket.broadcast.emit('checkArdStatus', arduinoGameState);
+    
     arduinoGameState = msg;
+    socket.broadcast.emit('checkArdStatus', arduinoGameState);
     console.log("The arduino status has changed to " + arduinoGameState);
   });
 

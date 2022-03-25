@@ -47,7 +47,7 @@
         var arduinoGameState = "";
         var playingStatus = "";
         
-        function updateArduinoStatus(status) {
+        function updateArduinoStatus(status) {//need to fix
             if(status === "waiting"){
                 console.log("changing status to READY");
                 arduinoGameState = "ready";
@@ -61,6 +61,26 @@
                 //socket.emit('updateArdStatus', arduinoGameState);
             }
             document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
+        }
+
+        function checkArdStatus(givenStatus){
+            if(givenStatus === "ready"){
+                console.log("changing status to READY");
+                arduinoGameState = "ready";
+                ardBtn.html(`Stop Arduino`); 
+                document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
+
+            }else {
+                console.log("changing status to WAITING");
+                arduinoGameState = "waiting";
+                ardBtn.html(`Start Arduino`);
+                document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
+
+            }
+        }
+
+        function setArduinoStatus(ardStatus){
+
         }
 
         
@@ -92,7 +112,15 @@
         })
 
         ardBtn.click(function() {
-            updateArduinoStatus(arduinoGameState);
+            if(arduinoGameState  === "waiting"){
+                arduinoGameState = "ready";
+                ardBtn.html('Stop Arduino');
+
+            }else {
+                arduinoGameState = "waiting";
+                ardBtn.html('Start Arduino');
+            }
+            document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
             socket.emit('updateArdStatus',arduinoGameState);
         });
 
@@ -122,13 +150,15 @@
             if(arduinoGameState === 'ready'){
                 arduinoGameState = "waiting";
                 document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
-                socket.emit('updateArdStatus', arduinoGameState);
+                //socket.emit('updateArdStatus', arduinoGameState);
                 ardBtn.html(`Start Arduino`); 
             }
         });
 
         socket.on('checkArdStatus', (msg) => {
-                updateArduinoStatus(msg);
+                //updateArduinoStatus(msg);
+                console.log('checking the arduino status')
+                checkArdStatus(msg);
         });
 
         socket.on('checkStartStatus', (msg) => {
@@ -144,6 +174,9 @@
             document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
             socket.emit('updateArdStatus', arduinoGameState);
             ardBtn.html(`Stop Arduino`); 
+            startBtn.html("Restart Game");
+            playingStatus = 'playing';
+            document.getElementById('playingstatus').innerHTML = "Game Status: " + playingStatus;
             winningId = "";
             
         });
