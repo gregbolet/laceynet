@@ -371,9 +371,9 @@ clientIo.on('connection', (socket) => {
       // console.log("ID " + msg.id + " num "+ msg.currNum + " map size " + clientDict.size);
       displayIo.emit('displayNumberSwitch', {id: msg.id, newClient: thisC});
     }
-    else {
-      console.log('something went wrong - server - buttonPressed ' + thisC.name);
-    }
+    // else {
+    //   console.log('something went wrong - server - buttonPressed ' + thisC.name);
+    // }
   });
 
 
