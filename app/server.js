@@ -17,7 +17,7 @@ const server = app.listen(PORT, function () {
 const io = socketIO(server);
 const speed_list = generateSpeed(10, 301, 10);
 
-var hist = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+var hist = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
 
 // Serve all the files from the /public folder
 // Given public/index.html it will be served from myaddress.com/index.html
