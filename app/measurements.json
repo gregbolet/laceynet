@@ -45,8 +45,8 @@
     },
     "84cca82e1c24": {
         "index":5,
-        "leftOffset": 0,
-        "rightOffset": 0,
+        "leftOffset": 10,
+        "rightOffset": 3,
         "frontOffset": 0
     },
     "9c9c1fe18db4": {
@@ -57,15 +57,15 @@
     },
     "84cca82fc96c": {
         "index":7,
-        "leftOffset": 0,
+        "leftOffset": 5,
         "rightOffset": 3,
         "frontOffset": 0
     },
     "9c9c1fc0dd70": {
         "index":8,
-        "leftOffset": 0,
+        "leftOffset": 3,
         "rightOffset": 0,
-        "frontOffset": 10
+        "frontOffset": 7
     },
     "84cca8300424": {
         "index":9,
