@@ -18,6 +18,7 @@ const io = socketIO(server);
 const speed_list = generateSpeed(10, 301, 10);
 
 var hist = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+var emits = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
 
 // Serve all the files from the /public folder
 // Given public/index.html it will be served from myaddress.com/index.html
@@ -129,6 +130,7 @@ adminIo.on('connection', (socket) => {
 
   hist[0] += 1;
 
+  emits[0] += 1;
   socket.emit('registered', {isGameOver:GameMan.getIsGameOver(), arduinoStatus: arduinoGameState});
 
   socket.on('startGame', (msg) => {
@@ -140,12 +142,15 @@ adminIo.on('connection', (socket) => {
     GameMan.restartGameWithCurrentWorkers();
     winningClient = "";
     // Tell all the players we restarted
+    emits[1] += 1;
     adminIo.emit('restartGame');
+    emits[2] += 1;
     io.emit('restartGame');
     let params = GameMan.getParams();
     console.log('HERE ARE THE PARAMETERS - ', params);
     let clientMapping = Object.fromEntries(clientDict);
     let winLedger = GameMan.getLedger();
+    emits[3] += 1;
     displayIo.emit('displayStartGame', {map: clientMapping, parameters: params, isGameOver: GameMan.getIsGameOver(), winner: winningClient, ledger: winLedger});
   });
 
@@ -153,6 +158,7 @@ adminIo.on('connection', (socket) => {
   socket.on('updateArdStatus', (msg) => {
     hist[2] += 1;
     arduinoGameState = msg;
+    emits[4] += 1;
     socket.broadcast.emit('checkArdStatus', arduinoGameState);
     console.log("The arduino status has changed to " + arduinoGameState);
   });
@@ -170,17 +176,23 @@ adminIo.on('connection', (socket) => {
     let winLedger = GameMan.getLedger();
     // Tell all the players we restarted
     
+    emits[5] += 1;
     io.emit('restartGame');
+    emits[6] += 1;
     displayIo.emit('displayRestartGame', {isGameOver: GameMan.getIsGameOver(), parameters: msg, ledger:winLedger});
+    emits[7] += 1;
     adminIo.emit('restartGame');
     GameMan.updateWinningNum(msg[2]);
+    emits[8] += 1;
     io.emit('updateWinningNumber', msg[2]);
+    emits[9] += 1;
     displayIo.emit('displayUpdateParams', msg);
   });
 
   socket.on('getParams', () => {
     hist[4] += 1;
     const stats = GameMan.getParams();
+    emits[10] += 1;
     socket.emit('displayUpdateParams', stats);//change to display io
   });
 
@@ -191,7 +203,9 @@ adminIo.on('connection', (socket) => {
     winningClient = "";
     GameMan.startGame();
     // Tell all the players we restarted
+    emits[11] += 1;
     adminIo.emit('restartGame');
+    emits[12] += 1;
     io.emit('restartGame');
   })
 
@@ -214,6 +228,7 @@ displayIo.on('connection', (socket) => {
   let params = GameMan.getParams();
   let winLedger = GameMan.getLedger();
   console.log(winningClient);
+  emits[13] += 1;
   socket.emit('displayRegistered', {map: clientMapping, parameters: params, isGameOver: GameMan.getIsGameOver(), winner: winningClient, ledger: winLedger});
  
 
@@ -235,7 +250,9 @@ function handleNewClient(socket, myNum){
   const newClient = new ClientObj(newName, socket.id, newColor, myNum,newImg);
   clientDict.set(socket.id, newClient); //add to overall dict
   let newMapping = Object.fromEntries(clientDict);
+  emits[14] += 1;
   displayIo.emit('displayNewClient', {map: newMapping, id: socket.id}); // send the updated new Mapping
+  emits[15] += 1;
   socket.emit('registered', {isGameOver: GameMan.getIsGameOver(), color: newColor, name: newName, img: newImg});
 }
 
@@ -253,10 +270,12 @@ clientIo.on('connection', (socket) => {
     // If there are no shares to hand out, tell the worker to idle
     if (shareObj == null) {
       console.info(`No shares left to hand out`);
+      emits[16] += 1;
       socket.emit('idle');
     }
     else{ // new share available
       console.info(`Sending new share ${shareObj.share}`);
+      emits[17] += 1;
       socket.emit('newShare', shareObj);
 
       let myNum = shareObj.share[0];
@@ -279,11 +298,13 @@ clientIo.on('connection', (socket) => {
       // If there are no shares to hand out, tell the worker to idle
       if (shareObj == null) {
         console.info(`No shares left to hand out`);
+        emits[18] += 1;
         socket.emit('idle');
         return;
       }
       // new share available
       console.info(`Sending new share ${shareObj.share}`);
+      emits[19] += 1;
       socket.emit('newShare', shareObj);
       let myNum = shareObj.share[0];
 
@@ -291,6 +312,7 @@ clientIo.on('connection', (socket) => {
       let currClient = clientDict.get(socket.id);
       currClient.num = myNum;
       console.log('GOT MY NEW NUMBER WOOHOO - ',currClient.num);
+      emits[20] += 1;
       displayIo.emit('displayNumberSwitch', {id: socket.id, newClient: currClient});
     }
   });
@@ -305,10 +327,12 @@ clientIo.on('connection', (socket) => {
 
     if (wasRejected) {
       console.info(`share rejected`);
+      emits[21] += 1;
       socket.emit('shareRejected');
     }
     else {
       console.info(`share accepted`);
+      emits[22] += 1;
       socket.emit('shareAccepted');
     }
 
@@ -333,6 +357,7 @@ clientIo.on('connection', (socket) => {
 
       if (wasRejected) {
         console.log('BOO I GOT REJECTED');
+        emits[23] += 1;
         socket.emit('youDidNotWin');
         return;
       }
@@ -342,6 +367,7 @@ clientIo.on('connection', (socket) => {
       console.log(`Got a WINNER!`);
 
       // Emit to everyone EXCEPT this worker that won
+      emits[24] += 1;
       socket.broadcast.emit('weGotAWinner');
 
       //emit to display that we have a winner and which worker it is
@@ -358,9 +384,11 @@ clientIo.on('connection', (socket) => {
         GameMan.updateLedger(winString);
       }
 
+      emits[25] += 1;
       displayIo.emit('displayGotAWinner', {id: id, winNum: currWinningNum});
 
       // Let the worker know that it did in fact win
+      emits[26] += 1;
       socket.emit('youAreTheWinner');
 
       // Set the game state to over
@@ -368,11 +396,14 @@ clientIo.on('connection', (socket) => {
 
       arduinoGameState = "waiting";//changing the arduino status bc game over
 
+      emits[27] += 1;
       adminIo.emit('gameEnded');
+      emits[28] += 1;
       clientIo.emit('sendSurvey');
     }
     else {
       // Just in case the share is actually a losing share
+      emits[29] += 1;
       socket.emit('youDidNotWin');
     }
   });
@@ -386,6 +417,7 @@ clientIo.on('connection', (socket) => {
       let thisC = clientDict.get(msg.id);
       thisC.num = msg.currNum;
       // console.log("ID " + msg.id + " num "+ msg.currNum + " map size " + clientDict.size);
+      emits[30] += 1;
       displayIo.emit('displayNumberSwitch', {id: msg.id, newClient: thisC});
     }
     // else {
@@ -403,6 +435,7 @@ clientIo.on('connection', (socket) => {
     clientDict.delete(socket.id);
 
     let newMapping = Object.fromEntries(clientDict);
+    emits[31] += 1;
     displayIo.emit('displayremoveClient', {map: newMapping, id: socket.id});
   });
 
@@ -423,17 +456,22 @@ setInterval(() => {
   hist.forEach(element => process.stdout.write(element+', '));
   process.stdout.write("\n");
 
+  emits.forEach(element => process.stdout.write(element+', '));
+  process.stdout.write("\n");
+
 }, 5000);
 
 // Update the page time every second
 setInterval(() => {
   //hist[15] += 1;
+  emits[32] += 1;
   clientIo.emit('time', new Date().toTimeString());
 }, 1000);
 
 // Update the page time every second for display
 setInterval(() => {
   //hist[16] += 1;
+  emits[33] += 1;
   displayIo.emit('time', new Date().toTimeString());
 }, 1000);
 
