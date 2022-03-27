@@ -11,30 +11,30 @@
  * */
 module.exports = class GameManager{
 
-  #maxNums;
-  #shareSize;
-  #clients;
-  #incompleteShares;
-  #winningNum;
-  #inProgressShares;
-  #repeatSharesIdx;
-  #completedShares;
-  #isGameOver;
-  #ledger;
+  static #maxNums;
+  static #shareSize;
+  static #clients;
+  static #incompleteShares;
+  static #winningNum;
+  static #inProgressShares;
+  static #repeatSharesIdx;
+  static #completedShares;
+  static #isGameOver;
+  static #ledger;
 
   #generateShares(){
 
-    let maxNums = this.#maxNums;
-    let shareSize = this.#shareSize;
+    let maxNums = GameManager.#maxNums;
+    let shareSize = GameManager.#shareSize;
 
     // These are to track the shares that are being worked on
-    this.#incompleteShares = [];
-    this.#inProgressShares = [];
-    this.#completedShares = [];
+    GameManager.#incompleteShares = [];
+    GameManager.#inProgressShares = [];
+    GameManager.#completedShares = [];
 
     // This tells us where we are in the RR inProgress Shares
     // that will be handed out when we run out of incompleteShares
-    this.#repeatSharesIdx = 0;
+    GameManager.#repeatSharesIdx = 0;
 
     let allNums = [];
 
@@ -72,7 +72,7 @@ module.exports = class GameManager{
       }
 
       // Once we construct the share, add it to the list
-      this.#incompleteShares.push(share);
+      GameManager.#incompleteShares.push(share);
     }
 
     // Once all the shares have been prepared, they can be
@@ -81,13 +81,13 @@ module.exports = class GameManager{
     // shipped with each share for quick verification of 
     // having found a winner
     
-    this.#winningNum = Math.floor(Math.random()*this.#maxNums) + 1;
+    GameManager.#winningNum = Math.floor(Math.random()*GameManager.#maxNums) + 1;
     
 
     
 
-    console.log(`Winning Num: ${this.#winningNum}`);
-    console.log('Shares: ',JSON.stringify(this.#incompleteShares));
+    console.log(`Winning Num: ${GameManager.#winningNum}`);
+    console.log('Shares: ',JSON.stringify(GameManager.#incompleteShares));
   }
 
   // Let's set up the game to play
@@ -98,11 +98,11 @@ module.exports = class GameManager{
 
     // Setup the game. This means the client list
     // and the problem space for the clients to explore
-    this.#maxNums = maxNums;
-    this.#shareSize = shareSize;
-    this.#clients = new Map();
-    this.#isGameOver = true;
-    this.#ledger = [];
+    GameManager.#maxNums = maxNums;
+    GameManager.#shareSize = shareSize;
+    GameManager.#clients = new Map();
+    GameManager.#isGameOver = true;
+    GameManager.#ledger = [];
 
     this.#generateShares();
 
@@ -116,7 +116,7 @@ module.exports = class GameManager{
     console.info(`Adding player [id=${socket.id}]`);
 
     // Map the socket to its assigned chunks
-    this.#clients.set(socket, {acceptedShares:0, rejectedShares:0});
+    GameManager.#clients.set(socket, {acceptedShares:0, rejectedShares:0});
   }
 
   // Remove player by socket
@@ -124,7 +124,7 @@ module.exports = class GameManager{
     console.info(`Removing player [id=${socket.id}]`);
 
     // Remove the client
-    this.#clients.delete(socket);
+    GameManager.#clients.delete(socket);
   }
 
   // Share comparison function
@@ -151,12 +151,12 @@ module.exports = class GameManager{
   reportCompletedShare(socket, share){
     console.info(`Accepting share ${share} from [id=${socket.id}]`);
 
-    let clientData = this.#clients.get(socket);
+    let clientData = GameManager.#clients.get(socket);
     let rejected = false;
 
     // Check if the share is already in the completion list
     // if it is, then we increment the rejected shares of this worker
-    this.#completedShares.every(complShare => {
+    GameManager.#completedShares.every(complShare => {
       if(GameManager.#areSharesEqual(complShare, share)){
         clientData.rejectedShares++;
         rejected = true;
@@ -173,10 +173,10 @@ module.exports = class GameManager{
       clientData.acceptedShares++;
 
       // Add the share to the completion list
-      this.#completedShares.push(share);
+      GameManager.#completedShares.push(share);
 
       // Remove the share from the in-progress list
-      this.#inProgressShares.forEach(function(inProgShare, index, object) {
+      GameManager.#inProgressShares.forEach(function(inProgShare, index, object) {
         if (GameManager.#areSharesEqual(inProgShare, share)) {
           object.splice(index, 1);
         }
@@ -190,44 +190,44 @@ module.exports = class GameManager{
   getNewShareObjForWorker(socket){
     //console.info(`Assigning new share to [id=${socket.id}]`);
 
-    console.log('Incomplete Shares: ',JSON.stringify(this.#incompleteShares));
-    console.log('In-Progress Shares: ',JSON.stringify(this.#inProgressShares));
-    console.log('Completed Shares: ',JSON.stringify(this.#completedShares));
+    console.log('Incomplete Shares: ',JSON.stringify(GameManager.#incompleteShares));
+    console.log('In-Progress Shares: ',JSON.stringify(GameManager.#inProgressShares));
+    console.log('Completed Shares: ',JSON.stringify(GameManager.#completedShares));
 
     // If we have enough shares to hand out
-    if(this.#incompleteShares.length > 0){
+    if(GameManager.#incompleteShares.length > 0){
 
       // Remove the first share from the share list
-      var nextShare = this.#incompleteShares.splice(0,1)[0];
+      var nextShare = GameManager.#incompleteShares.splice(0,1)[0];
 
       // Consider the share to be in-progress
-      this.#inProgressShares.push(nextShare);
+      GameManager.#inProgressShares.push(nextShare);
       console.info(`Share from incomplete list [${nextShare}]`);
 
       // Return the share and the winning number
-      return {share:nextShare, winNum:this.#winningNum};
+      return {share:nextShare, winNum:GameManager.#winningNum};
     }
 
     // No more shares left to hand out
     // but we have in-progress shares
-    else if(this.#inProgressShares.length > 0){
+    else if(GameManager.#inProgressShares.length > 0){
 
-      console.log('Repeat shares idx: ', this.#repeatSharesIdx)
+      console.log('Repeat shares idx: ', GameManager.#repeatSharesIdx)
 
       // Let's hand out the in-progress shares
       // in a round-robin style. This will duplicate
       // work, in the hopes that faster workers explore
       // the leftover space faster
-      if(this.#repeatSharesIdx >= this.#inProgressShares.length){
-        this.#repeatSharesIdx = 0;
+      if(GameManager.#repeatSharesIdx >= GameManager.#inProgressShares.length){
+        GameManager.#repeatSharesIdx = 0;
       }
 
-      let nextShare = this.#inProgressShares[this.#repeatSharesIdx++];
+      let nextShare = GameManager.#inProgressShares[GameManager.#repeatSharesIdx++];
 
 
       console.info(`Share from in-progress list [${nextShare}]`);
 
-      return {share:nextShare, winNum:this.#winningNum};
+      return {share:nextShare, winNum:GameManager.#winningNum};
     }
     else{
       // If we have 0 work to hand out, tell the worker to wait
@@ -238,11 +238,11 @@ module.exports = class GameManager{
 
   isWinningShare(share){
     // let's check if we have a winner
-    // console.log('type of winning number: ' + typeof(this.#winningNum));
+    // console.log('type of winning number: ' + typeof(GameManager.#winningNum));
     // console.log("my share "+ share);
-    // console.log("winning number: " + this.#winningNum);
-    // console.log("the winning share is in here?: " + share.includes(this.#winningNum));
-    return share.includes(this.#winningNum);
+    // console.log("winning number: " + GameManager.#winningNum);
+    // console.log("the winning share is in here?: " + share.includes(GameManager.#winningNum));
+    return share.includes(GameManager.#winningNum);
   }
 
   // Restart the game with all the players still connected
@@ -251,18 +251,18 @@ module.exports = class GameManager{
     // Regenerate all the shares
     this.#generateShares();
 
-    this.#clients.forEach((clientData, client) => {
+    GameManager.#clients.forEach((clientData, client) => {
       clientData.acceptedShares = 0;
       clientData.rejectedShares = 0;
     });
 
     console.log('New game started.');
-    console.log('Current parameters: ' + this.#maxNums + " range and " + this.#shareSize +" share size");
+    console.log('Current parameters: ' + GameManager.#maxNums + " range and " + GameManager.#shareSize +" share size");
   }
 
   // Allow the server to retrieve a list of the clients
   getClients(){
-    return this.#clients;
+    return GameManager.#clients;
   }
 
   resetGameParameters(input){
@@ -271,46 +271,46 @@ module.exports = class GameManager{
     let newShareSize = parseInt(input[1]);
     // Setup the game. This means the client list
     // and the problem space for the clients to explore
-    this.#maxNums = newRange;
-    this.#shareSize = newShareSize;
+    GameManager.#maxNums = newRange;
+    GameManager.#shareSize = newShareSize;
   }
 
   updateWinningNum(newWin){
     //console.log("THE NEW WINNING NUMBER IS " + newWin);
-    this.#winningNum = parseInt(newWin);
-    console.log("The new winning number is " + this.#winningNum);
+    GameManager.#winningNum = parseInt(newWin);
+    console.log("The new winning number is " + GameManager.#winningNum);
   }
 
   getWinningNum(){
-    return this.#winningNum;
+    return GameManager.#winningNum;
   }
 
   getLedger(){
-    return this.#ledger
+    return GameManager.#ledger
   }
 
   setLedger(num){
-    this.#ledger.push(num);
+    GameManager.#ledger.push(num);
   }
 
   updateLedger(num){
-    if(this.#ledger.length >= 7){
-      this.#ledger.shift();
+    if(GameManager.#ledger.length >= 7){
+      GameManager.#ledger.shift();
     }
-    this.#ledger.push(num);
-    return this.#ledger;
+    GameManager.#ledger.push(num);
+    return GameManager.#ledger;
   }
 
   getParams() {
-    let params = [this.#maxNums,this.#shareSize, this.#winningNum];
+    let params = [GameManager.#maxNums,GameManager.#shareSize, GameManager.#winningNum];
     return params;
   }
 
   getClientIDs(){  //don thibk i need this anymore
     var clientinfo ="";
     var count = 1;
-    this.#clients.forEach((clientData, client) => {
-      if(count >= this.#clients.size){
+    GameManager.#clients.forEach((clientData, client) => {
+      if(count >= GameManager.#clients.size){
         clientinfo += JSON.stringify("Display: "  + client.id, null, 2)
       }else {
         clientinfo += JSON.stringify("Client " + count + ": " + client.id, null, 2)
@@ -324,7 +324,7 @@ module.exports = class GameManager{
   getMyClients(){  //returns array of client id's //can probably delete this
     var arrayOfIDs = [];
     var count = 0;
-    this.#clients.forEach((clientData, client) => {
+    GameManager.#clients.forEach((clientData, client) => {
       arrayOfIDs[count] = client.id;
       count++;
     })
@@ -332,19 +332,19 @@ module.exports = class GameManager{
   }
 
   getClientSize() {
-    return this.#clients.size;
+    return GameManager.#clients.size;
   }
 
   getIsGameOver(){
-    return this.#isGameOver;
+    return GameManager.#isGameOver;
   }
 
   startGame() {
-    this.#isGameOver = false;
+    GameManager.#isGameOver = false;
   }
 
   endGame() {
-    this.#isGameOver = true;
+    GameManager.#isGameOver = true;
   }
 
 

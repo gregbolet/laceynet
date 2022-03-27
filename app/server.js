@@ -17,6 +17,7 @@ const server = app.listen(PORT, function () {
 const io = socketIO(server);
 const speed_list = generateSpeed(10, 301, 10);
 
+var hist = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
 
 // Serve all the files from the /public folder
 // Given public/index.html it will be served from myaddress.com/index.html
@@ -41,7 +42,7 @@ function generateSpeed(start, end, len){
   return slist;
 }
 
-app.set('/ardiono', io);
+app.set('/arduino', io);
 app.get('/arduino', (req,res)=>{
   console.info(req.headers);
   var data = {};
@@ -125,9 +126,13 @@ function getImage(name){
 // ------------------------- admin namespace -----------------------------
 adminIo.on('connection', (socket) => {
 
+  hist[0] += 1;
+
   socket.emit('registered', {isGameOver:GameMan.getIsGameOver(), arduinoStatus: arduinoGameState});
 
   socket.on('startGame', (msg) => {
+
+    hist[1] += 1;
     GameMan.startGame();
     console.log('THE GAME IS STARTED - ', GameMan.getIsGameOver());
     console.log(`Restarting game with current workers! - ADMIN`);
@@ -145,7 +150,7 @@ adminIo.on('connection', (socket) => {
 
   //updating arduino status
   socket.on('updateArdStatus', (msg) => {
-    
+    hist[2] += 1;
     arduinoGameState = msg;
     socket.broadcast.emit('checkArdStatus', arduinoGameState);
     console.log("The arduino status has changed to " + arduinoGameState);
@@ -153,6 +158,7 @@ adminIo.on('connection', (socket) => {
 
   //updates game parameters
   socket.on('setNewGameParams', (msg) =>{
+    hist[3] += 1;
     console.log('Changing the game parameters');
     console.log(msg)
     GameMan.resetGameParameters(msg);
@@ -172,11 +178,13 @@ adminIo.on('connection', (socket) => {
   });
 
   socket.on('getParams', () => {
+    hist[4] += 1;
     const stats = GameMan.getParams();
     socket.emit('displayUpdateParams', stats);//change to display io
   });
 
   socket.on('restartGame', (msg) => {
+    hist[5] += 1;
     console.log(`Restarting game with current workers! - ADMIN`);
     GameMan.restartGameWithCurrentWorkers();
     winningClient = "";
@@ -187,6 +195,7 @@ adminIo.on('connection', (socket) => {
   })
 
   socket.on('disconnect', () => {
+    hist[6] += 1;
     console.log('admin Client disconnected');
   });
 
@@ -196,6 +205,7 @@ adminIo.on('connection', (socket) => {
 
 // ------------------------- display namespace -----------------------------
 displayIo.on('connection', (socket) => {
+  hist[7] += 1;
   console.info(`display Client connected [id=${socket.id}]`);
 
   //initial registration
@@ -208,6 +218,7 @@ displayIo.on('connection', (socket) => {
 
 
   socket.on('disconnect', () => {
+    hist[8] += 1;
     console.log('display Client disconnected');
   });
 
@@ -229,6 +240,7 @@ function handleNewClient(socket, myNum){
 
 
 clientIo.on('connection', (socket) => {
+  hist[9] += 1;
   console.info(`Client connected [id=${socket.id}]`); //MOVE CLIENT CONNECTION TOT HE BOTTOM
 
   GameMan.addWorker(socket);
@@ -256,6 +268,7 @@ clientIo.on('connection', (socket) => {
   
   // Setup the new share request handler
   socket.on('needNewShare', () => {
+    hist[10] += 1;
     if (!GameMan.getIsGameOver()) { // game is still ON
       console.info(`Client needs new share [id=${socket.id}]`);
 
@@ -284,6 +297,7 @@ clientIo.on('connection', (socket) => {
   // Setup the completed share request handler
   // This is for shares that are not claimed to be winners
   socket.on('completedShare', (msg) => {
+    hist[11] += 1;
     console.info(`Client completed a share [share=${msg.share} id=${socket.id}]`);
     let share = msg.share;
     let wasRejected = GameMan.reportCompletedShare(socket, share);
@@ -301,6 +315,7 @@ clientIo.on('connection', (socket) => {
 
   // This handles shares that claim to be winners
   socket.on('iAmAWinner', (msg) => {
+    hist[12] += 1;
     if (GameMan.getIsGameOver()) {
       return;
     }
@@ -365,6 +380,7 @@ clientIo.on('connection', (socket) => {
 
   //let display panel know a client has switched numbers
   socket.on('buttonPressed', (msg) =>{
+    hist[13] += 1;
     if(clientDict.has(msg.id)){
       let thisC = clientDict.get(msg.id);
       thisC.num = msg.currNum;
@@ -380,6 +396,7 @@ clientIo.on('connection', (socket) => {
 
   // Set the socket disconnect event handler
   socket.on('disconnect', () => {
+    hist[14] += 1;
     console.log('Client disconnected');
     GameMan.removeWorker(socket);
     clientDict.delete(socket.id);
@@ -400,19 +417,25 @@ clientIo.on('connection', (socket) => {
 
 
 // ------------------------- extra functionality -----------------------------
+setInterval(() => {
+  console.log(hist.toString()); 
+}, 5000);
 
 // Update the page time every second
 setInterval(() => {
+  hist[15] += 1;
   clientIo.emit('time', new Date().toTimeString());
 }, 1000);
 
 // Update the page time every second for display
 setInterval(() => {
+  hist[16] += 1;
   displayIo.emit('time', new Date().toTimeString());
 }, 1000);
 
 // Refresh display/display every 30 seconds
 setInterval(() => {
+  hist[17] += 1;
   console.info('calling client response');
   displayIo.emit('requestRefresh', new Date().toTimeString());
 }, 1000000);
