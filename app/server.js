@@ -120,7 +120,7 @@ function generateName() {
 
 //gets image based on given name
 function getImage(name){
-  if(Object.keys(People.Icons).includes(name)){
+  if(Object.keys(People.JPGIcons).includes(name)){
     return People.Icons[name];
   }
 }
