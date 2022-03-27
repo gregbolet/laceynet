@@ -46,13 +46,13 @@
     "84cca82e1c24": {
         "index":5,
         "leftOffset": 10,
-        "rightOffset": 3,
+        "rightOffset": 7,
         "frontOffset": 0
     },
     "9c9c1fe18db4": {
         "index":6,
         "leftOffset": 5,
-        "rightOffset": 5,
+        "rightOffset": 7,
         "frontOffset": 0
     },
     "84cca82fc96c": {
@@ -69,8 +69,8 @@
     },
     "84cca8300424": {
         "index":9,
-        "leftOffset": 10,
-        "rightOffset": 0,
+        "leftOffset": 13,
+        "rightOffset": 3,
         "frontOffset": 0
     }
 }
