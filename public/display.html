@@ -82,7 +82,7 @@
             img.setAttribute("src",myC.img);
 
              //create wrapper 
-             var wrapper = document.createElement("div");
+            var wrapper = document.createElement("div");
             wrapper.setAttribute('id','wrapper');
             wrapper.className = "wrapper";
 
@@ -97,38 +97,24 @@
             }else {
                 clientNum.innerHTML = parseInt(myC.num);
             }
-            clientNum.style.backgroundColor = myC.color;
+            //clientNum.style.backgroundColor = myC.color;
+            clientNum.setAttribute('id', "num");
 
-            //create num header div
-            var numHeader = document.createElement("div");
-            numHeader.setAttribute('id',"numHead");
-            numHeader.appendChild(clientNum);
-            
+
             //create name div
              var clientName = document.createElement("div");
             clientName.innerHTML = myC.name;
             clientName.setAttribute('id', "client_name");
             clientName.className = "client_name"; 
-            //numHeader.appendChild(clientName);
            
 
-            //create name header
-            var nameHeader = document.createElement("div");
-            nameHeader.setAttribute('id',"nameHead");
-            nameHeader.appendChild(clientName);
-
-            wrapper.appendChild(clientNum);
             wrapper.appendChild(clientName);
-                        
-           clientNum.setAttribute('id', "num");
-
+            wrapper.appendChild(clientNum);
             
+                        
+                      
             //create div to hold everything
            
-            
-          /*   block.appendChild(numHeader);
-            block.appendChild(nameHeader); */
- 
             block.setAttribute('id', id); //set id of div to be the client id
             block.className = "block";
             //clientName.appendChild(img);
@@ -140,13 +126,10 @@
         function updateClient(id,obj){
             //get client div from container
             var client = document.getElementById(id);
-            var numHeader = client.querySelector('#numHead');
-            var clientNum = numHeader.querySelector('#num');
+            var wrapper = client.querySelector('#wrapper');
+            var clientNum = client.querySelector('#num');
             clientNum.innerHTML = parseInt(obj.num);
            
-            //clientNum.innerHTML = parseInt(obj.num); //update its current value
-            //console.log("animating " + obj.name);
-
             client.style.zIndex = 1000; //send to the front
             client.classList.add("animate"); //add animation
             
@@ -195,14 +178,16 @@
                 for(let [key,value] of clientDict){
                     if(key === msg.id){
                         winningClient = document.getElementById(msg.id); 
-                        winningName = value.name;                      
-                        var numHeader = winningClient.querySelector('#numHead');
+                        winningName = value.name;
+                        var wrapper = winningClient.querySelector('#wrapper');                      
+                        var numHeader = wrapper.querySelector('#num');
                         numHeader.style.background = "#2ECC71";
                         winningClient.classList.add('winnerAnimate');
                     }
                     else {
                         var client = document.getElementById(key);
-                        var numHeader = client.querySelector('#numHead');
+                        var wrapper = winningClient.querySelector('#wrapper');                      
+                        var numHeader = wrapper.querySelector('#num');
                         numHeader.style.background = "#E74C3C";
                         client.classList.remove('animate');
                     }
@@ -219,16 +204,19 @@
                 for(let [key,value] of clientDict){
                     if(key === msg){
                         winningClient = document.getElementById(msg);                       
-                        var numHeader = winningClient.querySelector('#numHead');
+                        var wrapper = winningClient.querySelector('#wrapper');                      
+                        var numHeader = wrapper.querySelector('#num');
                         numHeader.style.background = "#2ECC71";
                     }else if(value.num == -1){
                         var client = document.getElementById(key);
-                        var numHeader = client.querySelector('#numHead');
+                        var wrapper = client.querySelector('#wrapper');                      
+                        var numHeader = wrapper.querySelector('#num');
                         numHeader.style.background = value.color;
                     }
                     else {
                         var client = document.getElementById(key);
-                        var numHeader = client.querySelector('#numHead');
+                        var wrapper = client.querySelector('#wrapper');                      
+                        var numHeader = wrapper.querySelector('#num');
                         numHeader.style.background = "#E74C3C";
                     }
                 }

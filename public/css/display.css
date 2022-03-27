@@ -55,7 +55,7 @@
     text-align: center;
     align-items: center;
     /*background: dodgerblue;*/
-    border: 3px solid black;
+   /* border: 3px solid black;*/
     box-shadow: 0 0 0 0 rgba(0,0,0,1);
     transform:scale(1);
     animation: pulseStart 1s; 
@@ -146,6 +146,10 @@
     overflow: auto;
     font-weight:bold;
     background-color: white;
+    border: 1px solid black;
+    border-right:none;
+    border-left:none;
+    border-top:none;
   }
   
   
@@ -172,6 +176,7 @@
     text-align: center;
     height: 100%;
     width: 100%;
+    background-color: bisque;
     /*max-height: 50px;*/ 
   }
 
@@ -186,11 +191,11 @@
   }
 
   .picture{
-    width: 120px;
-    height: 120px;
+    width: 115px;
+    height: 118px;
     align-items: left;
     background-color: white;
-    border: 2px solid black;
+    border: 3px solid black;
     /*margin-left: auto; */ 
     
   }
@@ -224,6 +229,8 @@
     height:100%;
     width: 100%;
     background-color: white;
+    border: 3px solid black;
+    border-left:none;
   }
     .myNum{
       font-size: 150%;
