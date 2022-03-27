@@ -70,20 +70,25 @@
         
         // Add new client div to the display panel
         function addClientToPanel(id, myC){
-            //create name div
-            var clientName = document.createElement("div");
-            clientName.innerHTML = myC.name;
-            clientName.setAttribute('id', "client_name");
-            clientName.className = "client_name";
+            var block = document.createElement("div");
+
+            var hstack = document.createElement("div");
+            hstack.className = "hstack gap-3";    
+            block.appendChild(hstack);
+
             //create img div
             var img = document.createElement("img");
             img.className ="picture";
             img.setAttribute("src",myC.img);
 
-            //create name header
-            var nameHeader = document.createElement("div");
-            nameHeader.setAttribute('id',"nameHead");
-            nameHeader.appendChild(clientName);
+             //create wrapper 
+             var wrapper = document.createElement("div");
+            wrapper.setAttribute('id','wrapper');
+            wrapper.className = "wrapper";
+
+            hstack.appendChild(img);
+            hstack.appendChild(wrapper);
+
 
             //create num div         
             var clientNum = document.createElement("div");
@@ -92,22 +97,41 @@
             }else {
                 clientNum.innerHTML = parseInt(myC.num);
             }
-            
-            clientNum.setAttribute('id', "num");
+            clientNum.style.backgroundColor = myC.color;
 
-            //create num header
+            //create num header div
             var numHeader = document.createElement("div");
             numHeader.setAttribute('id',"numHead");
             numHeader.appendChild(clientNum);
-            numHeader.style.background = myC.color;
-            //create div to hold everything
-            var block = document.createElement("div");
-            block.appendChild(nameHeader);
-            block.appendChild(numHeader);
+            
+            //create name div
+             var clientName = document.createElement("div");
+            clientName.innerHTML = myC.name;
+            clientName.setAttribute('id', "client_name");
+            clientName.className = "client_name"; 
+            //numHeader.appendChild(clientName);
+           
 
+            //create name header
+            var nameHeader = document.createElement("div");
+            nameHeader.setAttribute('id',"nameHead");
+            nameHeader.appendChild(clientName);
+
+            wrapper.appendChild(clientNum);
+            wrapper.appendChild(clientName);
+                        
+           clientNum.setAttribute('id', "num");
+
+            
+            //create div to hold everything
+           
+            
+          /*   block.appendChild(numHeader);
+            block.appendChild(nameHeader); */
+ 
             block.setAttribute('id', id); //set id of div to be the client id
             block.className = "block";
-            clientName.appendChild(img);
+            //clientName.appendChild(img);
 
             container.append(block); //add to panel   
         }

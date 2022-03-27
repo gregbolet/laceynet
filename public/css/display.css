@@ -36,13 +36,14 @@
   }
 
   @keyframes pulse {
-    to {
+    to {;
         box-shadow: 0 0 0 16px 
     }
 } */
 
 .block{
     flex: 0 0 calc(25% - 1em);
+ 
     /*min-height: 100px;
     min-width: 200px;
     max-width: 200px;
@@ -54,11 +55,13 @@
     text-align: center;
     align-items: center;
     /*background: dodgerblue;*/
-    /*border: 4px solid black;*/
+    border: 3px solid black;
     box-shadow: 0 0 0 0 rgba(0,0,0,1);
     transform:scale(1);
     animation: pulseStart 1s; 
     z-index: 0;
+    /*padding-bottom: 10px;
+    padding-top: 10px;*/
 }
 
 .animate {
@@ -137,30 +140,42 @@
 
 
   #client_name{
-    font-size: 150%;
-    text-align: left;
+    font-size: 115%;
+    text-align: center;
     position: relative;
     overflow: auto;
     font-weight:bold;
+    background-color: white;
   }
+  
+  
 
   #nameHead{
-    
+    overflow: auto;
+    text-align: center;
+    /*border: 2px solid black;*/
   }
 
   #numHead{
-    height: 70%;
+    display: flex;
+    text-align: center;
+    overflow: hidden;
+    /* height: 70%;
   width: 100%;
   overflow: auto;
-  position: absolute;
+  position: absolute; */
   }
 
   #num{
     font-size:350%;
+    position: relative;
     text-align: center;
-    max-height: 50px;
+    height: 100%;
+    width: 100%;
+    /*max-height: 50px;*/ 
   }
 
+ 
   #ledger {
     text-align: center;
   }
@@ -171,10 +186,12 @@
   }
 
   .picture{
-    width: 50px;
-    height: 50px;
-    /*align-items: right;*/
-    margin-left: auto;  
+    width: 120px;
+    height: 120px;
+    align-items: left;
+    background-color: white;
+    border: 2px solid black;
+    /*margin-left: auto; */ 
     
   }
 
@@ -203,4 +220,31 @@
     opacity: 1;
   }
 
+  .wrapper {
+    height:100%;
+    width: 100%;
+    background-color: white;
+  }
+    .myNum{
+      font-size: 150%;
+    }
+
+    .myName{
+      background-color: white;
+    }
   
+
+.hstack {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  align-self: stretch;
+}
+
+    
+.vstack {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-self: stretch;
+}
