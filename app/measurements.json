@@ -22,55 +22,55 @@
     "84cca82fc998": {
         "index":1,
         "leftOffset": 0,
-        "rightOffset": 0,
+        "rightOffset": 5,
         "frontOffset": 0
     },
     "84cca82fcb2c": {
         "index":2,
-        "leftOffset": 0,
-        "rightOffset": 10,
-        "frontOffset": 0
+        "leftOffset": -5,
+        "rightOffset": 20,
+        "frontOffset": 5
     },
     "84cca8300214": {
         "index":3,
         "leftOffset": 5,
-        "rightOffset": 0,
+        "rightOffset": 10,
         "frontOffset": 5
     },
     "9c9c1fe6a908": {
         "index":4,
-        "leftOffset": 0,
-        "rightOffset": 5,
-        "frontOffset": 0
+        "leftOffset": 5,
+        "rightOffset": 10,
+        "frontOffset": 5
     },
     "84cca82e1c24": {
         "index":5,
-        "leftOffset": 0,
-        "rightOffset": 0,
+        "leftOffset": 10,
+        "rightOffset": 7,
         "frontOffset": 0
     },
     "9c9c1fe18db4": {
         "index":6,
         "leftOffset": 5,
-        "rightOffset": 5,
+        "rightOffset": 7,
         "frontOffset": 0
     },
     "84cca82fc96c": {
         "index":7,
-        "leftOffset": 0,
+        "leftOffset": 5,
         "rightOffset": 3,
         "frontOffset": 0
     },
     "9c9c1fc0dd70": {
         "index":8,
-        "leftOffset": 0,
+        "leftOffset": 3,
         "rightOffset": 0,
-        "frontOffset": 0
+        "frontOffset": 7
     },
     "84cca8300424": {
         "index":9,
-        "leftOffset": 10,
-        "rightOffset": 0,
+        "leftOffset": 13,
+        "rightOffset": 3,
         "frontOffset": 0
     }
 }
