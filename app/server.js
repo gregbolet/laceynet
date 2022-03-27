@@ -45,7 +45,7 @@ function generateSpeed(start, end, len){
 app.set('/arduino', io);
 app.get('/arduino', (req,res)=>{
   hist[15] += 1;
-  console.info(req.headers);
+  //console.info(req.headers);
   var data = {};
   if (req.headers.hasOwnProperty('measure')){
     var mac = req.headers['measure'];
