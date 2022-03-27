@@ -7,7 +7,7 @@ const People = require('../public/js/images.js');
 
 const measurements = require('./measurements.json');
 
-const PORT = process.env.PORT || 5000; 
+const PORT = process.env.PORT || 5001; 
 const app = express();
 const server = app.listen(PORT, function () {
   console.log(`Game Server UI listening on port ${PORT}!`)
@@ -418,24 +418,27 @@ clientIo.on('connection', (socket) => {
 
 // ------------------------- extra functionality -----------------------------
 setInterval(() => {
-  console.log(hist.toString()); 
+  //console.log(hist.toString()); 
+  hist.forEach(element => process.stdout.write(element+', '));
+  process.stdout.write("\n");
+
 }, 5000);
 
 // Update the page time every second
 setInterval(() => {
-  hist[15] += 1;
+  //hist[15] += 1;
   clientIo.emit('time', new Date().toTimeString());
 }, 1000);
 
 // Update the page time every second for display
 setInterval(() => {
-  hist[16] += 1;
+  //hist[16] += 1;
   displayIo.emit('time', new Date().toTimeString());
 }, 1000);
 
 // Refresh display/display every 30 seconds
 setInterval(() => {
-  hist[17] += 1;
+  //hist[17] += 1;
   console.info('calling client response');
   displayIo.emit('requestRefresh', new Date().toTimeString());
 }, 1000000);
