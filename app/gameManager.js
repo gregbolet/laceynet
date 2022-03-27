@@ -190,9 +190,9 @@ module.exports = class GameManager{
   getNewShareObjForWorker(socket){
     //console.info(`Assigning new share to [id=${socket.id}]`);
 
-    console.log('Incomplete Shares: ',JSON.stringify(GameManager.#incompleteShares));
-    console.log('In-Progress Shares: ',JSON.stringify(GameManager.#inProgressShares));
-    console.log('Completed Shares: ',JSON.stringify(GameManager.#completedShares));
+    //console.log('Incomplete Shares: ',JSON.stringify(GameManager.#incompleteShares));
+    //console.log('In-Progress Shares: ',JSON.stringify(GameManager.#inProgressShares));
+    //console.log('Completed Shares: ',JSON.stringify(GameManager.#completedShares));
 
     // If we have enough shares to hand out
     if(GameManager.#incompleteShares.length > 0){
