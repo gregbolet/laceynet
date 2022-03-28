@@ -64,19 +64,9 @@ app.get('/arduino', (req,res)=>{
 // Now let's setup a new GameManager instance
 var GameMan = new GameManager(10, 4);
 
-// Keep track of whether we need to restart the game
-var gameOver = false;
-//Keep track if the game has started
-var isGameStarted = false;
-
-var arduinoObj = {key: "hello world"};
-
 var winningClient = ""; //id of winningClient //dont think we use this???
 
 const clientNames = People.names;
-// ["Abraham Lincoln", "George Washington", "Ben Franklin", "Ada Lovelace", 
-// "Martin Luther King Jr.",  "Malcolm X", "Louis Armstrong", "Frank Sinatra", "Henry Ford", 
-// "Sacagawea", "Steve Jobs", "Muhammad Ali", "Harriet Tubman", "Grace Hopper"];
 
 const chosenClients = [];
 
@@ -85,10 +75,6 @@ const chosenColors = [];
 const clientColors =  ['#FE9',"#AFA","#FA7", '#9AF','#FFEFD5','#C2F0D1',"#FFB6C1","#D9D7FA"];//'#9AF','#F9A', '#E2CFE2'
 
 let clientDict = new Map(); //map of client ids to client objects
-
-let clientList = [];
-
-let winningLedger = [];
 
 // define namespaces 
 const displayIo = io.of('/display.html');
@@ -258,9 +244,9 @@ function handleNewClient(socket, myNum){
 
 
 clientIo.on('connection', (socket) => {
-  var address = socket.handshake.address;
-  console.log('New connection from ' + address.address + ':' + address.port);
-  
+  // var address = socket.handshake;
+  console.log('New connection from ' + socket.handshake);
+
   hist[9] += 1;
   console.info(`Client connected [id=${socket.id}]`); //MOVE CLIENT CONNECTION TOT HE BOTTOM
 
