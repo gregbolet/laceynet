@@ -232,6 +232,7 @@
       isGameOver = msg.isGameOver;
       playerName = msg.name;
       dispSurvey = msg.dispSurvey;
+      console.log("survey " + msg.dispSurvey);
       
       document.getElementById('playerName').innerHTML = playerName; //"Player: " +
       var img = document.createElement("img");
@@ -335,7 +336,7 @@
     });
 
     socket.on('sendSurvey', (msg) => {
-      console.log('time to send the survey');
+      console.log('time to send the survey') + dispSurvey;
       if (dispSurvey){
         if(window.innerHeight > window.innerWidth){
           console.log('im in portrait mode!');
