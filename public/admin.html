@@ -104,6 +104,7 @@
             var inputVal = document.getElementById("myInput").value;
             var params = inputVal.split(",");
             if(params.length == 3) {
+                console.log('param button clicked');
                 console.log(params);
                 socket.emit('setNewGameParams',params);
             }

@@ -179,7 +179,7 @@ adminIo.on('connection', (socket) => {
     emits[5] += 1;
     io.emit('restartGame');
     emits[6] += 1;
-    displayIo.emit('displayRestartGame', {isGameOver: GameMan.getIsGameOver(), parameters: msg, ledger:winLedger});
+   displayIo.emit('displayRestartGame', {isGameOver: GameMan.getIsGameOver(), parameters: msg, ledger:winLedger});
     emits[7] += 1;
     adminIo.emit('restartGame');
     GameMan.updateWinningNum(msg[2]);

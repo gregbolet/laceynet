@@ -186,7 +186,7 @@
                     }
                     else {
                         var client = document.getElementById(key);
-                        var wrapper = winningClient.querySelector('#wrapper');                      
+                        var wrapper = client.querySelector('#wrapper');                      
                         var numHeader = wrapper.querySelector('#num');
                         numHeader.style.background = "#E74C3C";
                         client.classList.remove('animate');
@@ -251,7 +251,12 @@
         function handleRestart(newStatus, newParams){
             //reset div color upon restart
             for (let [key,value] of clientDict){
-                document.getElementById(key).client.querySelector('#numHead').style.backgroundColor = value.color;
+                var client = document.getElementById(key);
+                var wrapper = client.querySelector('#wrapper');
+                var clientNum = client.querySelector('#num');
+                clientNum.style.backgroundColor = value.color;
+                console.log('im doing stuff');
+               // document.getElementById(key).client.querySelector('#numHead').style.backgroundColor = value.color;
             }
             winningId = "";
             updateParams(newParams);
