@@ -1,6 +1,7 @@
 <html>
   <head>
     <!-- Load Bootstrap/CSS/Popper/Jquery/Socket.io -->
+    <link rel="shortcut icon" href="#">
     <link rel="stylesheet" href="/css/gamestyle.css"> </link>
     <link rel="stylesheet" href="/css/bootstrap.min.css"> </link>
     <script src="/js/jquery-3.6.0.min.js"></script>
@@ -349,6 +350,7 @@
           });
         }
         else {
+          console.log('im in landscape mode');
           $(document).ready(function(){
             setTimeout(function(){
               $('#myModal').modal('show');
