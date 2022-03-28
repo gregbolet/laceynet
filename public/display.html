@@ -128,11 +128,15 @@
             var client = document.getElementById(id);
             var wrapper = client.querySelector('#wrapper');
             var clientNum = client.querySelector('#num');
-            clientNum.innerHTML = parseInt(obj.num);
+            // clientNum.innerHTML = parseInt(obj.num);
            
             client.style.zIndex = 1000; //send to the front
             client.classList.add("animate"); //add animation
             
+            setTimeout(function() {
+                clientNum.innerHTML = parseInt(obj.num);
+            }, 1000); // make the number show up after one sec
+
             setTimeout(function() {
                 client.classList.remove("animate");
             }, 2500); // 500 is the same time as the CSS animation
