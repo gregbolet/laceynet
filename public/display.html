@@ -46,6 +46,8 @@
         //link for rese https://stackoverflow.com/questions/61155301/how-to-remove-divs-inside-a-grid
         //https://stackoverflow.com/questions/64859592/how-can-i-make-div-content-appear-with-animation-when-clicking-a-button-that-inj
         
+        //css fade colors https://stackoverflow.com/questions/26936811/css-transition-fade-background-color-resetting-after
+
         const fadeDuration = 200;
         const fadeWait = 500;
         const container = $('#panel');
@@ -211,7 +213,7 @@
                         var client = document.getElementById(key);
                         var wrapper = client.querySelector('#wrapper');                      
                         var numHeader = wrapper.querySelector('#num');
-                        numHeader.style.background = value.color;
+                        numHeader.style.background = '#F2D2BD';//value.color;
                     }
                     else {
                         var client = document.getElementById(key);
@@ -254,7 +256,7 @@
                 var client = document.getElementById(key);
                 var wrapper = client.querySelector('#wrapper');
                 var clientNum = client.querySelector('#num');
-                clientNum.style.backgroundColor = value.color;
+                clientNum.style.backgroundColor = '#F2D2BD'; //value.color;
                 console.log('im doing stuff');
                // document.getElementById(key).client.querySelector('#numHead').style.backgroundColor = value.color;
             }
