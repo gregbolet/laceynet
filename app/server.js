@@ -245,7 +245,10 @@ function handleNewClient(socket, myNum){
 
 clientIo.on('connection', (socket) => {
   let addr = socket.handshake.address;
-  console.log('New connection from ' + addr + "with type: " + typeof addr);
+  var idx = addr.lastIndexOf(':');
+  if (~idx && ~addr.indexOf('.'))
+    addr = addr.slice(idx + 1);
+  console.log('New connection from ' + addr);
 
 
   hist[9] += 1;
