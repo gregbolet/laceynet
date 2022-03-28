@@ -6,6 +6,8 @@ const { param } = require('express/lib/request');
 const People = require('../public/js/images.js');
 
 const measurements = require('./measurements.json');
+const IP_UPPER = 41
+const IP_LOWER = 12
 
 const PORT = process.env.PORT || 5000; 
 const app = express();
@@ -228,7 +230,7 @@ displayIo.on('connection', (socket) => {
 
 
 // ------------------------- client namespace -----------------------------
-function handleNewClient(socket, myNum){
+function handleNewClient(socket, myNum, survey){
   console.info('ADDING NEW CLIENT OBJ TO CLIENT DICT');
   let newName = generateName();
   let newColor = generateColor();
@@ -239,17 +241,24 @@ function handleNewClient(socket, myNum){
   emits[14] += 1;
   displayIo.emit('displayNewClient', {map: newMapping, id: socket.id}); // send the updated new Mapping
   emits[15] += 1;
-  socket.emit('registered', {isGameOver: GameMan.getIsGameOver(), color: newColor, name: newName, img: newImg});
+  socket.emit('registered', {isGameOver: GameMan.getIsGameOver(), 
+    color: newColor, name: newName, img: newImg, dispSurvey: survey});
 }
 
 
 clientIo.on('connection', (socket) => {
   let addr = socket.handshake.address;
   var idx = addr.lastIndexOf(':');
-  if (~idx && ~addr.indexOf('.'))
+  if (~idx && ~addr.indexOf('.')){
     addr = addr.slice(idx + 1);
-  console.log('New connection from ' + addr);
-
+  }
+  console.log('New connection from IP address: ' + addr);
+  const ipList = addr.split('.');
+  let dispSurvey = true;
+  if (ipList[0] == '192' && ipList[1] == '168' && ipList[2] == '0' &&
+    IP_LOWER <= parseInt(ipList[3]) <= IP_UPPER){
+      dispSurvey = false;
+  }
 
   hist[9] += 1;
   console.info(`Client connected [id=${socket.id}]`); //MOVE CLIENT CONNECTION TOT HE BOTTOM
@@ -272,11 +281,11 @@ clientIo.on('connection', (socket) => {
       socket.emit('newShare', shareObj);
 
       let myNum = shareObj.share[0];
-      handleNewClient(socket, myNum);
+      handleNewClient(socket, myNum, dispSurvey);
     }
   }
   else { //doesnt get a share client //not playing
-    handleNewClient(socket,-1);
+    handleNewClient(socket, -1, dispSurvey);
   }
   
   // Setup the new share request handler

@@ -217,6 +217,7 @@
     var currentPos = -1;
     var winningNum = -1;
     var playerName = "";
+    var dispSurvey = true;
 
 
     // socket.on('clientStartGame', (msg) => {
@@ -230,6 +231,7 @@
     socket.on('registered', (msg) => {
       isGameOver = msg.isGameOver;
       playerName = msg.name;
+      dispSurvey = msg.dispSurvey;
       
       document.getElementById('playerName').innerHTML = playerName; //"Player: " +
       var img = document.createElement("img");
@@ -334,24 +336,24 @@
 
     socket.on('sendSurvey', (msg) => {
       console.log('time to send the survey');
-   
-      if(window.innerHeight > window.innerWidth){
-        console.log('im in portrait mode!');
- 
+      if (dispSurvey){
+        if(window.innerHeight > window.innerWidth){
+          console.log('im in portrait mode!');
 
-        $(document).ready(function(){
-          setTimeout(function(){
-            $('#myModal').modal('show');
-          }, 5000);
-          
-        });
-      }else {
           $(document).ready(function(){
-          setTimeout(function(){
-            $('#myModal').modal('show');
-          }, 5000);
-          
-        });
+            setTimeout(function(){
+              $('#myModal').modal('show');
+            }, 5000);
+            
+          });
+        }
+        else {
+          $(document).ready(function(){
+            setTimeout(function(){
+              $('#myModal').modal('show');
+            }, 5000);
+          });
+        }
       }
     
     });
