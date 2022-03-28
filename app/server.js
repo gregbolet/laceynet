@@ -258,6 +258,9 @@ function handleNewClient(socket, myNum){
 
 
 clientIo.on('connection', (socket) => {
+  var address = socket.handshake.address;
+  console.log('New connection from ' + address.address + ':' + address.port);
+  
   hist[9] += 1;
   console.info(`Client connected [id=${socket.id}]`); //MOVE CLIENT CONNECTION TOT HE BOTTOM
 
