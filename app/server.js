@@ -231,7 +231,7 @@ displayIo.on('connection', (socket) => {
 
 // ------------------------- client namespace -----------------------------
 function handleNewClient(socket, myNum, survey){
-  console.info('ADDING NEW CLIENT OBJ TO CLIENT DICT ' + survey);
+  console.info('ADDING NEW CLIENT OBJ TO CLIENT DICT ');
   let newName = generateName();
   let newColor = generateColor();
   let newImg = getImage(newName);
@@ -254,11 +254,9 @@ clientIo.on('connection', (socket) => {
   }
   console.log('New connection from IP address: ' + addr);
   const ipList = addr.split('.');
-  console.log('check the last part: '+ ipList[3]);
   let dispSurvey = true;
   if (ipList[0] == '192' && ipList[1] == '168' && ipList[2] == '0' &&
     IP_LOWER <= parseInt(ipList[3]) <= IP_UPPER){
-      console.log('Part of my crew, don\'t display survey');
       dispSurvey = false;
   }
 
