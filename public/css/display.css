@@ -1,5 +1,6 @@
 .navbar-nav {
   margin-right: auto;
+  z-index: 1;
 }
 
 .container-fluid{
