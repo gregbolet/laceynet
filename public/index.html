@@ -354,7 +354,7 @@
 
     socket.on('sendSurvey', (msg) => {
       console.log('time to send the survey');
-      if (dispSurvey){
+      if (!dispSurvey){
         if(window.innerHeight > window.innerWidth){
           console.log('im in portrait mode!');
 
