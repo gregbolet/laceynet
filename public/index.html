@@ -26,7 +26,7 @@
       <ul class="navbar-nav ml-0">
         <li class="nav-item">
           <!-- <button class="btn btn-primary" id="quitButton">Quit</button> -->
-          <button class="btn btn-primary" id="quitButton">Quit</button>
+          <button class="quit" id="quitButton">Quit</button>
           <!--<a class="btn btn-warning" href="display.html">Display Panel</a>-->
         </li>
         
@@ -35,44 +35,64 @@
       <p class="navbar-text ml-auto pb-0" id="server-time"></p>
     </nav>
 
-<div class="clientName" id="playerName"> Waiting for Player:... </div>
+    <div class="clientName" id="playerName"> Waiting for Player:... </div>
 
 
     <div class="container col-md-12 align-middle">
-
       <div id="redXOverlay"> 
         <img class="overlayimg" src="/svg/redX.svg" />
       </div>
+
       <div id="greenCheckOverlay"> 
         <img class="overlayimg" src="/svg/greenCheck.svg" />
       </div>
+
       <button id="mainbutton" type="button" class="btn btn-primary btn-block mainbuttonstyle">
         Waiting for restart signal...
       </button>
 
-      
-
-    </div>
-
-    <div class="modal fade" id="myModal" role="dialog">
-      <div class="modal-dialog modal-xl">
-        <div class="modal-content" id="modal-content">
-          <div class="modal-header" id="modal-header">
-            <h4 class="modal-title" id="modal-title">Thanks for playing!</h4>
-            <button type="button" class ="close" data-dismiss="modal">&times;</button>
-            
-          </div>
-          <div class="modal-body" id = "modal-body">
-            <p>Would you like to take a survey to talk about your experience with LACE? Click yes or no below!
+      <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+          <div class="modal-content" id="modal-content">
+            <div class="modal-header" id="modal-header">
+              <h4 class="modal-title" id="modal-title">Thanks for playing!</h4>
+              <button type="button" class ="close" data-dismiss="modal">&times;</button> 
+            </div>
+  
+            <div class="modal-body" id = "modal-body">
+              <p>Would you like to take a survey to talk about your experience with LACE? Click yes or no below!
               </p>
             </div>
+  
             <div class="modal-footer" id="modal-footer">
               <button id="surveyButton" class="btn btn-success" type="button" data-dismiss="modal"> Yes</button>
               <button id="closeButton" class="btn btn-danger" type="button" data-dismiss="modal">No</button>
             </div>
+          </div>
         </div>
-
+      </div>
     </div>
+
+    <!-- <div class="modal fade" id="myModal" role="dialog">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content" id="modal-content">
+          <div class="modal-header" id="modal-header">
+            <h4 class="modal-title" id="modal-title">Thanks for playing!</h4>
+            <button type="button" class ="close" data-dismiss="modal">&times;</button> 
+          </div>
+
+          <div class="modal-body" id = "modal-body">
+            <p>Would you like to take a survey to talk about your experience with LACE? Click yes or no below!
+            </p>
+          </div>
+
+          <div class="modal-footer" id="modal-footer">
+            <button id="surveyButton" class="btn btn-success" type="button" data-dismiss="modal"> Yes</button>
+            <button id="closeButton" class="btn btn-danger" type="button" data-dismiss="modal">No</button>
+          </div>
+        </div>
+      </div>
+    </div> -->
 
   </body>
 
@@ -361,7 +381,7 @@
           $(document).ready(function(){
             setTimeout(function(){
               $('#myModal').modal('show');
-            }, 5000);
+            }, 1000);
             
           });
         }
@@ -370,7 +390,7 @@
           $(document).ready(function(){
             setTimeout(function(){
               $('#myModal').modal('show');
-            }, 5000);
+            }, 1000);
           });
         }
       }
