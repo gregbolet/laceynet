@@ -6,6 +6,8 @@ const { param } = require('express/lib/request');
 const People = require('../public/js/images.js');
 
 const measurements = require('./measurements.json');
+const IP_UPPER = 41
+const IP_LOWER = 12
 
 const PORT = process.env.PORT || 5000; 
 const app = express();
@@ -64,19 +66,9 @@ app.get('/arduino', (req,res)=>{
 // Now let's setup a new GameManager instance
 var GameMan = new GameManager(10, 4);
 
-// Keep track of whether we need to restart the game
-var gameOver = false;
-//Keep track if the game has started
-var isGameStarted = false;
-
-var arduinoObj = {key: "hello world"};
-
 var winningClient = ""; //id of winningClient //dont think we use this???
 
 const clientNames = People.names;
-// ["Abraham Lincoln", "George Washington", "Ben Franklin", "Ada Lovelace", 
-// "Martin Luther King Jr.",  "Malcolm X", "Louis Armstrong", "Frank Sinatra", "Henry Ford", 
-// "Sacagawea", "Steve Jobs", "Muhammad Ali", "Harriet Tubman", "Grace Hopper"];
 
 const chosenClients = [];
 
@@ -85,10 +77,6 @@ const chosenColors = [];
 const clientColors =  ['#FE9',"#AFA","#FA7", '#9AF','#FFEFD5','#C2F0D1',"#FFB6C1","#D9D7FA"];//'#9AF','#F9A', '#E2CFE2'
 
 let clientDict = new Map(); //map of client ids to client objects
-
-let clientList = [];
-
-let winningLedger = [];
 
 // define namespaces 
 const displayIo = io.of('/display.html');
@@ -242,8 +230,8 @@ displayIo.on('connection', (socket) => {
 
 
 // ------------------------- client namespace -----------------------------
-function handleNewClient(socket, myNum){
-  console.info('ADDING NEW CLIENT OBJ TO CLIENT DICT');
+function handleNewClient(socket, myNum, survey){
+  console.info('ADDING NEW CLIENT OBJ TO CLIENT DICT ');
   let newName = generateName();
   let newColor = generateColor();
   let newImg = getImage(newName);
@@ -253,13 +241,27 @@ function handleNewClient(socket, myNum){
   emits[14] += 1;
   displayIo.emit('displayNewClient', {map: newMapping, id: socket.id}); // send the updated new Mapping
   emits[15] += 1;
-  socket.emit('registered', {isGameOver: GameMan.getIsGameOver(), color: newColor, name: newName, img: newImg});
+  socket.emit('registered', {isGameOver: GameMan.getIsGameOver(), 
+    color: newColor, name: newName, img: newImg, dispSurvey: survey});
 }
 
 
 
 
 clientIo.on('connection', (socket) => {
+  let addr = socket.handshake.address;
+  var idx = addr.lastIndexOf(':');
+  if (~idx && ~addr.indexOf('.')){
+    addr = addr.slice(idx + 1);
+  }
+  console.log('New connection from IP address: ' + addr);
+  const ipList = addr.split('.');
+  let dispSurvey = true;
+  if (ipList[0] == '192' && ipList[1] == '168' && ipList[2] == '0' &&
+    IP_LOWER <= parseInt(ipList[3]) <= IP_UPPER){
+      dispSurvey = false;
+  }
+
   hist[9] += 1;
   console.info(`Client connected [id=${socket.id}]`); //MOVE CLIENT CONNECTION TOT HE BOTTOM
 
@@ -281,11 +283,11 @@ clientIo.on('connection', (socket) => {
       socket.emit('newShare', shareObj);
 
       let myNum = shareObj.share[0];
-      handleNewClient(socket, myNum);
+      handleNewClient(socket, myNum, dispSurvey);
     }
   }
   else { //doesnt get a share client //not playing
-    handleNewClient(socket,-1);
+    handleNewClient(socket, -1, dispSurvey);
   }
   
   // Setup the new share request handler
