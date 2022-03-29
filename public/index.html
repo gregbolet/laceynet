@@ -158,30 +158,20 @@
 
     function resetConsencus(){
       document.getElementById('mainbutton').disabled = false; // enable main btn
-      document.getElementById('fullDiv').opacity = 0;
-      document.getElementById('fullDiv').style.zIndex = 0;
-      document.getElementById('fullDiv').classList.remove('fade-in');
-
-      document.getElementById('logoDiv').opacity = 0;
-      document.getElementById('logoDiv').style.zIndex = 0;
-      document.getElementById('logoDiv').classList.remove('fade-in');
-    }
-
-    function fadeInColor(color){
-
-    }
-
-    function fadeOutColor() {
-      console.log
+      var fullDiv = document.getElementById('fullDiv');
+      fullDiv.opacity = 0;
+      fullDiv.style.zIndex = 0;
+      fullDiv.classList.remove('fade-in');
+      fullDiv.classList.remove('fade-out');
+      if($('#fullDiv').find('img').length == 1){
+        //console.log(fullDiv.childNodes);
+        var image = document.getElementById('logo');
+        image.parentNode.removeChild(image);
+       // var image = fullDiv.querySelector('#img');
+        //fullDiv.removeChild(image);
+      }
 
     }
-
-    function fadeInLogo() {
-      console.log('Before promise call - logo')
-      
-
-    }
-
 
     // quit button - close window, disconnect client, update display
     quitBtn.click(function(){
@@ -392,6 +382,7 @@
         console.log('fading on...');
         var fullDiv = document.getElementById('fullDiv');
         setTimeout(function(){
+          fullDiv.style.backgroundColor = "green";
           fullDiv.style.zIndex = 5000;
           fullDiv.classList.add("fade-in");
         }, 5000);
@@ -404,10 +395,11 @@
 
         setTimeout(function() {
           fullDiv.classList.remove('fade-out');
+          fullDiv.style.backgroundColor = "transparent";
+          fullDiv.innerHTML = "";
           var img = document.createElement('img');
           img.className ="mainpicture";
-        // console.log(Icons);
-        //  if (Object.keys(Icons).includes(msg.name)){
+          img.setAttribute('id', 'logo');
           img.setAttribute("src","images/vtlogo.jpg");
           document.getElementById('fullDiv').appendChild(img);
           fullDiv.classList.add('fade-in');
