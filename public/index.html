@@ -398,7 +398,7 @@
     });
 
     socket.on('sendConsencus' , (msg) => {
-      if (dispSurvey){
+      if (!dispSurvey){
         console.log('fading on...');
         var fullDiv = document.getElementById('fullDiv');
         setTimeout(function(){

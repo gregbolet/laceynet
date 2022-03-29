@@ -403,7 +403,7 @@ clientIo.on('connection', (socket) => {
       emits[27] += 1;
       adminIo.emit('gameEnded');
       emits[28] += 1;
-      //clientIo.emit('sendSurvey');
+      clientIo.emit('sendSurvey');
       clientIo.emit('sendConsencus');
     }
     else {
