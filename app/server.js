@@ -121,7 +121,7 @@ function generateName() {
 //gets image based on given name
 function getImage(name){
   if(Object.keys(People.JPGIcons).includes(name)){
-    return People.Icons[name];
+    return People.JPGIcons[name];
   }
 }
 
@@ -255,6 +255,8 @@ function handleNewClient(socket, myNum){
   emits[15] += 1;
   socket.emit('registered', {isGameOver: GameMan.getIsGameOver(), color: newColor, name: newName, img: newImg});
 }
+
+
 
 
 clientIo.on('connection', (socket) => {
@@ -399,7 +401,8 @@ clientIo.on('connection', (socket) => {
       emits[27] += 1;
       adminIo.emit('gameEnded');
       emits[28] += 1;
-      clientIo.emit('sendSurvey');
+      //clientIo.emit('sendSurvey');
+      clientIo.emit('sendConsencus');
     }
     else {
       // Just in case the share is actually a losing share

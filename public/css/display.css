@@ -176,7 +176,7 @@
     text-align: center;
     height: 100%;
     width: 100%;
-    background-color: bisque;
+    background-color: #ffe4c4;
     /*max-height: 50px;*/ 
   }
 
@@ -186,7 +186,7 @@
   }
 
   .navbar-text{
-    font-size: 125%;
+    font-size: 150%;
     text-align: center;
   }
 

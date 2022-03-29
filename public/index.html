@@ -15,7 +15,8 @@
     <title>Guessing Game!</title>
   </head>
 
-  
+  <div id="fullDiv">PASS</div>
+  <div id="logoDiv" src="images/vtlogo.jpg"></div>
 
   <body>
 
@@ -153,8 +154,15 @@
       $("#greenCheckOverlay").fadeIn(fadeDuration).delay(fadeWait).fadeOut(fadeDuration, callback); 
     }
 
-    function sendConsencus(){
-      
+    function resetConsencus(){
+      document.getElementById('mainbutton').disabled = false; // enable main btn
+      document.getElementById('fullDiv').opacity = 0;
+      document.getElementById('fullDiv').style.zIndex = 0;
+      document.getElementById('fullDiv').classList.remove('fade-in');
+
+      document.getElementById('logoDiv').opacity = 0;
+      document.getElementById('logoDiv').style.zIndex = 0;
+      document.getElementById('logoDiv').classList.remove('fade-in');
     }
 
 
@@ -251,6 +259,8 @@
       $(document).ready(function(){
         $("#myModal").modal('hide');
       });
+
+      //resetConsencus();
       
       
     });
@@ -306,7 +316,8 @@
 
     // Handle the case of restarting the game
     socket.on('restartGame', (msg) => {
-      document.getElementById('mainbutton').disabled = false; // enable main btn
+      resetConsencus();
+
       //gameEnded = false;
       // $(document).ready(function(){
       //   $("#myModal").close();
@@ -354,6 +365,46 @@
         });
       }
     
+    });
+
+    socket.on('sendConsencus' , (msg) => {
+      console.log('fading on...');
+      var fullDiv = document.getElementById('fullDiv');
+      setTimeout(function(){
+        fullDiv.style.zIndex = 9;
+      fullDiv.classList.add("fade-in");
+    }, 5000);
+
+      setTimeout(function() {
+        fullDiv.classList.remove('fade-in');
+      console.log('fading out green');
+      fullDiv.classList.add("fade-out");
+    },15000);
+
+    setTimeout(function() {
+      var img = document.createElement("img");
+      img.setAttribute("src", "images/vtlogo.jpg");
+      img.setAttribute("height", "100%");
+      img.setAttribute("width","100%");
+      fullDiv.appendChild(img); 
+      fullDiv.classList.add('fade-in');
+    },25000);
+
+    /* var img = document.createElement("img");
+    img.setAttribute("src", "images/vtlogo.jpg");
+    img.setAttribute("height", "100%");
+    img.setAttribute("width","100%");
+    fullDiv.appendChild(img); */
+
+      /* var logodiv = document.getElementById('logoDiv');
+      setTimeout(function() {
+        console.log('fading in the logo');
+        logodiv.style.zIndex = 12;
+        logodiv.classList.add("fade-in");
+      },20000) */;
+      
+    
+
     });
 
     socket.on('time', (timeString) => {

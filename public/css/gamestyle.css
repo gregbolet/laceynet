@@ -142,3 +142,130 @@ body {
   width:auto;
 }
 
+#fullDiv {
+  height: 100%;
+  width: 100%;
+  position: fixed-top;
+  left: 0;
+  top: 0;
+  color: white;
+  opacity: 0;
+  background-color: green;
+  overflow: hidden;
+  position: fixed;
+  
+}
+#logoDiv {
+  height: 100%;
+  width: 100%;
+  left: 0;
+  top: 0;
+  background-image: "images/vtlogo.jpg";
+  opacity: 100;
+  overflow: hidden;
+  position: fixed;
+  
+}
+.fade-in {
+  animation: fadeIn ease 3s forwards;
+  -webkit-animation: fadeIn ease 3s forwards;
+  -moz-animation: fadeIn ease 3s forwards;
+  -o-animation: fadeIn ease 3s forwards;
+  -ms-animation: fadeIn ease 3s forwards;
+}
+@keyframes fadeIn {
+  0% {
+    opacity:0;
+  }
+  100% {
+    opacity:1;
+  }
+}
+
+@-moz-keyframes fadeIn {
+  0% {
+    opacity:0;
+  }
+  100% {
+    opacity:1;
+  }
+}
+
+@-webkit-keyframes fadeIn {
+  0% {
+    opacity:0;
+  }
+  100% {
+    opacity:1;
+  }
+}
+
+@-o-keyframes fadeIn {
+  0% {
+    opacity:0;
+  }
+  100% {
+    opacity:1;
+  }
+}
+
+@-ms-keyframes fadeIn {
+  0% {
+    opacity:0;
+  }
+  100% {
+    opacity:1;
+  }
+}
+
+.fade-out {
+  animation: fadeOut ease 3s forwards;
+  -webkit-animation: fadeOut ease 3s forwards;
+  -moz-animation: fadeOut ease 3s forwards;
+  -o-animation: fadeOut ease 3s forwards;
+  -ms-animation: fadeOut ease 3s forwards;
+}
+@keyframes fadeOut {
+  0% {
+    opacity:1;
+  }
+  100% {
+    opacity:0;
+  }
+}
+
+@-moz-keyframes fadeOut {
+  0% {
+    opacity:1;
+  }
+  100% {
+    opacity:0;
+  }
+}
+
+@-webkit-keyframes fadeOut {
+  0% {
+    opacity:1;
+  }
+  100% {
+    opacity:0;
+  }
+}
+
+@-o-keyframes fadeOut {
+  0% {
+    opacity:1;
+  }
+  100% {
+    opacity:0;
+  }
+}
+
+@-ms-keyframes fadeOut {
+  0% {
+    opacity:1;
+  }
+  100% {
+    opacity:0;
+  }
+}
