@@ -263,6 +263,7 @@ function pickRebel(){
   return res;
 }
 
+var connection_counter = 0;
 clientIo.on('connection', (socket) => {
   let addr = socket.handshake.address;
   var idx = addr.lastIndexOf(':');
@@ -284,6 +285,7 @@ clientIo.on('connection', (socket) => {
       else{
         consensusStatus = 1; // true
       }
+      connection_counter++;
   }
 
   hist[9] += 1;
