@@ -8,7 +8,7 @@
 }
 
 .mainbuttonstyle {
-  font-size:500% !important; /*used to be 400%*/
+  font-size:700% !important; /*used to be 400%*/
   width:100%; 
   height:75%; /*50*/
   top:25%;
@@ -20,7 +20,7 @@
 }
 
 .clientName {
-  font-size: 400%;
+  font-size: 550%; /*used to be 400*/
   display: flex;
   align-items: center;
   justify-content: center;
@@ -93,8 +93,8 @@ body {
 }
 
 .picture{
-  width: 100px;
-  height: 100px;
+  width: 125px;
+  height: 125px;
   align-items: right;  
 }
 
@@ -135,6 +135,9 @@ body {
   background-color: green;
   overflow: hidden;
   position: fixed;
+  font-size: 400%;
+  text-align: center;
+  vertical-align: middle;
   
 }
 #logoDiv {

@@ -157,7 +157,7 @@
     }
 
     function resetConsencus(){
-      document.getElementById('mainbutton').disabled = false; // enable main btn
+      //document.getElementById('mainbutton').disabled = false; // enable main btn
       var fullDiv = document.getElementById('fullDiv');
       fullDiv.opacity = 0;
       fullDiv.style.zIndex = 0;
@@ -247,6 +247,8 @@
       isGameOver = msg.isGameOver;
       playerName = msg.name;
       dispSurvey = msg.dispSurvey;
+      resetConsencus();
+      button.html('Waiting for restart signal...');
       
       document.getElementById('playerName').innerHTML = playerName; //"Player: " +
       var img = document.createElement("img");
@@ -325,6 +327,7 @@
 
     // Handle the case of restarting the game
     socket.on('restartGame', (msg) => {
+      document.getElementById('mainbutton').disabled = false; 
       resetConsencus();
 
       //gameEnded = false;
@@ -361,7 +364,7 @@
           $(document).ready(function(){
             setTimeout(function(){
               $('#myModal').modal('show');
-            }, 1000);
+            }, 2500);
             
           });
         }
@@ -370,7 +373,7 @@
           $(document).ready(function(){
             setTimeout(function(){
               $('#myModal').modal('show');
-            }, 1000);
+            }, 2500);
           });
         }
       }
@@ -382,7 +385,8 @@
         console.log('fading on...');
         var fullDiv = document.getElementById('fullDiv');
         setTimeout(function(){
-          fullDiv.style.backgroundColor = "green";
+          fullDiv.style.backgroundColor = msg;
+          fullDiv.innerHTML = "PASS";
           fullDiv.style.zIndex = 5000;
           fullDiv.classList.add("fade-in");
         }, 5000);
