@@ -277,6 +277,7 @@ clientIo.on('connection', (socket) => {
   if ((ipList[0] == "192") && (ipList[1] == "168") && (ipList[2] == "0") 
     && (IP_LOWER <= parseInt(ipList[3])) && (parseInt(ipList[3]) <= IP_UPPER)){
       console.log((ipList[0] == '192'),(ipList[1] == '168'), (ipList[2] == '0') , (IP_LOWER <= parseInt(ipList[3]) <= IP_UPPER));
+      console.log("part of crew don't disp survey");
       dispSurvey = false;
       if (rebel_pos.includes(connection_counter)){
         console.log("Sending a rebel!!");

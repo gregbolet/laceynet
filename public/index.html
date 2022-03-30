@@ -349,7 +349,8 @@
 
     socket.on('sendSurvey', (msg) => {
       console.log('time to send the survey');
-      if (!dispSurvey){ //should be true
+      console.log(dispSurvey);
+      if (dispSurvey){ //should be true
         if(window.innerHeight > window.innerWidth){
           console.log('im in portrait mode!');
 
@@ -373,7 +374,8 @@
     });
 
     socket.on('sendConsencus' , () => {
-      if (dispSurvey){ //should be false
+      console.log(dispSurvey);
+      if (!dispSurvey){ //should be false
         console.log('fading on...');
         var fullDiv = document.getElementById('fullDiv');
         setTimeout(function(){
