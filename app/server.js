@@ -37,6 +37,8 @@ app.use(express.json())
 // button on the display panel. Will say "ready"
 // when the game is ready for the arduinos
 var arduinoGameState = 'waiting';
+rebel_pos = pickRebel();
+console.log(rebel_pos);
 
 function generateSpeed(start, end, len){
   const slist = [];
@@ -120,11 +122,6 @@ function getImage(name){
 // ------------------------- admin namespace -----------------------------
 adminIo.on('connection', (socket) => {
 
-  hist[0] += 1;
-
-  emits[0] += 1;
-  rebel_pos = pickRebel();
-  console.log(rebel_pos);
   socket.emit('registered', {isGameOver:GameMan.getIsGameOver(), arduinoStatus: arduinoGameState});
 
   socket.on('startGame', (msg) => {
@@ -484,15 +481,15 @@ clientIo.on('connection', (socket) => {
 
 
 // ------------------------- extra functionality -----------------------------
-setInterval(() => {
-  //console.log(hist.toString()); 
-  hist.forEach(element => process.stdout.write(element+', '));
-  process.stdout.write("\n");
+// setInterval(() => {
+//   //console.log(hist.toString()); 
+//   hist.forEach(element => process.stdout.write(element+', '));
+//   process.stdout.write("\n");
 
-  emits.forEach(element => process.stdout.write(element+', '));
-  process.stdout.write("\n");
+//   emits.forEach(element => process.stdout.write(element+', '));
+//   process.stdout.write("\n");
 
-}, 5000);
+// }, 5000);
 
 // Update the page time every second
 setInterval(() => {
