@@ -427,7 +427,8 @@ clientIo.on('connection', (socket) => {
       adminIo.emit('gameEnded');
       emits[28] += 1;
       clientIo.emit('sendSurvey');
-      clientIo.emit('sendConsencus');
+      let color = "red";
+      clientIo.emit('sendConsencus',false);
     }
     else {
       // Just in case the share is actually a losing share
