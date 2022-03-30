@@ -372,7 +372,7 @@
     
     });
 
-    socket.on('sendConsencus' , (msg) => {
+    socket.on('sendConsencus' , () => {
       if (dispSurvey){ //should be false
         console.log('fading on...');
         var fullDiv = document.getElementById('fullDiv');
