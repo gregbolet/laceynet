@@ -124,6 +124,7 @@ adminIo.on('connection', (socket) => {
 
   emits[0] += 1;
   rebel_pos = pickRebel();
+  console.log(rebel_pos);
   socket.emit('registered', {isGameOver:GameMan.getIsGameOver(), arduinoStatus: arduinoGameState});
 
   socket.on('startGame', (msg) => {
