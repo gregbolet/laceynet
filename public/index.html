@@ -233,12 +233,14 @@
     var winningNum = -1;
     var playerName = "";
     var dispSurvey = true;
+    var consensusColor = -1;
 
     // Handle the message where we are confirmed to have registered
     socket.on('registered', (msg) => {
       isGameOver = msg.isGameOver;
       playerName = msg.name;
       dispSurvey = msg.dispSurvey;
+      consensusColor = msg.conStatus;
       resetConsencus();
       button.html('Waiting for restart signal...');
       
@@ -375,7 +377,7 @@
         console.log('fading on...');
         var fullDiv = document.getElementById('fullDiv');
         setTimeout(function(){
-          makeConcensus(fullDiv,msg);
+          makeConcensus(fullDiv, consensusColor);
         }, 5000);
 
         setTimeout(function() {
@@ -389,8 +391,8 @@
 
     });
 
-    function makeConcensus(fullDiv, color){
-      if(color){
+    function makeConcensus(fullDiv, conStatus){
+      if(conStatus){
         fullDiv.style.backgroundColor = "green";
         fullDiv.innerHTML = "PASS";
       }else {

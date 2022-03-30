@@ -427,7 +427,6 @@ clientIo.on('connection', (socket) => {
       adminIo.emit('gameEnded');
       emits[28] += 1;
       clientIo.emit('sendSurvey');
-      let color = "red";
       clientIo.emit('sendConsencus',false);
     }
     else {
