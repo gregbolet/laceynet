@@ -278,6 +278,7 @@ clientIo.on('connection', (socket) => {
       console.log((ipList[0] == '192'),(ipList[1] == '168'), (ipList[2] == '0') , (IP_LOWER <= parseInt(ipList[3]) <= IP_UPPER));
       dispSurvey = false;
       if (rebel_pos.includes(connection_counter)){
+        console.log("Sending a rebel!!");
         consensusStatus = 0; // false, become a rebel
       }
       else{
