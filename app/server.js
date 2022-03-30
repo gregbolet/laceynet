@@ -38,7 +38,7 @@ app.use(express.json())
 // button on the display panel. Will say "ready"
 // when the game is ready for the arduinos
 var arduinoGameState = 'waiting';
-rebel_pos = pickRebel();
+var rebel_pos = pickRebel();
 console.log(rebel_pos);
 
 function generateSpeed(start, end, len){
@@ -83,7 +83,6 @@ const chosenColors = [];
 const clientColors =  ['#FE9',"#AFA","#FA7", '#9AF','#FFEFD5','#C2F0D1',"#FFB6C1","#D9D7FA"];//'#9AF','#F9A', '#E2CFE2'
 
 let clientDict = new Map(); //map of client ids to client objects
-var rebel_pos = [];
 
 // define namespaces 
 const displayIo = io.of('/display.html');
