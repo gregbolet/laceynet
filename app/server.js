@@ -80,6 +80,7 @@ const chosenColors = [];
 const clientColors =  ['#FE9',"#AFA","#FA7", '#9AF','#FFEFD5','#C2F0D1',"#FFB6C1","#D9D7FA"];//'#9AF','#F9A', '#E2CFE2'
 
 let clientDict = new Map(); //map of client ids to client objects
+var rebel_pos = [];
 
 // define namespaces 
 const displayIo = io.of('/display.html');
@@ -122,6 +123,7 @@ adminIo.on('connection', (socket) => {
   hist[0] += 1;
 
   emits[0] += 1;
+  rebel_pos = pickRebel();
   socket.emit('registered', {isGameOver:GameMan.getIsGameOver(), arduinoStatus: arduinoGameState});
 
   socket.on('startGame', (msg) => {
@@ -261,8 +263,6 @@ function pickRebel(){
   return res;
 }
 
-var connection_counter = 0;
-var rebel_pos = pickRebel();
 clientIo.on('connection', (socket) => {
   let addr = socket.handshake.address;
   var idx = addr.lastIndexOf(':');
