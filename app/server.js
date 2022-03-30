@@ -6,8 +6,11 @@ const { param } = require('express/lib/request');
 const People = require('../public/js/images.js');
 
 const measurements = require('./measurements.json');
-const IP_UPPER = 41
-const IP_LOWER = 12
+const IP_UPPER = 41;
+const IP_LOWER = 12;
+const NUM_TABLET = 30;
+const NUM_FALSE = 0.1 * NUM_TABLET; // 3 false 
+
 
 const PORT = process.env.PORT || 5000; 
 const app = express();
@@ -230,7 +233,7 @@ displayIo.on('connection', (socket) => {
 
 
 // ------------------------- client namespace -----------------------------
-function handleNewClient(socket, myNum, survey){
+function handleNewClient(socket, myNum, survey, consensusStatus){
   console.info('ADDING NEW CLIENT OBJ TO CLIENT DICT ');
   let newName = generateName();
   let newColor = generateColor();
@@ -242,12 +245,24 @@ function handleNewClient(socket, myNum, survey){
   displayIo.emit('displayNewClient', {map: newMapping, id: socket.id}); // send the updated new Mapping
   emits[15] += 1;
   socket.emit('registered', {isGameOver: GameMan.getIsGameOver(), 
-    color: newColor, name: newName, img: newImg, dispSurvey: survey});
+    color: newColor, name: newName, img: newImg, dispSurvey: survey, conStatus: consensusStatus});
 }
 
+function pickRebel(){
+  var res = [];
+  var counter = 0;
+  while(counter < NUM_FALSE){
+    let temp = Math.floor(Math.random() * NUM_TABLET);
+    if (!res.includes(temp)){
+        res.push(temp);
+        counter ++;
+    }
+  }
+  return res;
+}
 
-
-
+var connection_counter = 0;
+var rebel_pos = pickRebel();
 clientIo.on('connection', (socket) => {
   let addr = socket.handshake.address;
   var idx = addr.lastIndexOf(':');
@@ -257,10 +272,17 @@ clientIo.on('connection', (socket) => {
   console.log('New connection from IP address: ' + addr);
   const ipList = addr.split('.');
   let dispSurvey = true;
+  let consensusStatus = -1; // default
   if ((ipList[0] == "192") && (ipList[1] == "168") && (ipList[2] == "0") 
     && (IP_LOWER <= parseInt(ipList[3])) && (parseInt(ipList[3]) <= IP_UPPER)){
       console.log((ipList[0] == '192'),(ipList[1] == '168'), (ipList[2] == '0') , (IP_LOWER <= parseInt(ipList[3]) <= IP_UPPER));
       dispSurvey = false;
+      if (rebel_pos.includes(connection_counter)){
+        consensusStatus = 0; // false, become a rebel
+      }
+      else{
+        consensusStatus = 1; // true
+      }
   }
 
   hist[9] += 1;
@@ -284,11 +306,11 @@ clientIo.on('connection', (socket) => {
       socket.emit('newShare', shareObj);
 
       let myNum = shareObj.share[0];
-      handleNewClient(socket, myNum, dispSurvey);
+      handleNewClient(socket, myNum, dispSurvey, consensusStatus);
     }
   }
   else { //doesnt get a share client //not playing
-    handleNewClient(socket, -1, dispSurvey);
+    handleNewClient(socket, -1, dispSurvey, consensusStatus);
   }
   
   // Setup the new share request handler
