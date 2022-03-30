@@ -10,6 +10,7 @@ const IP_UPPER = 41;
 const IP_LOWER = 12;
 const NUM_TABLET = 30;
 const NUM_FALSE = 0.1 * NUM_TABLET; // 3 false 
+var connection_counter = 0;
 
 
 const PORT = process.env.PORT || 5000; 
@@ -261,7 +262,6 @@ function pickRebel(){
   return res;
 }
 
-var connection_counter = 0;
 clientIo.on('connection', (socket) => {
   let addr = socket.handshake.address;
   var idx = addr.lastIndexOf(':');
@@ -284,8 +284,10 @@ clientIo.on('connection', (socket) => {
       else{
         consensusStatus = 1; // true
       }
+      console.log(connection_counter);
       connection_counter++;
   }
+  console.log("my con status: " + consensusStatus);
 
   hist[9] += 1;
   console.info(`Client connected [id=${socket.id}]`); //MOVE CLIENT CONNECTION TOT HE BOTTOM
