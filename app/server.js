@@ -10,7 +10,7 @@ const IP_UPPER = 41;
 const IP_LOWER = 12;
 const NUM_TABLET = 30;
 const NUM_FALSE = 0.1 * NUM_TABLET; // 3 false 
-var connection_counter = 0;
+var cons_counter = 0;
 
 
 const PORT = process.env.PORT || 5000; 
@@ -38,8 +38,6 @@ app.use(express.json())
 // button on the display panel. Will say "ready"
 // when the game is ready for the arduinos
 var arduinoGameState = 'waiting';
-var rebel_pos = pickRebel();
-console.log(rebel_pos);
 
 function generateSpeed(start, end, len){
   const slist = [];
@@ -233,7 +231,7 @@ displayIo.on('connection', (socket) => {
 
 
 // ------------------------- client namespace -----------------------------
-function handleNewClient(socket, myNum, survey, consensusStatus){
+function handleNewClient(socket, myNum, survey, tempID){
   console.info('ADDING NEW CLIENT OBJ TO CLIENT DICT ');
   let newName = generateName();
   let newColor = generateColor();
@@ -245,7 +243,7 @@ function handleNewClient(socket, myNum, survey, consensusStatus){
   displayIo.emit('displayNewClient', {map: newMapping, id: socket.id}); // send the updated new Mapping
   emits[15] += 1;
   socket.emit('registered', {isGameOver: GameMan.getIsGameOver(), 
-    color: newColor, name: newName, img: newImg, dispSurvey: survey, conStatus: consensusStatus});
+    color: newColor, name: newName, img: newImg, dispSurvey: survey, uid: tempID});
 }
 
 function pickRebel(){
@@ -261,6 +259,8 @@ function pickRebel(){
   return res;
 }
 
+
+
 clientIo.on('connection', (socket) => {
   let addr = socket.handshake.address;
   var idx = addr.lastIndexOf(':');
@@ -270,22 +270,15 @@ clientIo.on('connection', (socket) => {
   console.log('New connection from IP address: ' + addr);
   const ipList = addr.split('.');
   let dispSurvey = true;
-  let consensusStatus = -1; // default
+  let uid = -1; // default
   if ((ipList[0] == "192") && (ipList[1] == "168") && (ipList[2] == "0") 
     && (IP_LOWER <= parseInt(ipList[3])) && (parseInt(ipList[3]) <= IP_UPPER)){
       console.log((ipList[0] == '192'),(ipList[1] == '168'), (ipList[2] == '0') , (IP_LOWER <= parseInt(ipList[3]) <= IP_UPPER));
       console.log("part of crew don't disp survey");
       dispSurvey = false;
-      console.log("rebel " + rebel_pos);
-      if (rebel_pos.includes(connection_counter)){
-        console.log("Sending a rebel!!");
-        consensusStatus = 0; // false, become a rebel
-      }
-      else{
-        consensusStatus = 1; // true
-      }
-      console.log(connection_counter);
-      connection_counter++;
+      uid = cons_counter; // per server session ID
+      console.log(cons_counter);
+      cons_counter++;
   }
   console.log("my con status: " + consensusStatus);
 
@@ -310,11 +303,11 @@ clientIo.on('connection', (socket) => {
       socket.emit('newShare', shareObj);
 
       let myNum = shareObj.share[0];
-      handleNewClient(socket, myNum, dispSurvey, consensusStatus);
+      handleNewClient(socket, myNum, dispSurvey, uid);
     }
   }
   else { //doesnt get a share client //not playing
-    handleNewClient(socket, -1, dispSurvey, consensusStatus);
+    handleNewClient(socket, -1, dispSurvey, uid);
   }
   
   // Setup the new share request handler
@@ -431,7 +424,9 @@ clientIo.on('connection', (socket) => {
       adminIo.emit('gameEnded');
       emits[28] += 1;
       clientIo.emit('sendSurvey');
-      clientIo.emit('sendConsencus');
+      var rebel_pos = pickRebel();
+      console.log(rebel_pos);
+      clientIo.emit('sendConsencus', {consensus: rebel_pos});
     }
     else {
       // Just in case the share is actually a losing share

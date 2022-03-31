@@ -233,14 +233,14 @@
     var winningNum = -1;
     var playerName = "";
     var dispSurvey = true;
-    var consensusColor = -1;
+    var tempID = -1;
 
     // Handle the message where we are confirmed to have registered
     socket.on('registered', (msg) => {
       isGameOver = msg.isGameOver;
       playerName = msg.name;
       dispSurvey = msg.dispSurvey;
-      consensusColor = msg.conStatus;
+      tempID = msg.uid;
       resetConsencus();
       button.html('Waiting for restart signal...');
       
@@ -373,13 +373,13 @@
     
     });
 
-    socket.on('sendConsencus' , () => {
-      console.log(dispSurvey);
+    socket.on('sendConsencus' , (msg) => {
+      let arr = msg.consensus;
       if (!dispSurvey){ //should be false
         console.log('fading on...');
         var fullDiv = document.getElementById('fullDiv');
         setTimeout(function(){
-          makeConcensus(fullDiv, consensusColor);
+          makeConcensus(fullDiv, arr);
         }, 5000);
 
         setTimeout(function() {
@@ -393,13 +393,13 @@
 
     });
 
-    function makeConcensus(fullDiv, conStatus){
-      if(conStatus){
-        fullDiv.style.backgroundColor = "green";
-        fullDiv.innerHTML = "PASS";
-      }else {
+    function makeConcensus(fullDiv, falseArr){
+      if(falseArr.includes(tempID)){
         fullDiv.style.backgroundColor = "red";
         fullDiv.innerHTML = "REJECT";
+      }else {
+        fullDiv.style.backgroundColor = "green";
+        fullDiv.innerHTML = "PASS";
       }
       fullDiv.style.zIndex = 5000;
       fullDiv.classList.add("fade-in");
