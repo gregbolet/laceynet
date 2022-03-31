@@ -398,17 +398,11 @@
           });
         }
       }
-    
+
     });
 
-<<<<<<< HEAD
-    //tells tablets to display th 
-    socket.on('sendConsencus' , () => {
-      console.log(dispSurvey);
-=======
     socket.on('sendConsencus' , (msg) => {
       let arr = msg.consensus;
->>>>>>> d835d08899185d317ff2227f88ab27eacfc190fd
       if (!dispSurvey){ //should be false
         console.log('fading on...');
         var fullDiv = document.getElementById('fullDiv');
@@ -426,8 +420,6 @@
       }
     });
 
-<<<<<<< HEAD
-=======
     function makeConcensus(fullDiv, falseArr){
       if(falseArr.includes(tempID) && !winnerForceGreen){
         fullDiv.style.backgroundColor = "red";
@@ -461,7 +453,6 @@
     }
 
    
->>>>>>> d835d08899185d317ff2227f88ab27eacfc190fd
 
     socket.on('time', (timeString) => {
       let el = document.getElementById('server-time');
