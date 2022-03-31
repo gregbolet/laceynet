@@ -173,6 +173,37 @@
 
     }
 
+    function makeConcensus(fullDiv, conStatus){
+      if(conStatus){
+        fullDiv.style.backgroundColor = "green";
+        fullDiv.innerHTML = "PASS";
+      }else {
+        fullDiv.style.backgroundColor = "red";
+        fullDiv.innerHTML = "REJECT";
+      }
+      fullDiv.style.zIndex = 5000;
+      fullDiv.classList.add("fade-in");
+    }
+
+    function removeConcensus(fullDiv){
+      fullDiv.classList.remove('fade-in');
+      console.log('fading out color');
+      fullDiv.classList.add("fade-out");
+    }
+
+    //
+    function makeScreenSaver(fullDiv) {
+      fullDiv.classList.remove('fade-out');
+      fullDiv.style.backgroundColor = "transparent";
+      fullDiv.innerHTML = "";
+      var img = document.createElement('img');
+      img.className ="mainpicture";
+      img.setAttribute('id', 'logo');
+      img.setAttribute("src","images/vtlogo.jpg");
+      document.getElementById('fullDiv').appendChild(img);
+      fullDiv.classList.add('fade-in');
+    }
+
     // quit button - close window, disconnect client, update display
     quitBtn.click(function(){
       window.close('','_parent',''); // close window
@@ -264,8 +295,6 @@
       $(document).ready(function(){
         $("#myModal").modal('hide');
       });
-     
-      
     });
 
     
@@ -322,11 +351,6 @@
       document.getElementById('mainbutton').disabled = false; 
       resetConsencus();
 
-      //gameEnded = false;
-      // $(document).ready(function(){
-      //   $("#myModal").close();
-      // });
-
       $(document).ready(function(){
         $("#myModal").modal('hide');
       });
@@ -347,6 +371,7 @@
       isGameOver = true;
     });
 
+    //tells clients to display survey if they are not one of the tablets
     socket.on('sendSurvey', (msg) => {
       console.log('time to send the survey');
       console.log(dispSurvey);
@@ -373,6 +398,7 @@
     
     });
 
+    //tells tablets to display th 
     socket.on('sendConsencus' , () => {
       console.log(dispSurvey);
       if (!dispSurvey){ //should be false
@@ -393,38 +419,6 @@
 
     });
 
-    function makeConcensus(fullDiv, conStatus){
-      if(conStatus){
-        fullDiv.style.backgroundColor = "green";
-        fullDiv.innerHTML = "PASS";
-      }else {
-        fullDiv.style.backgroundColor = "red";
-        fullDiv.innerHTML = "REJECT";
-      }
-      fullDiv.style.zIndex = 5000;
-      fullDiv.classList.add("fade-in");
-    }
-
-    function removeConcensus(fullDiv){
-      fullDiv.classList.remove('fade-in');
-      console.log('fading out color');
-      fullDiv.classList.add("fade-out");
-    }
-
-    //
-    function makeScreenSaver(fullDiv) {
-      fullDiv.classList.remove('fade-out');
-      fullDiv.style.backgroundColor = "transparent";
-      fullDiv.innerHTML = "";
-      var img = document.createElement('img');
-      img.className ="mainpicture";
-      img.setAttribute('id', 'logo');
-      img.setAttribute("src","images/vtlogo.jpg");
-      document.getElementById('fullDiv').appendChild(img);
-      fullDiv.classList.add('fade-in');
-    }
-
-   
 
     socket.on('time', (timeString) => {
       let el = document.getElementById('server-time');
