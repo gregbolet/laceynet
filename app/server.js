@@ -280,7 +280,7 @@ clientIo.on('connection', (socket) => {
       console.log(cons_counter);
       cons_counter++;
   }
-  console.log("my con status: " + consensusStatus);
+  console.log("my con status: " + cons_counter);
 
   hist[9] += 1;
   console.info(`Client connected [id=${socket.id}]`); //MOVE CLIENT CONNECTION TOT HE BOTTOM
