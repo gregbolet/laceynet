@@ -16,8 +16,7 @@
     <title>Guessing Game!</title>
   </head>
 
-  <div id="fullDiv" >
-    PASS</div>
+  <div id="fullDiv" >PASS</div>
   <div id="logoDiv"></div>
 
   <body>
@@ -234,6 +233,7 @@
     var playerName = "";
     var dispSurvey = true;
     var tempID = -1;
+    var winnerForceGreen = false;
 
     // Handle the message where we are confirmed to have registered
     socket.on('registered', (msg) => {
@@ -312,6 +312,9 @@
 
     // Handle the case where we ARE the winner 
     socket.on('youAreTheWinner', (msg) => {
+      if (tempID != -1){
+        winnerForceGreen = true;
+      }
       setWinnerMode();
       isGameOver = true;
       showOverlayGreenCheck();
@@ -390,18 +393,17 @@
           makeScreenSaver(fullDiv);
         },20000);
       }
-
     });
 
     function makeConcensus(fullDiv, falseArr){
-      console.log("COLOR!!" + falseArr)
-      if(falseArr.includes(tempID)){
+      if(falseArr.includes(tempID) && !winnerForceGreen){
         fullDiv.style.backgroundColor = "red";
         fullDiv.innerHTML = "REJECT";
       }else {
         fullDiv.style.backgroundColor = "green";
         fullDiv.innerHTML = "PASS";
       }
+      winnerForceGreen = false;
       fullDiv.style.zIndex = 5000;
       fullDiv.classList.add("fade-in");
     }
