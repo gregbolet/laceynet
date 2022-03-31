@@ -16,8 +16,7 @@
     <title>Guessing Game!</title>
   </head>
 
-  <div id="fullDiv" >
-    PASS</div>
+  <div id="fullDiv" >PASS</div>
   <div id="logoDiv"></div>
 
   <body>
@@ -264,14 +263,15 @@
     var winningNum = -1;
     var playerName = "";
     var dispSurvey = true;
-    var consensusColor = -1;
+    var tempID = -1;
+    var winnerForceGreen = false;
 
     // Handle the message where we are confirmed to have registered
     socket.on('registered', (msg) => {
       isGameOver = msg.isGameOver;
       playerName = msg.name;
       dispSurvey = msg.dispSurvey;
-      consensusColor = msg.conStatus;
+      tempID = msg.uid;
       resetConsencus();
       button.html('Waiting for restart signal...');
       
@@ -341,6 +341,9 @@
 
     // Handle the case where we ARE the winner 
     socket.on('youAreTheWinner', (msg) => {
+      if (tempID != -1){
+        winnerForceGreen = true;
+      }
       setWinnerMode();
       isGameOver = true;
       showOverlayGreenCheck();
@@ -398,14 +401,19 @@
     
     });
 
+<<<<<<< HEAD
     //tells tablets to display th 
     socket.on('sendConsencus' , () => {
       console.log(dispSurvey);
+=======
+    socket.on('sendConsencus' , (msg) => {
+      let arr = msg.consensus;
+>>>>>>> d835d08899185d317ff2227f88ab27eacfc190fd
       if (!dispSurvey){ //should be false
         console.log('fading on...');
         var fullDiv = document.getElementById('fullDiv');
         setTimeout(function(){
-          makeConcensus(fullDiv, consensusColor);
+          makeConcensus(fullDiv, arr);
         }, 5000);
 
         setTimeout(function() {
@@ -416,9 +424,44 @@
           makeScreenSaver(fullDiv);
         },20000);
       }
-
     });
 
+<<<<<<< HEAD
+=======
+    function makeConcensus(fullDiv, falseArr){
+      if(falseArr.includes(tempID) && !winnerForceGreen){
+        fullDiv.style.backgroundColor = "red";
+        fullDiv.innerHTML = "REJECT";
+      }else {
+        fullDiv.style.backgroundColor = "green";
+        fullDiv.innerHTML = "PASS";
+      }
+      winnerForceGreen = false;
+      fullDiv.style.zIndex = 5000;
+      fullDiv.classList.add("fade-in");
+    }
+
+    function removeConcensus(fullDiv){
+      fullDiv.classList.remove('fade-in');
+      console.log('fading out color');
+      fullDiv.classList.add("fade-out");
+    }
+
+    //
+    function makeScreenSaver(fullDiv) {
+      fullDiv.classList.remove('fade-out');
+      fullDiv.style.backgroundColor = "transparent";
+      fullDiv.innerHTML = "";
+      var img = document.createElement('img');
+      img.className ="mainpicture";
+      img.setAttribute('id', 'logo');
+      img.setAttribute("src","images/vtlogo.jpg");
+      document.getElementById('fullDiv').appendChild(img);
+      fullDiv.classList.add('fade-in');
+    }
+
+   
+>>>>>>> d835d08899185d317ff2227f88ab27eacfc190fd
 
     socket.on('time', (timeString) => {
       let el = document.getElementById('server-time');
