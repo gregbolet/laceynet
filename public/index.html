@@ -9,10 +9,14 @@
     <script src="/js/bootstrap.min.js" ></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/images.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Modern theme -->
+    <link href="https://unpkg.com/survey-jquery/modern.min.css" type="text/css" rel="stylesheet">
+    <script type="text/javascript" src="https://unpkg.com/survey-jquery"></script>
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" /> -->
-
+    <script src="surveyContent.js"></script>
     <title>Guessing Game!</title>
   </head>
 
@@ -22,15 +26,7 @@
   <body>
 
     <nav class="navbar navbar-expand-lg sticky-top navbar-light bg-light">
-      <ul class="navbar-nav ml-0">
-        <li class="nav-item">
-          <!-- <button class="btn btn-primary" id="quitButton">Quit</button> -->
-          <button class="quit" id="quitButton">Quit</button>
-          <!--<a class="btn btn-warning" href="display.html">Display Panel</a>-->
-        </li>
-        
-      </ul>
-      <!--<a class="navbar-brand mx-auto" href="#" id="playerName">Player: </a>-->
+      <button class="quit" id="quitButton">Quit</button>
       <p class="navbar-text ml-auto pb-0" id="server-time"></p>
     </nav>
 
@@ -70,10 +66,14 @@
           </div>
         </div>
       </div>
+
+      <!-- <div id="surveyElement"></div> -->
     </div>
 
-    
+    <div class="survey" id="surveyElement"></div>
+
   </body>
+  <!-- <div id="result"></div> -->
 
   
 
@@ -82,15 +82,18 @@
     //https://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_ref_js_modal_js&stacked=h - modal source
 
     //import People from './js/images.js'
+    Survey
+      .StylesManager
+      .applyTheme("modern");
 
     var button = $( "#mainbutton" );
     var quitBtn = $( "#quitButton" );
     var surveyBtn = $("#surveyButton");
     var closeBtn = $("#closeButton");
+    var container = $(".container");
     var isGameOver = false;
     const fadeDuration = 200;
     const fadeWait = 500;
-    //var gameEnded = true;
     console.log("disabled main button");
     document.getElementById('mainbutton').disabled = true; // disable main btn
     //false when io is sent
@@ -105,11 +108,25 @@
       console.log("Continue mode is called " + new Date().toTimeString());
     }
 
+    function setServeyMode(){
+      $(document).ready(function(){
+        setTimeout(function(){
+          button.removeClass("btn-primary");
+          button.removeClass("btn-success");
+          button.removeClass( "btn-danger" );
+          button.remove();
+          container.height(0); // set height = 0
+          survey.render("surveyElement");
+          // button.removeClass("container col-md-12 align-middle");
+        }, 2500);
+      });
+    }
+
     function setWaitingMode(){
       if(isGameOver){
         button.removeClass( "btn-danger" )
         button.removeClass( "btn-warning" );
-        button.removeClass( "btn-success" )
+        button.removeClass( "btn-success" );
         button.addClass( "btn-primary" );
         button.html('Waiting for restart signal...');
       }
@@ -117,6 +134,7 @@
 
     function setRestartMode(){
       if(!isGameOver){
+        button.add();
         button.removeClass( "btn-danger" );
         button.removeClass( "btn-primary" );
         button.removeClass( "btn-success" );
@@ -235,6 +253,11 @@
     var tempID = -1;
     var winnerForceGreen = false;
 
+    // Survey.defaultBootstrapCss.navigationButton = "btn btn-green";
+    // Survey.defaultBootstrapCss.progressBar = "bar-green";
+    // Survey.Survey.cssType = "bootstrap";
+    var survey = new Survey.Model(surveyContent);
+    
     // Handle the message where we are confirmed to have registered
     socket.on('registered', (msg) => {
       isGameOver = msg.isGameOver;
@@ -354,24 +377,27 @@
       console.log('time to send the survey');
       console.log(dispSurvey);
       if (dispSurvey){ //should be true
-        if(window.innerHeight > window.innerWidth){
-          console.log('im in portrait mode!');
+        setServeyMode();
+        // survey.render("surveyElement");
+        // hide(document.getElementById('mainbutton'));
+        // if(window.innerHeight > window.innerWidth){
+        //   console.log('im in portrait mode!');
 
-          $(document).ready(function(){
-            setTimeout(function(){
-              $('#myModal').modal('show');
-            }, 2500);
+        //   $(document).ready(function(){
+        //     setTimeout(function(){
+        //       $('#myModal').modal('show');
+        //     }, 2500);
             
-          });
-        }
-        else {
-          console.log('im in landscape mode');
-          $(document).ready(function(){
-            setTimeout(function(){
-              $('#myModal').modal('show');
-            }, 2500);
-          });
-        }
+        //   });
+        // }
+        // else {
+        //   console.log('im in landscape mode');
+        //   $(document).ready(function(){
+        //     setTimeout(function(){
+        //       $('#myModal').modal('show');
+        //     }, 2500);
+        //   });
+        // }
       }
     
     });
