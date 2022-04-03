@@ -63,6 +63,24 @@
 
             }
         }
+
+        function checkParams(param){
+            let range = parseInt(param[0]);
+            let shareSize = parseInt(param[1]);
+            let winningNum = parseInt(param[2]);
+
+            if(winningNum > range || winningNum <= 0){
+                return false;
+            }
+            if(shareSize > range || shareSize <= 0){
+                return false;
+            }
+            if(range <= 0){
+                return false;
+            }
+            
+            return true;
+        }
       
 
         startBtn.click(function(){
@@ -103,10 +121,12 @@
         paramBtn.click(function() {
             var inputVal = document.getElementById("myInput").value;
             var params = inputVal.split(",");
-            if(params.length == 3) {
+            if(params.length == 3 && checkParams(params)) {
                 console.log('param button clicked');
                 console.log(params);
                 socket.emit('setNewGameParams',params);
+            }else {
+                alert("Error: Something wrong with param input. Game has not been restarted, try again.");
             }
         });
 
