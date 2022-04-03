@@ -10,3 +10,22 @@
 # Keep gitignore
 !.gitignore
 
+# Node build artifacts
+node_modules
+npm-debug.log
+
+# Local development
+*.env
+*.dev
+*.swp
+.*.swp
+.DS_Store
+
+# Docker
+Dockerfile
+docker-compose.yml
+
+# Keep the gitignore file
+!.gitignore
+
+

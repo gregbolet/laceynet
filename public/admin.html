@@ -1,0 +1,192 @@
+<html>
+    <head>
+        <!-- Load Bootstrap/CSS/Popper/Jquery/Socket.io -->
+        <link rel="stylesheet" href="/css/gamestyle.css"> </link>
+        <link rel="stylesheet" href="/css/bootstrap.min.css"> </link>
+        <link rel="stylesheet" href="/css/display.css"> </link>
+        <script src="/js/jquery-3.6.0.min.js"></script>
+        <script src="/js/popper.min.js" ></script>
+        <script src="/js/bootstrap.min.js" ></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+        <script src="/js/ClientObj.js"></script>
+
+        <title>Guessing Game!</title>
+    </head>
+
+    <body>
+        <button class="btn btn-info" id="startButton">Start Game</button>
+        <p class="text ml-auto pb-0" id="playingstatus">Game Status: not started</p>
+        <button class="btn btn-info" id="startArduinoButton">Start Arduino</button>
+        <p class="text ml-auto pb-0" id="arduinostatus">Arduino Status: waiting</p>
+        <button class="btn btn-danger" id="emerButton">Emergency STOP</button>
+        <!--<button class="btn btn-info" id="startWaitingRoomButton">Start Waiting Room</button>
+        <button class="btn btn-info" id="restartButton">Restart Game</button>-->
+        <input type="text" placeholder="Range,Share Size..." id="myInput">
+        <button class="btn btn-warning" id="paramButton" >Set Game Params </button>
+    </body>
+
+   
+
+    <script>
+        //References;
+        // link for grid https://stackoverflow.com/questions/43115822/can-i-make-a-css-grid-with-dynamic-number-of-rows-or-columns
+        //link for rese https://stackoverflow.com/questions/61155301/how-to-remove-divs-inside-a-grid
+        //https://stackoverflow.com/questions/64859592/how-can-i-make-div-content-appear-with-animation-when-clicking-a-button-that-inj
+        
+        var startBtn = $( "#startButton" );
+        var ardBtn = $( "#startArduinoButton" );
+        var waitingRoomBtn = $( "#startWaitingRoomButton" );
+        //var restartBtn = $( "#restartButton" );
+        var paramBtn = $('#paramButton');
+        var emerBtn = $('#emerButton');
+        var isGameOver = true;
+        //var gameEnded = true; //by default game is not started
+        var arduinoGameState = "";
+        var playingStatus = "";
+        
+        
+        function checkArdStatus(givenStatus){
+            if(givenStatus === "ready"){
+                console.log("changing status to READY");
+                arduinoGameState = "ready";
+                ardBtn.html(`Stop Arduino`); 
+                document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
+
+            }else {
+                console.log("changing status to WAITING");
+                arduinoGameState = "waiting";
+                ardBtn.html(`Start Arduino`);
+                document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
+
+            }
+        }
+      
+
+        startBtn.click(function(){
+            if (isGameOver){ // game has already ended 
+                console.log("starting the game now!!");
+                socket.emit('startGame', isGameOver);
+                playingStatus = 'playing';
+                document.getElementById('playingstatus').innerHTML = "Game Status: " + playingStatus;
+                isGameOver = false;
+                //startBtn.prop('disabled', true);
+                startBtn.html("Restart Game");
+            }else {
+                //need to restart the game
+                console.log('restarting the game');
+                socket.emit('restartGame');
+
+            }
+        });
+
+        emerBtn.click(function(){
+            
+            socket.emit('updateArdStatus',"STOP");
+        })
+
+        ardBtn.click(function() {
+            if(arduinoGameState  === "waiting"){
+                arduinoGameState = "ready";
+                ardBtn.html('Stop Arduino');
+
+            }else {
+                arduinoGameState = "waiting";
+                ardBtn.html('Start Arduino');
+            }
+            document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
+            socket.emit('updateArdStatus',arduinoGameState);
+        });
+
+        paramBtn.click(function() {
+            var inputVal = document.getElementById("myInput").value;
+            var params = inputVal.split(",");
+            if(params.length == 3) {
+                console.log('param button clicked');
+                console.log(params);
+                socket.emit('setNewGameParams',params);
+            }
+        });
+
+
+
+
+        // ------------------------ sockets --------------------------
+        // URL defaults to window.location
+        let socket = io('/admin.html');
+
+        socket.on('gameEnded', () => {
+            isGameOver = true;
+            // document.getElementById("startButton").disabled = false; //reenable start button
+            startBtn.prop('disabled', false);
+            startBtn.html('Start Game');
+            playingStatus = 'not started';
+            document.getElementById('playingstatus').innerHTML = "Game Status: " + playingStatus;
+            if(arduinoGameState === 'ready'){
+                arduinoGameState = "waiting";
+                document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
+                //socket.emit('updateArdStatus', arduinoGameState);
+                ardBtn.html(`Start Arduino`); 
+            }
+        });
+
+        socket.on('checkArdStatus', (msg) => {
+                //updateArduinoStatus(msg);
+                console.log('checking the arduino status')
+                checkArdStatus(msg);
+        });
+
+        socket.on('checkStartStatus', (msg) => {
+            
+        })
+
+
+        // Handle the case of restarting the game
+        socket.on('restartGame', (msg) => {
+            isGameOver = false;
+            console.log("RESTART GAME - changing status to READY");
+            arduinoGameState = "ready";
+            document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
+            socket.emit('updateArdStatus', arduinoGameState);
+            ardBtn.html(`Stop Arduino`); 
+            startBtn.html("Restart Game");
+            playingStatus = 'playing';
+            document.getElementById('playingstatus').innerHTML = "Game Status: " + playingStatus;
+            winningId = "";
+            
+        });
+
+        socket.on('updateParams', (msg) => {
+            updateParams(msg);
+        });
+
+        socket.on('registered', (msg) => {
+            isGameOver=msg.isGameOver; 
+
+            if(!isGameOver){
+              
+               // startBtn.prop('disabled', true);
+               startBtn.html('Restart Game');
+                document.getElementById('playingstatus').innerHTML = "Game Status: playing";
+                
+            }else {
+                startBtn.html('Start Game');
+                document.getElementById('playingstatus').innerHTML = "Game Status: not started";
+            }
+
+            arduinoGameState = msg.arduinoStatus;
+            document.getElementById('arduinostatus').innerHTML = "Arduino Status: " + arduinoGameState;
+            if(arduinoGameState === 'ready'){
+                ardBtn.html(`Stop Arduino`); 
+            }else {
+                ardBtn.html(`Start Arduino`); 
+            }
+
+            console.log('i have been registered');
+
+        });
+   
+    </script>
+</html>

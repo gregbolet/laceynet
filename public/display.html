@@ -1,0 +1,380 @@
+<html>
+    <head>
+        <!-- Load Bootstrap/CSS/Popper/Jquery/Socket.io -->
+        <link rel="stylesheet" href="/css/gamestyle.css"> </link>
+        <link rel="stylesheet" href="/css/bootstrap.min.css"> </link>
+        <link rel="stylesheet" href="/css/display.css"> </link>
+        <script src="/js/jquery-3.6.0.min.js"></script>
+        <script src="/js/popper.min.js" ></script>
+        <script src="/js/bootstrap.min.js" ></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+        <script src="/js/ClientObj.js"></script>
+
+        <title>Guessing Game!</title>
+    </head>
+
+    <body>
+        <nav class="navbar navbar-expand-lg 
+        navbar-dark bg-dark">
+           
+            <p class="navbar-text ml-auto pb-0" id="range"></p>
+            <p class="navbar-text ml-auto pb-0" id="shareSize"></p>
+            <p class="navbar-text ml-auto pb-0" id="winNum"></p>
+    
+            <p class="navbar-text ml-auto pb-0" id="server-time"></p>
+        </nav>
+
+        <!--Second navbar-->
+    <nav class="navbar navbar-expand-lg 
+    navbar-dark bg-dark">
+    <p class="navbar-text ml-auto pb-0"  id="ledger">Winners: </p>
+    
+    </nav>
+    
+        <div id="panel" class="container-fluid"></div>
+          
+    </body>
+
+   
+
+    <script>
+        //References;
+        // link for grid https://stackoverflow.com/questions/43115822/can-i-make-a-css-grid-with-dynamic-number-of-rows-or-columns
+        //link for rese https://stackoverflow.com/questions/61155301/how-to-remove-divs-inside-a-grid
+        //https://stackoverflow.com/questions/64859592/how-can-i-make-div-content-appear-with-animation-when-clicking-a-button-that-inj
+        
+        //css fade colors https://stackoverflow.com/questions/26936811/css-transition-fade-background-color-resetting-after
+
+        const fadeDuration = 200;
+        const fadeWait = 500;
+        const container = $('#panel');
+        var isGameOver = false;
+        var clientDict = new Map();
+        var range = -1;
+        var shareSize = -1;
+        var winNum = -1;
+        var imageDict = new Map();
+        var winners= [];
+        
+        // resets the container from all blocks
+        function resetGrid(){
+            document.querySelectorAll(".item").forEach((e) => e.parentNode.removeChild(e));
+        }
+ 
+        //helps reset container from all blocks
+        function removeBlocks() {
+            document.querySelectorAll(".animate").forEach((e) => e.remove(e));
+            document.querySelectorAll(".block").forEach((e) => e.remove(e));
+        }
+        
+        // Add new client div to the display panel
+        function addClientToPanel(id, myC){
+            var block = document.createElement("div");
+
+            var hstack = document.createElement("div");
+            hstack.className = "hstack gap-3";    
+            block.appendChild(hstack);
+
+            //create img div
+            var img = document.createElement("img");
+            img.className ="picture";
+            img.setAttribute("src",myC.img);
+
+             //create wrapper 
+            var wrapper = document.createElement("div");
+            wrapper.setAttribute('id','wrapper');
+            wrapper.className = "wrapper";
+
+            hstack.appendChild(img);
+            hstack.appendChild(wrapper);
+
+
+            //create num div         
+            var clientNum = document.createElement("div");
+            if(myC.num == -1){
+                clientNum.innerHTML = "?";
+            }else {
+                clientNum.innerHTML = parseInt(myC.num);
+            }
+            //clientNum.style.backgroundColor = myC.color;
+            clientNum.setAttribute('id', "num");
+
+
+            //create name div
+             var clientName = document.createElement("div");
+            clientName.innerHTML = myC.name;
+            clientName.setAttribute('id', "client_name");
+            clientName.className = "client_name"; 
+           
+
+            wrapper.appendChild(clientName);
+            wrapper.appendChild(clientNum);
+            
+                        
+                      
+            //create div to hold everything
+           
+            block.setAttribute('id', id); //set id of div to be the client id
+            block.className = "block";
+            //clientName.appendChild(img);
+
+            container.append(block); //add to panel 
+        }
+
+        /*Updates client div in display panel*/
+        function updateClient(id,obj){
+            //get client div from container
+            var client = document.getElementById(id);
+            var wrapper = client.querySelector('#wrapper');
+            var clientNum = client.querySelector('#num');
+            // clientNum.innerHTML = parseInt(obj.num);
+           
+            client.style.zIndex = 1000; //send to the front
+            client.classList.add("animate"); //add animation
+            
+            setTimeout(function() {
+                clientNum.innerHTML = parseInt(obj.num);
+            }, 1000); // make the number show up after one sec
+
+            setTimeout(function() {
+                client.classList.remove("animate");
+            }, 2500); // 500 is the same time as the CSS animation
+            void client.offsetWidth;
+            client.style.zIndex = 0;
+
+            let box = client;
+            let width = box.clientWidth;
+            let height = box.clientHeight;
+            
+        }
+
+
+        // Removes client from display panel
+        function removeClient(id){
+            let client = document.getElementById(id);
+            client.remove();
+        }
+
+        //update the winner ledger
+        function updateLedger(name, number){
+            if(winners.length >= 7){
+                winners.shift();
+            }
+
+            let space = " ";
+            if(winners.length == 0){
+                space = "";
+            }
+            console.log(winners);
+            if(name != "") {
+                let winString = space + name + " : " + number;
+                winners.push(winString);
+                document.getElementById('ledger').innerHTML = "Winners: [" + winners.join() + "]";
+            }
+        }
+
+        // update block when winner found
+        function updateWinnerBlock(msg) {
+            var winningClient;
+            var winningName;
+            if(isGameOver){
+                for(let [key,value] of clientDict){
+                    if(key === msg.id){
+                        winningClient = document.getElementById(msg.id); 
+                        winningName = value.name;
+                        var wrapper = winningClient.querySelector('#wrapper');                      
+                        var numHeader = wrapper.querySelector('#num');
+                        numHeader.style.background = "#2ECC71";
+                        winningClient.classList.add('winnerAnimate');
+                    }
+                    else {
+                        var client = document.getElementById(key);
+                        var wrapper = client.querySelector('#wrapper');                      
+                        var numHeader = wrapper.querySelector('#num');
+                        numHeader.style.background = "#E74C3C";
+                        client.classList.remove('animate');
+                    }
+                }
+                updateLedger(winningName, msg.winNum);
+            }
+            winningClient.classList.remove("winnerAnimate");
+        }
+
+        //update winner block when panel is registered after a win
+        function updateWinnerBlockEnd(msg){
+            var winningClient;
+            if(isGameOver){
+                for(let [key,value] of clientDict){
+                    if(key === msg){
+                        winningClient = document.getElementById(msg);                       
+                        var wrapper = winningClient.querySelector('#wrapper');                      
+                        var numHeader = wrapper.querySelector('#num');
+                        numHeader.style.background = "#2ECC71";
+                    }else if(value.num == -1){
+                        var client = document.getElementById(key);
+                        var wrapper = client.querySelector('#wrapper');                      
+                        var numHeader = wrapper.querySelector('#num');
+                        numHeader.style.background = '#ffe4c4';//value.color;
+                    }
+                    else {
+                        var client = document.getElementById(key);
+                        var wrapper = client.querySelector('#wrapper');                      
+                        var numHeader = wrapper.querySelector('#num');
+                        numHeader.style.background = "#E74C3C";
+                    }
+                }
+            }
+        }
+
+        // Updates game parameters
+        function updateParams(params){
+            console.log("calling function");
+            console.log(params);
+            range = params[0];
+            document.getElementById('range').innerHTML = "Range: " + range;
+            shareSize = params[1];
+            document.getElementById('shareSize').innerHTML = "Share size: " + shareSize;
+            winNum = params[2];
+            document.getElementById('winNum').innerHTML = "Winning Number: " + winNum;
+        }
+
+        //Handles panel colors when the game is over
+        function handleGameEnd(winner){
+            isGameOver = true;
+            updateWinnerBlock(winner);
+        }
+
+        //update panel when display is registered after game win
+        function updateGameEnd(msg){
+            isGameOver = true;
+            updateWinnerBlockEnd(msg);
+        }
+
+        //Handles pabel colors when the game is restarting
+        function handleRestart(newStatus, newParams){
+            //reset div color upon restart
+            for (let [key,value] of clientDict){
+                var client = document.getElementById(key);
+                var wrapper = client.querySelector('#wrapper');
+                var clientNum = client.querySelector('#num');
+                clientNum.style.backgroundColor = '#ffe4c4'; //value.color;
+                console.log('im doing stuff');
+               // document.getElementById(key).client.querySelector('#numHead').style.backgroundColor = value.color;
+            }
+            winningId = "";
+            updateParams(newParams);
+            isGameOver = newStatus;
+        } 
+
+        //Updates the display pnael when the game is starting
+        function handleGameStart(startMsg){
+            //reset panel
+            resetGrid();
+            removeBlocks();
+            updateParams(startMsg.parameters); //for display parameters
+            console.log('were starting')
+            //set up client map
+            clientDict = new Map(Object.entries(startMsg.map)); // cast back to map
+            console.log(clientDict);
+            for(const [key,value] of clientDict.entries()){
+                addClientToPanel(key,value); //add each client to the board
+            }
+            winners = startMsg.ledger;
+            console.log(winners);
+            console.log(startMsg.ledger);
+            document.getElementById('ledger').innerHTML = "Winners: [" + winners.join() + "]";
+            
+        }
+
+        // ------------------------ sockets --------------------------
+        // URL defaults to window.location
+        let socket = io('/display.html');
+        let currentShare = [];
+        let currentPos = -1;
+        let winningNum = -1;
+        let winningId = "";
+
+        // registers display panel in game and checks if game is finished
+        socket.on('displayRegistered', (msg) => {
+            console.log("registered display panel...");
+            
+            handleGameStart(msg);
+
+            if(msg.isGameOver){ //if the game is over, put in proper format
+                console.log(msg.winner);
+                updateGameEnd(msg.winner);
+            }
+        });
+
+        //updates panel on game start message
+        socket.on('displayStartGame', (msg) => {
+            console.log('starting the game...');
+            //console.log(msg.)
+            isGameOver = msg.isGameOver;
+            if(!isGameOver){
+                handleGameStart(msg);
+            }
+        });
+
+
+        // Handle the case of restarting the game
+        socket.on('displayRestartGame', (msg) => {
+            console.log("Restarting the display");
+            console.log("params - ", msg.parameters);
+           // handleGameStart()
+            handleRestart(msg.isGameOver, msg.parameters);
+            winners = msg.ledger;
+            document.getElementById('ledger').innerHTML = "Winners: [" + winners.join() + "]";
+        });
+
+        socket.on('displayGotAWinner', (winner) => {
+            console.log('got a winner -- display');
+            handleGameEnd(winner);
+        });
+
+
+        //adds client to window and dictionary
+        socket.on('displayNewClient', (msg) => {
+            console.log('added client to screen...');
+            clientDict = new Map(Object.entries(msg.map)); // update clientDict to be the new mapping
+            let lastElem = clientDict.get(msg.id);          
+            addClientToPanel(msg.id, lastElem); //1 is a ClientObj
+        });
+
+
+        //cilnet number has changed, checks map for changes and updates
+        socket.on('displayNumberSwitch', (msg)  => {
+            if (!clientDict.has(msg.id)){ // id not in client dict
+                clientDict.set(msg.id, msg.newClient);
+                addClientToPanel(msg.id, msg.newClient);
+               // console.log()
+                return;
+            }
+
+            updateClient(msg.id, msg.newClient);
+        });
+
+
+        // update the paramters upon receive
+        socket.on('displayUpdateParams', (msg) => {
+            updateParams(msg);
+        });
+
+        //removes client from panel and dictionary
+        socket.on('displayremoveClient', (msg) => {
+            console.log('Client disconnected, removing from game');
+            clientDict = new Map(Object.entries(msg.map));
+            removeClient(msg.id);
+        });
+    
+        //server time for testing
+        socket.on('time', (timeString) => {
+            let elem = document.getElementById('server-time');
+            elem.innerHTML = 'Server time: ' + timeString;
+        });
+
+    </script>
+</html>

@@ -1,0 +1,464 @@
+<html>
+  <head>
+    <!-- Load Bootstrap/CSS/Popper/Jquery/Socket.io -->
+    <link rel="shortcut icon" href="#">
+    <link rel="stylesheet" href="/css/gamestyle.css"> </link>
+    <link rel="stylesheet" href="/css/bootstrap.min.css"> </link>
+    <script src="/js/jquery-3.6.0.min.js"></script>
+    <script src="/js/popper.min.js" ></script>
+    <script src="/js/bootstrap.min.js" ></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/images.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" /> -->
+
+    <title>Guessing Game!</title>
+  </head>
+
+  <div id="fullDiv" >PASS</div>
+  <div id="logoDiv"></div>
+
+  <body>
+
+    <nav class="navbar navbar-expand-lg sticky-top navbar-light bg-light">
+      <ul class="navbar-nav ml-0">
+        <li class="nav-item">
+          <!-- <button class="btn btn-primary" id="quitButton">Quit</button> -->
+          <button class="quit" id="quitButton">Quit</button>
+          <!--<a class="btn btn-warning" href="display.html">Display Panel</a>-->
+        </li>
+        
+      </ul>
+      <!--<a class="navbar-brand mx-auto" href="#" id="playerName">Player: </a>-->
+      <p class="navbar-text ml-auto pb-0" id="server-time"></p>
+    </nav>
+
+    <div class="clientName" id="playerName"> Waiting for Player:... </div>
+
+
+    <div class="container col-md-12 align-middle">
+      <div id="redXOverlay"> 
+        <img class="overlayimg" src="/svg/redX.svg" />
+      </div>
+
+      <div id="greenCheckOverlay"> 
+        <img class="overlayimg" src="/svg/greenCheck.svg" />
+      </div>
+
+      <button id="mainbutton" type="button" class="btn btn-primary btn-block mainbuttonstyle">
+        Waiting for restart signal...
+      </button>
+
+      <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+          <div class="modal-content" id="modal-content">
+            <div class="modal-header" id="modal-header">
+              <h4 class="modal-title" id="modal-title">Thanks for playing!</h4>
+              <button type="button" class ="close" data-dismiss="modal">&times;</button> 
+            </div>
+  
+            <div class="modal-body" id = "modal-body">
+              <p>Would you like to take a survey to talk about your experience with LACE? Click yes or no below!
+              </p>
+            </div>
+  
+            <div class="modal-footer" id="modal-footer">
+              <button id="surveyButton" class="btn btn-success" type="button" data-dismiss="modal"> Yes</button>
+              <button id="closeButton" class="btn btn-danger" type="button" data-dismiss="modal">No</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
+  </body>
+
+  
+
+  <script>
+    // Use JQuery to grab our button object
+    //https://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_ref_js_modal_js&stacked=h - modal source
+
+    //import People from './js/images.js'
+
+    var button = $( "#mainbutton" );
+    var quitBtn = $( "#quitButton" );
+    var surveyBtn = $("#surveyButton");
+    var closeBtn = $("#closeButton");
+    var isGameOver = false;
+    const fadeDuration = 200;
+    const fadeWait = 500;
+    //var gameEnded = true;
+    console.log("disabled main button");
+    document.getElementById('mainbutton').disabled = true; // disable main btn
+    //false when io is sent
+
+    function setContinueMode(){
+      if(!isGameOver){
+        button.removeClass( "btn-danger" )
+        button.removeClass( "btn-warning" );
+        button.removeClass( "btn-success" )
+        button.addClass( "btn-primary" );
+      }
+      console.log("Continue mode is called " + new Date().toTimeString());
+    }
+
+    function setWaitingMode(){
+      if(isGameOver){
+        button.removeClass( "btn-danger" )
+        button.removeClass( "btn-warning" );
+        button.removeClass( "btn-success" )
+        button.addClass( "btn-primary" );
+        button.html('Waiting for restart signal...');
+      }
+    }
+
+    function setRestartMode(){
+      if(!isGameOver){
+        button.removeClass( "btn-danger" );
+        button.removeClass( "btn-primary" );
+        button.removeClass( "btn-success" );
+        button.addClass( "btn-warning" );
+      }
+    }
+
+    function setLoserMode(){
+      if(!isGameOver){
+        button.removeClass( "btn-warning" )
+        button.removeClass( "btn-primary" )
+        button.removeClass( "btn-success" )
+        button.addClass( "btn-danger" )
+        //gameEnded = true;
+        //button.html('Winner found! Waiting for restart...');
+        isGameOver = true;
+        console.log("IS the game over? "  + isGameOver + new Date().toTimeString());
+      }
+    }
+
+    function setWinnerMode(){
+      if(!isGameOver){
+        button.removeClass( "btn-danger" )
+        button.removeClass( "btn-warning" )
+        button.removeClass( "btn-primary" )
+        button.addClass( "btn-success" )
+      }
+    }
+
+    function showOverlayRedX(callback){
+      console.log("red overlay is being called");
+      $("#redXOverlay").fadeIn(fadeDuration).delay(fadeWait).fadeOut(fadeDuration, callback); 
+    }
+
+    function showOverlayGreenCheck(callback){
+      $("#greenCheckOverlay").fadeIn(fadeDuration).delay(fadeWait).fadeOut(fadeDuration, callback); 
+    }
+
+    function resetConsencus(){
+      //document.getElementById('mainbutton').disabled = false; // enable main btn
+      var fullDiv = document.getElementById('fullDiv');
+      fullDiv.opacity = 0;
+      fullDiv.style.zIndex = 0;
+      fullDiv.classList.remove('fade-in');
+      fullDiv.classList.remove('fade-out');
+      if($('#fullDiv').find('img').length == 1){
+        //console.log(fullDiv.childNodes);
+        var image = document.getElementById('logo');
+        image.parentNode.removeChild(image);
+       // var image = fullDiv.querySelector('#img');
+        //fullDiv.removeChild(image);
+      }
+
+    }
+
+    function makeConcensus(fullDiv, conStatus){
+      if(conStatus){
+        fullDiv.style.backgroundColor = "green";
+        fullDiv.innerHTML = "PASS";
+      }else {
+        fullDiv.style.backgroundColor = "red";
+        fullDiv.innerHTML = "REJECT";
+      }
+      fullDiv.style.zIndex = 5000;
+      fullDiv.classList.add("fade-in");
+    }
+
+    function removeConcensus(fullDiv){
+      fullDiv.classList.remove('fade-in');
+      console.log('fading out color');
+      fullDiv.classList.add("fade-out");
+    }
+
+    //
+    function makeScreenSaver(fullDiv) {
+      fullDiv.classList.remove('fade-out');
+      fullDiv.style.backgroundColor = "transparent";
+      fullDiv.innerHTML = "";
+      var img = document.createElement('img');
+      img.className ="mainpicture";
+      img.setAttribute('id', 'logo');
+      img.setAttribute("src","images/vtlogo.jpg");
+      document.getElementById('fullDiv').appendChild(img);
+      fullDiv.classList.add('fade-in');
+    }
+
+    // quit button - close window, disconnect client, update display
+    quitBtn.click(function(){
+      window.close('','_parent',''); // close window
+     // window.close();
+     // socket.emit('disconnect');
+    });
+
+    closeBtn.click(function() {
+      $(document).ready(function(){
+        $("#myModal").modal('hide');
+      });
+    });
+
+
+    button.click(function(){
+      // Do nothing if the game is over
+      if(isGameOver){
+        console.log("sorry game over oop");
+        return;
+      }
+      // If we click on the winning number, let the server know
+      // Otherwise, advance to the next number in the share
+      if(currentPos < currentShare.length && winningNum == currentShare[currentPos]){
+        console.log(`I think I\'m a winner! ${winningNum}, [${currentShare}]`);
+        socket.emit('iAmAWinner', {share:currentShare, id:socket.id});
+      }
+      // If we have over-clicked, let's request new work
+      // and let the server know we completed our share
+      else if(currentPos >= currentShare.length - 1){
+        console.log(`Completed share! ${currentShare}`);
+        showOverlayRedX(function(){
+          socket.emit('completedShare', {share:currentShare});
+        });
+      }  
+      else{
+        showOverlayRedX(function(){
+          socket.emit('buttonPressed', {currNum: currentShare[currentPos], id:socket.id});  
+        });
+        setContinueMode();
+        currentPos++;
+        console.log("Curr pos is " + currentPos);
+        console.log("Curr num is " + currentShare[currentPos]);
+        button.html(`${currentShare[currentPos]}`); 
+      }
+
+    }); 
+
+    surveyBtn.click(function() {
+      location.href = "https://docs.google.com/forms/d/e/1FAIpQLSdr2CI0EBNSr6nPejzUV8o0m06-OmO9-zmhv08tLObg_XA_oQ/viewform?usp=sf_link";
+    });
+
+
+    // ------------------------ sockets --------------------------
+    // URL defaults to window.location
+    var socket = io('/');
+    var currentShare = [];
+    var currentPos = -1;
+    var winningNum = -1;
+    var playerName = "";
+    var dispSurvey = true;
+    var tempID = -1;
+    var winnerForceGreen = false;
+
+    // Handle the message where we are confirmed to have registered
+    socket.on('registered', (msg) => {
+      isGameOver = msg.isGameOver;
+      playerName = msg.name;
+      dispSurvey = msg.dispSurvey;
+      tempID = msg.uid;
+      resetConsencus();
+      button.html('Waiting for restart signal...');
+      
+      document.getElementById('playerName').innerHTML = playerName; //"Player: " +
+      var img = document.createElement("img");
+      img.className ="picture";
+     // console.log(Icons);
+    //  if (Object.keys(Icons).includes(msg.name)){
+      console.log(msg.img);
+        img.setAttribute("src",msg.img);
+        document.getElementById('playerName').appendChild(img);
+     // }
+      if(!isGameOver){
+        setContinueMode();
+        document.getElementById('mainbutton').disabled = false;
+      }else {
+         setWaitingMode();
+         document.getElementById('mainbutton').disabled = true;;
+      }
+
+      $(document).ready(function(){
+        $("#myModal").modal('hide');
+      });
+    });
+
+    
+
+    // Handle incoming message for the requested share
+    socket.on('newShare', (msg) => {
+      if(isGameOver){
+        console.log("sorry the game is over");
+        return;
+      }
+
+      console.log('Got a new share');
+      console.log(msg.share);
+      currentShare = msg.share;
+      winningNum = msg.winNum;
+      currentPos = 0;
+
+      // Set the button text to the first element
+      button.html(`${currentShare[currentPos]}`);   
+      setContinueMode();
+    });
+
+    // On share acceptance, request a new share of work
+    socket.on('shareAccepted', (msg) => {
+      socket.emit('needNewShare'); 
+    });
+
+    // On share rejection, request a new share of work
+    socket.on('shareRejected', (msg) => {
+      socket.emit('needNewShare'); 
+    });
+
+    // Handle the case where we have a winner 
+    socket.on('weGotAWinner', (msg) => {
+      setLoserMode();
+      button.html('Winner found! Waiting for restart...');
+      console.log("im a loser :(" + new Date().toTimeString());
+    });
+
+    // Handle the case where we are told we lost 
+    socket.on('youDidNotWin', (msg) => {
+      socket.emit('needNewShare'); 
+    });
+
+    // Handle the case where we ARE the winner 
+    socket.on('youAreTheWinner', (msg) => {
+      if (tempID != -1){
+        winnerForceGreen = true;
+      }
+      setWinnerMode();
+      isGameOver = true;
+      showOverlayGreenCheck();
+    });
+
+    // Handle the case of restarting the game
+    socket.on('restartGame', (msg) => {
+      document.getElementById('mainbutton').disabled = false; 
+      resetConsencus();
+
+      $(document).ready(function(){
+        $("#myModal").modal('hide');
+      });
+      console.log('restart is being called');
+      setLoserMode();
+      isGameOver = false;
+      socket.emit('needNewShare');
+    });
+
+    socket.on('updateWinningNumber', (msg) => {
+      winningNum = msg;
+      console.log('the new wining number is ' + winningNum);
+    })
+
+    // Handle the case where we are told to idle
+    socket.on('idle', (msg) => {
+      setLoserMode();
+      isGameOver = true;
+    });
+
+    //tells clients to display survey if they are not one of the tablets
+    socket.on('sendSurvey', (msg) => {
+      console.log('time to send the survey');
+      console.log(dispSurvey);
+      if (dispSurvey){ //should be true
+        if(window.innerHeight > window.innerWidth){
+          console.log('im in portrait mode!');
+
+          $(document).ready(function(){
+            setTimeout(function(){
+              $('#myModal').modal('show');
+            }, 2500);
+            
+          });
+        }
+        else {
+          console.log('im in landscape mode');
+          $(document).ready(function(){
+            setTimeout(function(){
+              $('#myModal').modal('show');
+            }, 2500);
+          });
+        }
+      }
+
+    });
+
+    socket.on('sendConsencus' , (msg) => {
+      let arr = msg.consensus;
+      if (!dispSurvey){ //should be false
+        console.log('fading on...');
+        var fullDiv = document.getElementById('fullDiv');
+        setTimeout(function(){
+          makeConcensus(fullDiv, arr);
+        }, 5000);
+
+        setTimeout(function() {
+          removeConcensus(fullDiv);
+        },15000);
+
+        setTimeout(function() {
+          makeScreenSaver(fullDiv);
+        },20000);
+      }
+    });
+
+    function makeConcensus(fullDiv, falseArr){
+      if(falseArr.includes(tempID) && !winnerForceGreen){
+        fullDiv.style.backgroundColor = "red";
+        fullDiv.innerHTML = "REJECT";
+      }else {
+        fullDiv.style.backgroundColor = "green";
+        fullDiv.innerHTML = "PASS";
+      }
+      winnerForceGreen = false;
+      fullDiv.style.zIndex = 5000;
+      fullDiv.classList.add("fade-in");
+    }
+
+    function removeConcensus(fullDiv){
+      fullDiv.classList.remove('fade-in');
+      console.log('fading out color');
+      fullDiv.classList.add("fade-out");
+    }
+
+    //
+    function makeScreenSaver(fullDiv) {
+      fullDiv.classList.remove('fade-out');
+      fullDiv.style.backgroundColor = "transparent";
+      fullDiv.innerHTML = "";
+      var img = document.createElement('img');
+      img.className ="mainpicture";
+      img.setAttribute('id', 'logo');
+      img.setAttribute("src","images/vtlogo.jpg");
+      document.getElementById('fullDiv').appendChild(img);
+      fullDiv.classList.add('fade-in');
+    }
+
+   
+
+    socket.on('time', (timeString) => {
+      let el = document.getElementById('server-time');
+      el.innerHTML = 'Server time: ' + timeString;
+    });
+    
+  </script>
+
+</html>

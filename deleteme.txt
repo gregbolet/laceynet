@@ -1,0 +1,37 @@
+[OKAY] package.json file found - trying 'npm start'
+[OKAY] package.json file found - trying 'npm start'
+4:37:51 PM web.1 |  > start
+4:37:51 PM web.1 |  > node ./app/server.js
+4:37:51 PM web.1 |  Starting new game...
+4:37:51 PM web.1 |  New game started.
+4:37:51 PM web.1 |  Winning Num: 4
+4:37:51 PM web.1 |  Shares:  [[4,6,10,1],[5,9,3,7],[8,2]]
+4:37:51 PM web.1 |  Game Server UI listening on port 5000!
+4:37:54 PM web.1 |  Client connected [id=X9JpMenFK513AuM6AAAB]
+4:37:54 PM web.1 |  Adding player [id=X9JpMenFK513AuM6AAAB]
+4:37:54 PM web.1 |  Client needs new share [id=X9JpMenFK513AuM6AAAB]
+4:37:54 PM web.1 |  Assigning new share to [id=X9JpMenFK513AuM6AAAB]
+4:37:54 PM web.1 |  Share from incomplete list [4,6,10,1]
+4:37:54 PM web.1 |  Sending new share 4,6,10,1
+4:37:54 PM web.1 |  Client completed a share [share=4,6,10,1 id=X9JpMenFK513AuM6AAAB]
+4:37:54 PM web.1 |  Accepting share 4,6,10,1 from [id=X9JpMenFK513AuM6AAAB]
+4:37:54 PM web.1 |  share accepted
+4:37:54 PM web.1 |  Client needs new share [id=X9JpMenFK513AuM6AAAB]
+4:37:54 PM web.1 |  Assigning new share to [id=X9JpMenFK513AuM6AAAB]
+4:37:54 PM web.1 |  Share from incomplete list [5,9,3,7]
+4:37:54 PM web.1 |  Sending new share 5,9,3,7
+4:37:54 PM web.1 |  Client completed a share [share=5,9,3,7 id=X9JpMenFK513AuM6AAAB]
+4:37:54 PM web.1 |  Accepting share 5,9,3,7 from [id=X9JpMenFK513AuM6AAAB]
+4:37:54 PM web.1 |  share accepted
+4:37:54 PM web.1 |  Client needs new share [id=X9JpMenFK513AuM6AAAB]
+4:37:54 PM web.1 |  Assigning new share to [id=X9JpMenFK513AuM6AAAB]
+4:37:54 PM web.1 |  Share from incomplete list [8,2]
+4:37:54 PM web.1 |  Sending new share 8,2
+4:37:54 PM web.1 |  Client completed a share [share=8,2 id=X9JpMenFK513AuM6AAAB]
+4:37:54 PM web.1 |  Accepting share 8,2 from [id=X9JpMenFK513AuM6AAAB]
+4:37:54 PM web.1 |  share accepted
+4:37:54 PM web.1 |  Client needs new share [id=X9JpMenFK513AuM6AAAB]
+4:37:54 PM web.1 |  Assigning new share to [id=X9JpMenFK513AuM6AAAB]
+4:37:54 PM web.1 |  Idle signal to be sent
+4:37:54 PM web.1 |  No shares left to hand out
+[DONE] Killing all processes with signal  SIGINT
