@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en">
+  <head>
+    <link rel="shortcut icon" href="#">
+    <link rel="stylesheet" href="/css/bootstrap.min.css"> </link>
+    <script src="/js/jquery-3.6.0.min.js"></script>
+    <script src="/js/popper.min.js" ></script>
+    <script src="/js/bootstrap.min.js" ></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Modern theme -->
+    <link href="https://unpkg.com/survey-jquery/modern.min.css" type="text/css" rel="stylesheet">
+    <script type="text/javascript" src="https://unpkg.com/survey-jquery"></script>
+
+    <title>Survey</title>
+    <script src="./js/surveyContent.js"></script>
+  </head>
+
+  <body>
+    <div id="surveyElement"></div>
+  </body>
+
+  
+
+  <script>
+    const serverAddr = 'http://localhost:5000/survey';
+    // const serverAddr = 'http://192.168.0.1:5000/survey';
+    Survey
+        .StylesManager
+        .applyTheme("modern");
+    Survey.defaultBootstrapCss.navigationButton = "btn btn-green";
+    Survey.defaultBootstrapCss.progressBar = "bar-green";
+    var survey = new Survey.Model(surveyContent);
+
+    survey.onComplete.add(function(result) {
+        console.log(result.data);
+        var postBody = JSON.stringify(result.data);
+        var http = new XMLHttpRequest();
+        //Open first, before setting the request headers.
+        http.open('POST', serverAddr, true);
+        http.setRequestHeader('Content-type', 'application/json');
+        http.setRequestHeader('Access-Control-Allow-Origin', '*');
+        http.onload = function () {
+            // do something to response
+            console.log(this.responseText);
+        };
+        http.send(postBody);
+    });
+
+    survey.render("surveyElement");
+    
+  </script>
+
+</html>

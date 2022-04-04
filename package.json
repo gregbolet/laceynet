@@ -2,6 +2,7 @@
   "dependencies": {
     "express": "^4.17.2",
     "socket.io": "^4.4.0",
+    "survey-jquery": "^1.9.22",
     "ws": "^8.4.0"
   },
   "scripts": {
