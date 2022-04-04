@@ -253,7 +253,7 @@
     }); 
 
     surveyBtn.click(function() {
-      location.href = "https://docs.google.com/forms/d/e/1FAIpQLSdr2CI0EBNSr6nPejzUV8o0m06-OmO9-zmhv08tLObg_XA_oQ/viewform?usp=sf_link";
+      // location.href = "https://docs.google.com/forms/d/e/1FAIpQLSdr2CI0EBNSr6nPejzUV8o0m06-OmO9-zmhv08tLObg_XA_oQ/viewform?usp=sf_link";
       location.href = "./survey.html";
     });
 
@@ -354,6 +354,7 @@
 
     // Handle the case of restarting the game
     socket.on('restartGame', (msg) => {
+      location.href = "./index.html";
       document.getElementById('mainbutton').disabled = false; 
       resetConsencus();
 
