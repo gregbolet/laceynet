@@ -170,17 +170,6 @@
 
     }
 
-    function makeConcensus(fullDiv, conStatus){
-      if(conStatus){
-        fullDiv.style.backgroundColor = "green";
-        fullDiv.innerHTML = "PASS";
-      }else {
-        fullDiv.style.backgroundColor = "red";
-        fullDiv.innerHTML = "REJECT";
-      }
-      fullDiv.style.zIndex = 5000;
-      fullDiv.classList.add("fade-in");
-    }
 
     function removeConcensus(fullDiv){
       fullDiv.classList.remove('fade-in');

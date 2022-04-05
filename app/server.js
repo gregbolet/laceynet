@@ -4,6 +4,8 @@ const GameManager = require('./gameManager.js');
 const ClientObj = require('../public/js/ClientObj.js');
 const { param } = require('express/lib/request');
 const People = require('../public/js/images.js');
+const fs = require('fs');
+const path = require('path');
 
 const measurements = require('./measurements.json');
 const IP_UPPER = 41;
@@ -52,7 +54,6 @@ function generateSpeed(start, end, len){
 app.set('/arduino', io);
 app.get('/arduino', (req,res)=>{
   hist[15] += 1;
-  //console.info(req.headers);
   var data = {};
   if (req.headers.hasOwnProperty('measure')){
     var mac = req.headers['measure'];
@@ -67,8 +68,21 @@ app.get('/arduino', (req,res)=>{
 
 app.set('/survey', io);
 app.post('/survey', (req,res)=>{
-    console.log(JSON.stringify(req.body));
-    res.sendStatus(201);
+  console.log(JSON.stringify(req.body));
+  res.sendStatus(201);
+  let currentdate = new Date(); 
+  let fname = currentdate.getDate() + "-"
+              + (currentdate.getMonth()+1)  + "-" 
+              + currentdate.getFullYear() + "T"  
+              + currentdate.getHours() + ":"  
+              + currentdate.getMinutes() + ":" 
+              + currentdate.getSeconds();
+  fs.writeFile(path.resolve('./surveyData', `${fname}.json`), JSON.stringify(req.body), 'utf8', function(err) {
+    if (err) {
+      console.log("An error occured while writing JSON Object to File.");
+      console.log(err);
+    }
+  });
 })
 
 //---------------------- Arduino ends ---------------------------
