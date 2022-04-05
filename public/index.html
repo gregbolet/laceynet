@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en" xml:lang="en">
+<html>
   <head>
     <!-- Load Bootstrap/CSS/Popper/Jquery/Socket.io -->
     <link rel="shortcut icon" href="#">
@@ -9,7 +8,6 @@
     <script src="/js/popper.min.js" ></script>
     <script src="/js/bootstrap.min.js" ></script>
     <script src="/socket.io/socket.io.js"></script>
-    <script>var exports = {};</script>
     <script src="/js/images.js"></script>
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
@@ -253,8 +251,7 @@
     }); 
 
     surveyBtn.click(function() {
-      // location.href = "https://docs.google.com/forms/d/e/1FAIpQLSdr2CI0EBNSr6nPejzUV8o0m06-OmO9-zmhv08tLObg_XA_oQ/viewform?usp=sf_link";
-      location.href = "./survey.html";
+      location.href = "./survey.html"; //"https://docs.google.com/forms/d/e/1FAIpQLSdr2CI0EBNSr6nPejzUV8o0m06-OmO9-zmhv08tLObg_XA_oQ/viewform?usp=sf_link";
     });
 
 
@@ -354,7 +351,6 @@
 
     // Handle the case of restarting the game
     socket.on('restartGame', (msg) => {
-      location.href = "./index.html";
       document.getElementById('mainbutton').disabled = false; 
       resetConsencus();
 
