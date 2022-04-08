@@ -57,7 +57,7 @@
     },
     "84cca82fc96c": {
         "index":7,
-        "leftOffset": 5,
+        "leftOffset": 7,
         "rightOffset": 3,
         "frontOffset": 0
     },
@@ -71,6 +71,6 @@
         "index":9,
         "leftOffset": 13,
         "rightOffset": 3,
-        "frontOffset": 0
+        "frontOffset": 5
     }
 }
