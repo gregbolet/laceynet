@@ -16,7 +16,7 @@
     <title>Guessing Game!</title>
   </head>
 
-  <div id="fullDiv" >PASS</div>
+  <div id="fullDiv" >ACCEPT</div>
   <div id="logoDiv"></div>
 
   <body>
@@ -175,7 +175,7 @@
     function makeConcensus(fullDiv, conStatus){
       if(conStatus){
         fullDiv.style.backgroundColor = "green";
-        fullDiv.innerHTML = "PASS";
+        fullDiv.innerHTML = "ACCEPT";
       }else {
         fullDiv.style.backgroundColor = "red";
         fullDiv.innerHTML = "REJECT";
@@ -426,7 +426,7 @@
         fullDiv.innerHTML = "REJECT";
       }else {
         fullDiv.style.backgroundColor = "green";
-        fullDiv.innerHTML = "PASS";
+        fullDiv.innerHTML = "ACCEPT";
       }
       winnerForceGreen = false;
       fullDiv.style.zIndex = 5000;
